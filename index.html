@@ -660,7 +660,7 @@
                             <p class="text-xs text-zinc-400">Marca o levanta la mora de expensas en tiempo real o restablece el PIN a 0000.</p>
                         </div>
 
-                        <!-- Filtros Rápidos: Todos / Morosos / Al Día + Controles de Datos -->
+                        <!-- Filtros Rápidos: Todos / Morosos / Al Día + Controles de Datos y Respaldo -->
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
                                 <button id="btnFilterHousesAll" onclick="setAdminHouseFilter('TODOS')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 text-white transition">
@@ -673,7 +673,14 @@
                                     ✅ Al Día
                                 </button>
                             </div>
-                            <div class="flex items-center gap-1">
+                            <div class="flex flex-wrap items-center gap-1">
+                                <button type="button" onclick="exportBackupJSON()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition" title="Descargar copia de seguridad de casas, pases y bitácora">
+                                    <i class="fa-solid fa-download"></i> Guardar Respaldo
+                                </button>
+                                <button type="button" onclick="document.getElementById('importBackupFileInput').click()" class="px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-[11px] font-bold transition" title="Cargar archivo de respaldo previamente guardado">
+                                    <i class="fa-solid fa-upload"></i> Cargar Respaldo
+                                </button>
+                                <input type="file" id="importBackupFileInput" accept=".json" class="hidden" onchange="handleImportBackupJSON(event)">
                                 <button type="button" onclick="resetToDemoData()" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-purple-300 border border-zinc-800 text-[11px] font-bold transition" title="Cargar 6 casas y pases de ejemplo">
                                     <i class="fa-solid fa-database"></i> Datos Demo
                                 </button>
@@ -682,6 +689,14 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-emerald-950/20 border border-emerald-500/25 rounded-xl px-3.5 py-2 text-[11px] text-emerald-300">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i>
+                            <span><strong>Guardado Automático Activo:</strong> Toda casa, PIN o pase que crees queda guardado automáticamente en este navegador para tus próximos inicios de sesión.</span>
+                        </div>
+                        <span id="autoSaveStatusBadge" class="font-mono text-[10px] text-emerald-400 shrink-0 font-bold">Sincronizado</span>
                     </div>
 
                     <input type="text" id="adminHouseSearchInput" oninput="renderAdminHouses()" placeholder="Buscar por número de casa, familia o manzano..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
@@ -1229,9 +1244,70 @@
                     fastPasses,
                     auditLogs: auditLogs.slice(0, 150)
                 }));
+                const badge = document.getElementById('autoSaveStatusBadge');
+                if (badge) {
+                    const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    badge.textContent = `Guardado automático activo (${nowStr})`;
+                }
             } catch (err) {
                 console.warn('No se pudo guardar en almacenamiento local:', err);
             }
+        }
+
+        function exportBackupJSON() {
+            try {
+                const payload = {
+                    version: 'VisePass_SCZ_v4',
+                    exportedAt: new Date().toISOString(),
+                    condominium: CONDO_CONFIG.name,
+                    houses,
+                    passes,
+                    fastPasses,
+                    auditLogs
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const dateTag = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = `Respaldo_VisePass_SCZ_${dateTag}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Respaldo descargado', `${houses.length} casas y ${passes.length} pases guardados en archivo.`, 'emerald');
+            } catch (err) {
+                showToast('Error al exportar', 'No se pudo generar el archivo de respaldo.', 'rose');
+            }
+        }
+
+        function handleImportBackupJSON(event) {
+            const file = event.target && event.target.files ? event.target.files[0] : null;
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (!parsed || !Array.isArray(parsed.houses)) {
+                        showToast('Archivo inválido', 'El archivo seleccionado no es un respaldo válido de VisePass.', 'rose');
+                        return;
+                    }
+                    houses = parsed.houses;
+                    passes = Array.isArray(parsed.passes) ? parsed.passes : [];
+                    fastPasses = Array.isArray(parsed.fastPasses) ? parsed.fastPasses : [];
+                    auditLogs = Array.isArray(parsed.auditLogs) ? parsed.auditLogs : [];
+                    selectedWalletPassId = passes[0]?.id || null;
+                    saveLocalState();
+                    pushStateToCloud();
+                    refreshAllViews();
+                    showToast('Respaldo restaurado', `Se cargaron ${houses.length} casas y ${passes.length} pases correctamente.`, 'emerald');
+                } catch (err) {
+                    showToast('Error al cargar', 'No se pudo leer el archivo JSON de respaldo.', 'rose');
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
         }
 
         /* ==========================================
