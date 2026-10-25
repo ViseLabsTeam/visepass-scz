@@ -1521,6 +1521,10 @@
         let fastPasses = [];
         let auditLogs = [];
         let blacklist = [];
+        let lastStateUpdatedAt = 0;
+        const CLIENT_INSTANCE_ID = 'VP-' + Math.random().toString(36).slice(2, 10);
+        const CLOUD_SYNC_TOPIC = 'visepass_scz_lahacienda_peredo_v4_live';
+        let cloudEventSource = null;
 
         function loadLocalState() {
             try {
@@ -1534,6 +1538,7 @@
                 if (Array.isArray(parsed.fastPasses)) fastPasses = parsed.fastPasses;
                 if (Array.isArray(parsed.auditLogs)) auditLogs = parsed.auditLogs;
                 if (Array.isArray(parsed.blacklist)) blacklist = parsed.blacklist;
+                if (typeof parsed.updatedAt === 'number') lastStateUpdatedAt = parsed.updatedAt;
             } catch (err) {
                 console.warn('No se pudo leer almacenamiento local:', err);
             }
@@ -1541,6 +1546,7 @@
 
         function saveLocalState() {
             try {
+                if (!lastStateUpdatedAt) lastStateUpdatedAt = Date.now();
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     adminPassword,
                     guardPassword,
@@ -1548,12 +1554,13 @@
                     passes,
                     fastPasses,
                     auditLogs: auditLogs.slice(0, 150),
-                    blacklist
+                    blacklist,
+                    updatedAt: lastStateUpdatedAt
                 }));
                 const badge = document.getElementById('autoSaveStatusBadge');
                 if (badge) {
                     const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                    badge.textContent = `Guardado automático activo (${nowStr})`;
+                    badge.textContent = `Sincronizado (${nowStr})`;
                 }
             } catch (err) {
                 console.warn('No se pudo guardar en almacenamiento local:', err);
@@ -1623,79 +1630,100 @@
         }
 
         /* ==========================================
-           3. SINCRONIZACIÓN CLOUD FIRESTORE (NO BLOQUEANTE)
+           3. SINCRONIZACIÓN EN LA NUBE EN VIVO (MULTI-DISPOSITIVO)
            ========================================== */
-        let db = null;
-        let auth = null;
-        let currentUser = null;
-        let firebaseSetDoc = null;
-        let firebaseDoc = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'visepass-scz-lahacienda';
-        const STATE_DOC_ID = 'la_hacienda_rincon_clean_v4';
+        function applyRemoteCloudState(remoteData) {
+            if (!remoteData || remoteData.v !== 'visepass_v4') return;
+            if (remoteData.senderId === CLIENT_INSTANCE_ID) return;
+            if (typeof remoteData.updatedAt === 'number' && remoteData.updatedAt < lastStateUpdatedAt) return;
+
+            if (typeof remoteData.adminPassword === 'string') adminPassword = remoteData.adminPassword;
+            if (typeof remoteData.guardPassword === 'string') guardPassword = remoteData.guardPassword;
+            if (Array.isArray(remoteData.houses)) houses = remoteData.houses;
+            if (Array.isArray(remoteData.passes)) passes = remoteData.passes;
+            if (Array.isArray(remoteData.fastPasses)) fastPasses = remoteData.fastPasses;
+            if (Array.isArray(remoteData.auditLogs)) auditLogs = remoteData.auditLogs;
+            if (Array.isArray(remoteData.blacklist)) blacklist = remoteData.blacklist;
+            lastStateUpdatedAt = remoteData.updatedAt || Date.now();
+
+            saveLocalState();
+            updateAdminAndGuardLoginUI();
+            syncCurrentHouseHeader();
+            refreshAllViews();
+        }
 
         async function initCloudSync() {
+            if (isOfflineMode) return;
             try {
-                if (typeof __firebase_config === 'undefined' || !__firebase_config) return;
-                const firebaseConfig = JSON.parse(__firebase_config);
-
-                const appMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
-                const authMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
-                const fsMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-
-                const app = appMod.initializeApp(firebaseConfig);
-                auth = authMod.getAuth(app);
-                db = fsMod.getFirestore(app);
-                firebaseDoc = fsMod.doc;
-                firebaseSetDoc = fsMod.setDoc;
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await authMod.signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await authMod.signInAnonymously(auth);
-                }
-
-                authMod.onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        const stateRef = fsMod.doc(db, 'artifacts', appId, 'public', 'data', 'condo_state', STATE_DOC_ID);
-                        fsMod.onSnapshot(stateRef, (snap) => {
-                            if (snap.exists()) {
-                                const data = snap.data();
-                                if (data.housesJson) houses = JSON.parse(data.housesJson);
-                                if (data.passesJson) passes = JSON.parse(data.passesJson);
-                                if (data.fastPassesJson) fastPasses = JSON.parse(data.fastPassesJson);
-                                if (data.auditLogsJson) auditLogs = JSON.parse(data.auditLogsJson);
-                                syncCurrentHouseHeader();
-                                refreshAllViews();
-                            } else {
-                                pushStateToCloud();
+                // 1. Descargar último estado guardado en el canal de la nube del condominio
+                const resp = await fetch(`https://ntfy.sh/${CLOUD_SYNC_TOPIC}/json?poll=1&since=all`);
+                if (resp.ok) {
+                    const text = await resp.text();
+                    const lines = text.trim().split('\n').filter(Boolean);
+                    let newestPayload = null;
+                    for (const line of lines) {
+                        try {
+                            const evt = JSON.parse(line);
+                            if (evt.event === 'message' && evt.message) {
+                                const parsedMsg = JSON.parse(evt.message);
+                                if (parsedMsg && parsedMsg.v === 'visepass_v4') {
+                                    newestPayload = parsedMsg;
+                                }
                             }
-                        }, (err) => {
-                            console.warn("Modo local activo:", err);
-                        });
+                        } catch (_) {}
                     }
-                });
+                    if (newestPayload) {
+                        applyRemoteCloudState(newestPayload);
+                    }
+                }
             } catch (e) {
-                console.warn("Operando en memoria local rápida:", e);
+                console.warn("Cargando en modo local:", e);
+            }
+
+            // 2. Escuchar cambios en vivo (Tiempo Real < 1 segundo) entre celulares y computadoras
+            try {
+                if (cloudEventSource) cloudEventSource.close();
+                cloudEventSource = new EventSource(`https://ntfy.sh/${CLOUD_SYNC_TOPIC}/sse`);
+                cloudEventSource.onmessage = (event) => {
+                    if (isOfflineMode) return;
+                    try {
+                        const evtData = JSON.parse(event.data);
+                        if (evtData && evtData.message) {
+                            const remoteState = JSON.parse(evtData.message);
+                            applyRemoteCloudState(remoteState);
+                        }
+                    } catch (_) {}
+                };
+            } catch (e) {
+                console.warn("Stream en vivo no disponible:", e);
             }
         }
 
         async function pushStateToCloud() {
+            lastStateUpdatedAt = Date.now();
             saveLocalState();
             syncCurrentHouseHeader();
             refreshAllViews();
-            if (!db || !currentUser || isOfflineMode || !firebaseDoc || !firebaseSetDoc) return;
+            if (isOfflineMode) return;
             try {
-                const stateRef = firebaseDoc(db, 'artifacts', appId, 'public', 'data', 'condo_state', STATE_DOC_ID);
-                await firebaseSetDoc(stateRef, {
-                    housesJson: JSON.stringify(houses),
-                    passesJson: JSON.stringify(passes),
-                    fastPassesJson: JSON.stringify(fastPasses),
-                    auditLogsJson: JSON.stringify(auditLogs.slice(0, 150)),
-                    updatedAt: Date.now()
+                const payload = JSON.stringify({
+                    v: 'visepass_v4',
+                    senderId: CLIENT_INSTANCE_ID,
+                    updatedAt: lastStateUpdatedAt,
+                    adminPassword,
+                    guardPassword,
+                    houses,
+                    passes,
+                    fastPasses,
+                    auditLogs: auditLogs.slice(0, 60),
+                    blacklist
+                });
+                await fetch(`https://ntfy.sh/${CLOUD_SYNC_TOPIC}`, {
+                    method: 'POST',
+                    body: payload
                 });
             } catch (e) {
-                console.warn("Error sincronizando estado:", e);
+                console.warn("Guardado en memoria local (sin conexión externa):", e);
             }
         }
 
