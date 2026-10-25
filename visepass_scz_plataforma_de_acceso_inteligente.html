@@ -469,7 +469,7 @@
 
                 <button id="btnGuardPre" onclick="setGuardMode('PREAUTORIZADOS')" class="p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95">
                     <div class="text-left">
-                        <span id="preAuthCountBadge" class="text-xs font-mono uppercase font-bold text-amber-400 block">1 EN ESPERA</span>
+                        <span id="preAuthCountBadge" class="text-xs font-mono uppercase font-bold text-amber-400 block">0 EN ESPERA</span>
                         <span class="text-2xl font-black tracking-tight">TAXI / DELIVERY</span>
                     </div>
                     <i class="fa-solid fa-motorcycle text-4xl text-amber-400"></i>
@@ -550,7 +550,7 @@
                         <span>Visitantes y Proveedores Actualmente ADENTRO del Condominio</span>
                     </h3>
                     <span id="insideCounterBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        1 Adentro Ahora
+                        0 Adentro Ahora
                     </span>
                 </div>
                 <div id="insideVisitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
@@ -566,7 +566,7 @@
                 <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
                     <div>
                         <span class="text-xs text-zinc-400 font-semibold">Padrón de Unidades</span>
-                        <div id="adminTotalHousesCount" class="text-2xl font-black text-white mt-0.5">6</div>
+                        <div id="adminTotalHousesCount" class="text-2xl font-black text-white mt-0.5">0</div>
                         <span class="text-[11px] text-emerald-400 font-mono">PIN Inicial por defecto: 0000</span>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">
@@ -577,7 +577,7 @@
                 <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
                     <div>
                         <span class="text-xs text-zinc-400 font-semibold">Control de Morosidad</span>
-                        <div id="adminMorososSummaryText" class="text-xl font-black text-red-400 mt-0.5">2 Domicilios en mora</div>
+                        <div id="adminMorososSummaryText" class="text-xl font-black text-red-400 mt-0.5">0 Domicilios en mora</div>
                         <span class="text-[11px] text-zinc-400">Bloqueo automático de QR rápido</span>
                     </div>
                     <div class="w-11 h-11 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center text-xl">
@@ -1107,7 +1107,7 @@
         /* ==========================================
            2. ESTADO GLOBAL Y DATOS INICIALES POR DEFECTO
            ========================================== */
-        const STORAGE_KEY = 'visepass_scz_state_v3_clean_logs';
+        const STORAGE_KEY = 'visepass_scz_state_v4_brand_new';
 
         const DEFAULT_HOUSES = [
             { number: '30', street: 'Manzano A', family: 'Familia Peredo', pin: '0000', isMorosa: false, moraNote: '' },
@@ -1183,14 +1183,14 @@
         // Bitácora completamente limpia (0 registros) lista para estrenar
         const DEFAULT_AUDIT_LOGS = [];
 
-        let activeRole = 'RESIDENTE';
-        let currentHouse = '30';
-        let currentFamily = 'Familia Peredo';
+        let activeRole = 'ADMIN';
+        let currentHouse = '';
+        let currentFamily = 'Sin Domicilios';
         let currentGuardName = 'Portería Principal (Turno Día)';
 
         let isOfflineMode = false;
         let guardMode = 'ENTRADA';
-        let selectedPassId = 'PASE-SCZ-030';
+        let selectedPassId = '';
         let html5QrScanner = null;
         let isCameraRunning = false;
 
@@ -1201,10 +1201,11 @@
         let isScannerCoolingDown = false;
         let cooldownTimerInterval = null;
 
-        let houses = JSON.parse(JSON.stringify(DEFAULT_HOUSES));
-        let passes = JSON.parse(JSON.stringify(DEFAULT_PASSES));
-        let fastPasses = JSON.parse(JSON.stringify(DEFAULT_FAST_PASSES));
-        let auditLogs = JSON.parse(JSON.stringify(DEFAULT_AUDIT_LOGS));
+        // Estado inicial 100% limpio (0 casas, 0 pases, 0 taxis y 0 bitácora) listo para configurar desde cero
+        let houses = [];
+        let passes = [];
+        let fastPasses = [];
+        let auditLogs = [];
 
         function loadLocalState() {
             try {
@@ -1242,7 +1243,7 @@
         let firebaseSetDoc = null;
         let firebaseDoc = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'visepass-scz-lahacienda';
-        const STATE_DOC_ID = 'la_hacienda_rincon_clean_v2';
+        const STATE_DOC_ID = 'la_hacienda_rincon_clean_v4';
 
         async function initCloudSync() {
             try {
