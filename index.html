@@ -1001,9 +1001,8 @@
                     <span><strong>Permiso Portería:</strong> Acceso exclusivo a la terminal de escaneo de pases QR, control de entradas/salidas y registro en garita.</span>
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-zinc-300 block mb-1">Selecciona Puesto / Turno de Portería</label>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Selecciona Turno de Portería</label>
                     <select id="guardNameInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="Portería Principal">🛡️ Portería Principal</option>
                         <option value="Turno Día">☀️ Turno Día</option>
                         <option value="Turno Noche">🌙 Turno Noche</option>
                     </select>
@@ -1308,7 +1307,7 @@
         let activeRole = 'ADMIN';
         let currentHouse = '';
         let currentFamily = 'Sin Domicilios';
-        let currentGuardName = 'Portería Principal (Turno Día)';
+        let currentGuardName = 'Turno Día';
 
         let isOfflineMode = false;
         let guardMode = 'ENTRADA';
