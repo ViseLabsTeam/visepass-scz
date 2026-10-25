@@ -746,6 +746,116 @@
                 </div>
             </div>
 
+            <!-- APARTADO DE SEGURIDAD: CAMBIO DE CONTRASEÑAS (VECINOS, PORTERÍA Y ADMINISTRACIÓN) -->
+            <div id="adminSecuritySection" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-amber-400"></i>
+                            <span>Centro de Seguridad y Cambio de Contraseñas</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400">Restablece el PIN de cualquier vecino si lo olvidó, cambia la clave de los guardias en Portería o blinda la contraseña de Administración ante cualquier vulnerabilidad.</p>
+                    </div>
+                    <span class="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                        🔐 Control Total de Credenciales
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Tarjeta 1: Contraseña / PIN de Vecinos -->
+                    <form onsubmit="handleAdminResetNeighborPinForm(event)" class="bg-zinc-950 border border-purple-500/30 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-purple-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-house-lock"></i>
+                                    <span>1. Contraseña de Vecinos</span>
+                                </span>
+                                <span id="adminSecCurrentHousePinBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-200 border border-purple-500/30">
+                                    PIN: --
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-zinc-400">
+                                Si un propietario olvidó su PIN de ingreso, selecciónalo aquí y asígnale uno nuevo al instante.
+                            </p>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Seleccionar Casa / Vecino</label>
+                                <select id="adminSecHouseSelect" onchange="updateAdminSecHousePinPreview()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"></select>
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Nueva Contraseña / PIN del Vecino</label>
+                                <input type="text" id="adminSecNewHousePinInput" required placeholder="Ej. 4580 o 0000" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-purple-500">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <button type="submit" class="flex-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition">
+                                Cambiar PIN Vecino
+                            </button>
+                            <button type="button" onclick="quickSetNeighborPin0000()" class="px-2.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-[11px] font-mono font-bold transition" title="Restablecer a 0000">
+                                0000
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Tarjeta 2: Contraseña de Guardias (Portería) -->
+                    <form onsubmit="handleAdminUpdateGuardPassword(event)" class="bg-zinc-950 border border-emerald-500/30 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>2. Contraseña de Portería</span>
+                                </span>
+                                <span id="adminSecGuardPassBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-200 border border-emerald-500/30">
+                                    Activa
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-zinc-400">
+                                Clave exclusiva para los guardias (<strong>Turno Día</strong> y <strong>Turno Noche</strong>). Cámbiala cuando rote el personal de seguridad.
+                            </p>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Nueva Contraseña para Guardias</label>
+                                <input type="password" id="adminSecNewGuardPassInput" required placeholder="Mínimo 4 caracteres..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Confirmar Contraseña de Portería</label>
+                                <input type="password" id="adminSecConfirmGuardPassInput" required placeholder="Repite la clave de portería..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+                            Actualizar Clave de Portería
+                        </button>
+                    </form>
+
+                    <!-- Tarjeta 3: Contraseña de la Propia Administración -->
+                    <form onsubmit="handleAdminUpdateOwnPasswordSection(event)" class="bg-zinc-950 border border-amber-500/30 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-key"></i>
+                                    <span>3. Contraseña Administración</span>
+                                </span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/30">
+                                    Nivel Maestro
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-zinc-400">
+                                En caso de sospecha o vulnerabilidad, cambia aquí la credencial maestra de <strong>Administración</strong> inmediatamente.
+                            </p>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Nueva Contraseña de Administración</label>
+                                <input type="password" id="adminSecNewAdminPassInput" required placeholder="Nueva clave maestra..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-medium text-zinc-300 block mb-1">Confirmar Nueva Contraseña</label>
+                                <input type="password" id="adminSecConfirmAdminPassInput" required placeholder="Repite la nueva clave..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase transition">
+                            Blindar Clave de Administración
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <!-- SECCIÓN B: BITÁCORA INTERACTIVA DE MOVIMIENTOS POR DÍA -->
             <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -1324,6 +1434,7 @@
 
         // Estado inicial 100% limpio (0 casas, 0 pases, 0 taxis y 0 bitácora) listo para configurar desde cero
         let adminPassword = '';
+        let guardPassword = '';
         let houses = [];
         let passes = [];
         let fastPasses = [];
@@ -1335,6 +1446,7 @@
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
                 if (typeof parsed.adminPassword === 'string') adminPassword = parsed.adminPassword;
+                if (typeof parsed.guardPassword === 'string') guardPassword = parsed.guardPassword;
                 if (Array.isArray(parsed.houses)) houses = parsed.houses;
                 if (Array.isArray(parsed.passes)) passes = parsed.passes;
                 if (Array.isArray(parsed.fastPasses)) fastPasses = parsed.fastPasses;
@@ -1348,6 +1460,7 @@
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     adminPassword,
+                    guardPassword,
                     houses,
                     passes,
                     fastPasses,
@@ -1370,6 +1483,7 @@
                     exportedAt: new Date().toISOString(),
                     condominium: 'La Hacienda - Rincón',
                     adminPassword,
+                    guardPassword,
                     houses,
                     passes,
                     fastPasses,
@@ -1403,6 +1517,7 @@
                         return;
                     }
                     if (typeof parsed.adminPassword === 'string') adminPassword = parsed.adminPassword;
+                    if (typeof parsed.guardPassword === 'string') guardPassword = parsed.guardPassword;
                     houses = parsed.houses;
                     passes = Array.isArray(parsed.passes) ? parsed.passes : [];
                     fastPasses = Array.isArray(parsed.fastPasses) ? parsed.fastPasses : [];
@@ -1581,6 +1696,7 @@
 
         function refreshAllViews() {
             renderLoginHouseOptions();
+            renderAdminSecuritySection();
             updateMoraUI();
             renderVecinoPasses();
             renderVecinoFastPasses();
@@ -1592,6 +1708,127 @@
             if (guardMode === 'PREAUTORIZADOS') {
                 renderGuardPreAuthScreen();
             }
+        }
+
+        function renderAdminSecuritySection() {
+            const select = document.getElementById('adminSecHouseSelect');
+            const badge = document.getElementById('adminSecCurrentHousePinBadge');
+            const guardBadge = document.getElementById('adminSecGuardPassBadge');
+
+            if (guardBadge) {
+                if (guardPassword && guardPassword !== adminPassword) {
+                    guardBadge.textContent = 'Clave Propia Activa';
+                } else if (adminPassword) {
+                    guardBadge.textContent = 'Sincronizada';
+                } else {
+                    guardBadge.textContent = 'Sin configurar';
+                }
+            }
+
+            if (!select) return;
+            if (houses.length === 0) {
+                select.innerHTML = `<option value="">— Registra una casa primero —</option>`;
+                if (badge) badge.textContent = 'PIN: --';
+                return;
+            }
+            const prevVal = select.value;
+            select.innerHTML = houses.map(h =>
+                `<option value="${escapeHtml(h.number)}">Casa ${escapeHtml(h.number)} — ${escapeHtml(h.family)}</option>`
+            ).join('');
+            if (prevVal && houses.some(h => h.number === prevVal)) {
+                select.value = prevVal;
+            }
+            updateAdminSecHousePinPreview();
+        }
+
+        function updateAdminSecHousePinPreview() {
+            const select = document.getElementById('adminSecHouseSelect');
+            const badge = document.getElementById('adminSecCurrentHousePinBadge');
+            if (!select || !badge) return;
+            const houseObj = houses.find(h => h.number === select.value);
+            badge.textContent = houseObj ? `PIN actual: ${houseObj.pin}` : 'PIN: --';
+        }
+
+        function handleAdminResetNeighborPinForm(e) {
+            e.preventDefault();
+            if (houses.length === 0) {
+                showToast('⚠️ Primero registra un domicilio en el padrón');
+                return;
+            }
+            const houseNum = document.getElementById('adminSecHouseSelect')?.value;
+            const newPin = (document.getElementById('adminSecNewHousePinInput')?.value || '').trim();
+            const houseObj = houses.find(h => h.number === houseNum);
+            if (!houseObj) return;
+            if (newPin.length < 4) {
+                showToast('⚠️ El nuevo PIN del vecino debe tener al menos 4 caracteres');
+                return;
+            }
+            houseObj.pin = newPin;
+            document.getElementById('adminSecNewHousePinInput').value = '';
+            saveLocalState();
+            pushStateToCloud();
+            updateAdminSecHousePinPreview();
+            showToast(`🏠 Contraseña/PIN de Casa ${houseObj.number} (${houseObj.family}) cambiada a: ${newPin}`);
+        }
+
+        function quickSetNeighborPin0000() {
+            if (houses.length === 0) {
+                showToast('⚠️ Primero registra un domicilio en el padrón');
+                return;
+            }
+            const houseNum = document.getElementById('adminSecHouseSelect')?.value;
+            const houseObj = houses.find(h => h.number === houseNum);
+            if (!houseObj) return;
+            houseObj.pin = '0000';
+            document.getElementById('adminSecNewHousePinInput').value = '';
+            saveLocalState();
+            pushStateToCloud();
+            updateAdminSecHousePinPreview();
+            showToast(`🔄 PIN de Casa ${houseObj.number} restablecido a 0000`);
+        }
+
+        function handleAdminUpdateGuardPassword(e) {
+            e.preventDefault();
+            const pass1 = (document.getElementById('adminSecNewGuardPassInput')?.value || '').trim();
+            const pass2 = (document.getElementById('adminSecConfirmGuardPassInput')?.value || '').trim();
+            if (pass1.length < 4) {
+                showToast('⚠️ La contraseña de Portería debe tener al menos 4 caracteres');
+                return;
+            }
+            if (pass1 !== pass2) {
+                showToast('⛔ Las contraseñas de Portería no coinciden');
+                return;
+            }
+            guardPassword = pass1;
+            document.getElementById('adminSecNewGuardPassInput').value = '';
+            document.getElementById('adminSecConfirmGuardPassInput').value = '';
+            saveLocalState();
+            pushStateToCloud();
+            renderAdminSecuritySection();
+            showToast('🛡️ Nueva contraseña exclusiva para Guardias de Portería guardada');
+        }
+
+        function handleAdminUpdateOwnPasswordSection(e) {
+            e.preventDefault();
+            const pass1 = (document.getElementById('adminSecNewAdminPassInput')?.value || '').trim();
+            const pass2 = (document.getElementById('adminSecConfirmAdminPassInput')?.value || '').trim();
+            if (pass1.length < 4) {
+                showToast('⚠️ La nueva contraseña de Administración debe tener al menos 4 caracteres');
+                return;
+            }
+            if (pass1 !== pass2) {
+                showToast('⛔ Las contraseñas de Administración no coinciden');
+                return;
+            }
+            adminPassword = pass1;
+            if (!guardPassword) guardPassword = pass1;
+            document.getElementById('adminSecNewAdminPassInput').value = '';
+            document.getElementById('adminSecConfirmAdminPassInput').value = '';
+            saveLocalState();
+            pushStateToCloud();
+            updateAdminAndGuardLoginUI();
+            renderAdminSecuritySection();
+            showToast('🔐 Contraseña maestra de Administración blindada y actualizada');
         }
 
         let hasAuthenticatedSession = false;
@@ -1803,21 +2040,22 @@
 
         function handleLoginGuardia(e) {
             e.preventDefault();
-            if (!adminPassword) {
+            const validGuardPass = guardPassword || adminPassword;
+            if (!validGuardPass) {
                 selectLoginTab('ADMIN');
                 showLoginError('⚠️ Primero configura la contraseña por primera vez en la pestaña Admin.');
                 showToast('⚠️ Configura primero la contraseña en Administración');
                 return;
             }
             const enteredPass = (document.getElementById('guardPasswordInput')?.value || '').trim();
-            if (enteredPass !== adminPassword) {
+            if (enteredPass !== validGuardPass && enteredPass !== adminPassword) {
                 showLoginError('⛔ Contraseña incorrecta. Acceso exclusivo para Portería y Administración.');
                 showToast('⛔ Contraseña de Portería incorrecta');
                 return;
             }
 
             document.getElementById('loginErrorMsg').classList.add('hidden');
-            currentGuardName = document.getElementById('guardNameInput').value || 'Portería Principal';
+            currentGuardName = document.getElementById('guardNameInput').value || 'Turno Día';
             activeRole = 'GUARDIA';
             document.getElementById('activeRoleHeaderBadge').textContent = `PORTERÍA • ${currentGuardName.toUpperCase()}`;
 
@@ -1843,6 +2081,7 @@
                     return;
                 }
                 adminPassword = pass1;
+                if (!guardPassword) guardPassword = pass1;
                 document.getElementById('adminFirstSetupPass').value = '';
                 document.getElementById('adminFirstSetupConfirm').value = '';
                 saveLocalState();
