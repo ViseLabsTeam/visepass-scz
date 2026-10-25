@@ -1,0 +1,2998 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VisePass SCZ — Control de Acceso Inteligente en Wallet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Librería Generadora de QR Real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Librería Lectora de Cámara QR -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Gradientes auténticos estilo Apple Wallet iOS */
+        .ios-pass-purple {
+            background: radial-gradient(circle at 20% 15%, #9333ea 0%, #6b21a8 45%, #3b0764 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .ios-pass-purple::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-conic-gradient(from 0deg at 15% 15%, rgba(255,255,255,0.06) 0deg 12deg, transparent 12deg 24deg);
+            pointer-events: none;
+        }
+        .ios-pass-vip {
+            background: radial-gradient(circle at 20% 15%, #ca8a04 0%, #713f12 45%, #18181b 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .ios-pass-staff {
+            background: radial-gradient(circle at 20% 15%, #059669 0%, #065f46 50%, #022c22 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .ios-pass-worker {
+            background: radial-gradient(circle at 20% 15%, #ea580c 0%, #9a3412 50%, #431407 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.015); }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1.2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 selection:bg-purple-500 selection:text-white">
+
+    <!-- ==========================================
+         BARRA SUPERIOR DE NAVEGACIÓN Y ESTADO
+         ========================================== -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-zinc-950/90 border-b border-zinc-800/80 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Marca y Condominio -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30 border border-purple-400/30">
+                    <i class="fa-solid fa-wallet text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold tracking-tight text-base text-white">VisePass</span>
+                        <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">SCZ v2.0</span>
+                        <span id="activeRoleHeaderBadge" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">SISTEMA NUEVO</span>
+                    </div>
+                    <p class="text-xs text-zinc-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-purple-400 text-[10px]"></i>
+                        <span>Condominio La Hacienda - Rincón • Santa Cruz</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pestañas de Navegación por Rol (Visibilidad controlada según permisos del rol activo) -->
+            <nav id="mainRoleNav" class="flex flex-wrap items-center gap-1.5 bg-zinc-900/90 p-1.5 rounded-xl border border-zinc-800">
+                <button id="tab-vecino" onclick="switchTab('vecino')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow relative">
+                    <i class="fa-solid fa-house-user"></i>
+                    <span>Mi Casa (Crear Pase)</span>
+                </button>
+                <button id="tab-wallet" onclick="switchTab('wallet')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-zinc-400 hover:text-white relative">
+                    <i class="fa-brands fa-apple"></i>
+                    <span>Tarjeta Wallet</span>
+                </button>
+                <button id="tab-guardia" onclick="switchTab('guardia')" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-zinc-400 hover:text-white relative">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Portería (Escáner QR)</span>
+                    <span id="guardAlertBadge" class="hidden w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                </button>
+                <button id="tab-admin" onclick="switchTab('admin')" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-zinc-400 hover:text-white relative">
+                    <i class="fa-solid fa-building-shield"></i>
+                    <span>Administración</span>
+                </button>
+            </nav>
+
+            <!-- Controles de Red y Cambio de Usuario -->
+            <div class="flex items-center gap-2">
+                <button id="networkStatusBtnDesktop" onclick="toggleOfflineMode()" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition" title="Simular corte de internet en Garita">
+                    <span id="netDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span id="netText">En Línea (Cloud Sync)</span>
+                </button>
+                <button onclick="openAuthPortal()" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-user-lock text-purple-400"></i>
+                    <span>Cambiar Rol / Salir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================
+         CONTENEDOR PRINCIPAL DE VISTAS
+         ========================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- ==========================================
+             VISTA 1: PANEL DEL VECINO / RESIDENTE
+             ========================================== -->
+        <section id="view-vecino" class="space-y-6">
+            <!-- Estado Inicial Vacío cuando el condominio aún no tiene domicilios registrados -->
+            <div id="emptyCondoVecinoState" class="hidden bg-zinc-900/90 border-2 border-dashed border-purple-500/40 rounded-2xl p-8 text-center space-y-4">
+                <div class="w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/40 text-purple-400 flex items-center justify-center text-3xl mx-auto">
+                    <i class="fa-solid fa-building-circle-check"></i>
+                </div>
+                <div class="max-w-md mx-auto space-y-1">
+                    <span class="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold">Instalación Limpia Lista</span>
+                    <h2 class="text-xl font-black text-white">Aún no hay domicilios registrados</h2>
+                    <p class="text-xs text-zinc-400">
+                        El sistema está limpio y listo para tu demostración. Dirígete a la pestaña de <strong>Administración</strong> para dar de alta la primera casa o lote del condominio.
+                    </p>
+                </div>
+                <button type="button" onclick="switchTab('admin')" class="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-purple-600/30 transition">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Ir a Administración y Crear Primer Domicilio</span>
+                </button>
+            </div>
+
+            <!-- Contenido de Vecino cuando ya existe al menos 1 casa -->
+            <div id="activeCondoVecinoContent" class="space-y-6">
+            <!-- Alerta de Bloqueo por Mora (oculta si está al día) -->
+            <div id="moraBannerVecino" class="hidden bg-red-950/80 border-2 border-red-500 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center shrink-0 text-lg font-black">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-white uppercase tracking-wide">⛔ Emisión de Pases QR Restringida por Mora en Expensas</h3>
+                        <p id="moraBannerVecinoDetail" class="text-xs text-red-200 mt-0.5">
+                            Tu domicilio registra cuotas pendientes en administración. Tus visitas deberán anunciarse por citófono tradicional en portería hasta regularizar el pago.
+                        </p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 rounded-lg bg-red-500/20 border border-red-400/40 text-red-200 font-mono text-xs font-bold shrink-0">
+                    RESTRICCIÓN ACTIVA
+                </span>
+            </div>
+
+            <!-- Cabecera del Domicilio Actual + Acciones Rápidas -->
+            <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex flex-col items-center justify-center shrink-0">
+                        <span class="text-[9px] uppercase font-bold text-purple-300">CASA</span>
+                        <span id="residentHouseBigNumber" class="text-xl font-black text-white leading-none">30</span>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 id="residentFamilyTitle" class="text-lg sm:text-xl font-black text-white">Familia Peredo</h1>
+                            <span id="residentHouseSubtitle" class="text-xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-purple-300 border border-zinc-700 font-bold">Casa 30</span>
+                            <button onclick="openChangePinModal()" class="text-xs px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-semibold flex items-center gap-1 transition">
+                                <i class="fa-solid fa-key text-amber-400"></i>
+                                <span>Cambiar PIN</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-zinc-400 mt-1">Genera pases para Apple Wallet / Google Wallet o pre-autoriza Taxis y Deliveries en 1 toque.</p>
+                    </div>
+                </div>
+
+                <!-- 3 Botones de Acción Directa -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 shrink-0">
+                    <button onclick="focusNewPassForm()" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Invitar Visita</span>
+                    </button>
+                    <button onclick="openTaxiModal()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition">
+                        <i class="fa-solid fa-motorcycle"></i>
+                        <span>Viene Taxi / Delivery</span>
+                    </button>
+                    <button onclick="openChurrascoModal()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-fire-burner text-orange-400"></i>
+                        <span>Link Churrasco / Junte</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid Principal Vecino: Izquierda Formulario / Derecha Pases Activos -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Columna Izquierda (5 cols): Crear Pase -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div id="createPassCard" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4 transition-all">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-id-card-clip text-purple-400"></i>
+                                Nuevo Pase de Acceso (Apple / Google Wallet)
+                            </h2>
+                            <span id="formMoraLockBadge" class="hidden text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">
+                                ⛔ Bloqueado por Mora
+                            </span>
+                        </div>
+
+                        <!-- Frecuentes en 1 toque -->
+                        <div>
+                            <label class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block mb-1.5">Tus Frecuentes (Cargar en 1 toque):</label>
+                            <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                                <button type="button" onclick="fillFrequent('Sebastian Peredo', '8945123 SC', '5421-XYZ', 'VISITA SOCIAL')" class="px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-medium whitespace-nowrap hover:bg-purple-500/25 transition">
+                                    ⚡ Sebastian Peredo
+                                </button>
+                                <button type="button" onclick="fillFrequent('Vitto (Socio Vise Labs)', '7654321 SC', '4012-ABC', 'VISITA SOCIAL')" class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium whitespace-nowrap hover:bg-zinc-700 transition">
+                                    👨‍💻 Vitto (Vise Labs)
+                                </button>
+                                <button type="button" onclick="fillFrequent('María Flores (Hogar)', '6341298 SC', 'SIN AUTO', 'PERSONAL HOGAR')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium whitespace-nowrap hover:bg-emerald-500/25 transition">
+                                    🏠 María (Hogar)
+                                </button>
+                                <button type="button" onclick="fillFrequent('Don Mario (Piscinero)', '4981234 SC', 'MOTO-99', 'PROVEEDOR / OBRA')" class="px-2.5 py-1 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-300 text-xs font-medium whitespace-nowrap hover:bg-orange-500/25 transition">
+                                    🏊‍♂️ Don Mario (Piscina)
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="newPassForm" onsubmit="handleCreatePass(event)" class="space-y-3">
+                            <fieldset id="newPassFieldset" class="space-y-3">
+                                <div>
+                                    <label class="text-xs font-medium text-zinc-300 block mb-1">Categoría de Acceso</label>
+                                    <select id="passTypeInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                                        <option value="VISITA SOCIAL">🟣 VISITA SOCIAL (Amigos y Familiares)</option>
+                                        <option value="RESIDENTE VIP">🟡 RESIDENTE VIP (Familiar / Propietario)</option>
+                                        <option value="PERSONAL HOGAR">🟢 PERSONAL DEL HOGAR (Lun-Sáb 07:00 a 19:00)</option>
+                                        <option value="PROVEEDOR / OBRA">🟠 PROVEEDOR / TÉCNICO (Horario Laboral hasta 18:00)</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs font-medium text-zinc-300 block mb-1">Nombre Completo del Visitante</label>
+                                        <input type="text" id="visitorNameInput" required placeholder="Ej. Carlos Saucedo" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-medium text-zinc-300 block mb-1">C.I. y/o Placa</label>
+                                        <input type="text" id="visitorCiInput" required placeholder="Ej. 8945123 SC | 5421-XYZ" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs font-medium text-zinc-300 block mb-1">Unidad / Casa</label>
+                                        <input type="text" id="houseInput" value="30" readonly class="w-full bg-zinc-950/60 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-400 font-bold cursor-not-allowed">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-medium text-zinc-300 block mb-1">Fecha de Validez</label>
+                                        <input type="text" id="validUntilInput" value="26/10/26" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="submitCreatePassBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                    <span>Emitir Pase Oficial y Ver QR Wallet</span>
+                                </button>
+                            </fieldset>
+                        </form>
+                    </div>
+
+                    <!-- Taxis y Deliveries Anunciados por esta Casa -->
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-bolt text-amber-400"></i>
+                                Taxis y Deliveries Anunciados (Paso Rápido)
+                            </h3>
+                            <button onclick="openTaxiModal()" class="text-xs text-amber-400 hover:underline font-bold">+ Anunciar</button>
+                        </div>
+                        <div id="vecinoFastPassList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha (7 cols): Pases Activos de esta Casa -->
+                <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-ticket text-purple-400"></i>
+                                Pases Emitidos por tu Domicilio
+                            </h2>
+                            <p class="text-xs text-zinc-400">Haz clic en "Abrir Tarjeta QR" para escanearlo con tu iPhone o enviarlo por WhatsApp.</p>
+                        </div>
+                    </div>
+
+                    <div id="vecinoPassesList" class="space-y-3"></div>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             VISTA 2: TARJETA APPLE / GOOGLE WALLET + QR REAL
+             ========================================== -->
+        <section id="view-wallet" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Columna Izquierda: Tarjeta Visual idéntica al iPhone -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div id="walletCardContainer" class="w-full max-w-[360px] rounded-[28px] p-5 shadow-2xl border border-white/20 text-white select-none transition-all duration-300 ios-pass-purple">
+                        <!-- Cabecera del Pase -->
+                        <div class="relative z-10 flex items-center justify-between pb-3 border-b border-white/15">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center border border-white/30">
+                                    <i class="fa-solid fa-sun text-white text-sm"></i>
+                                </div>
+                                <span id="cardCondoName" class="font-bold text-sm tracking-tight">La Hacienda - Rincon</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[9px] uppercase tracking-wider text-white/75 font-bold">TIPO DE PASE</div>
+                                <div id="cardPassType" class="text-xs font-extrabold tracking-wide">VISITA SOCIAL</div>
+                            </div>
+                        </div>
+
+                        <!-- Campos Primarios y Secundarios (Idéntico a tu captura de iOS) -->
+                        <div class="relative z-10 my-4 space-y-3">
+                            <div class="grid grid-cols-12 gap-2 bg-black/25 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                                <div class="col-span-8">
+                                    <div class="text-[9px] uppercase tracking-wider text-white/70 font-bold">VISITA</div>
+                                    <div id="cardVisitorName" class="text-base font-extrabold truncate">Sebastian Peredo</div>
+                                </div>
+                                <div class="col-span-4 text-right">
+                                    <div class="text-[9px] uppercase tracking-wider text-white/70 font-bold">VÁLIDO HASTA</div>
+                                    <div id="cardValidUntil" class="text-sm font-bold">26/10/26</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-12 gap-2 bg-black/25 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                                <div class="col-span-4">
+                                    <div class="text-[9px] uppercase tracking-wider text-white/70 font-bold">CASA</div>
+                                    <div id="cardHouse" class="text-xl font-black leading-none mt-0.5">30</div>
+                                </div>
+                                <div class="col-span-8 text-right">
+                                    <div class="text-[9px] uppercase tracking-wider text-white/70 font-bold">C.I. / PLACA</div>
+                                    <div id="cardCiPlaca" class="text-xs font-bold truncate mt-1">8945123 SC | 5421-XYZ</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/25 backdrop-blur-md rounded-xl px-3 py-2.5 border border-white/10 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[9px] uppercase tracking-wider text-white/70 font-bold">AUTORIZADO POR:</div>
+                                    <div id="cardAuthBy" class="text-xs font-bold">Familia Peredo</div>
+                                </div>
+                                <span id="cardStatusPill" class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
+                                    AUTORIZADO
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Caja Central del Código QR Real -->
+                        <div class="relative z-10 mt-5 flex flex-col items-center">
+                            <div class="bg-white p-3.5 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+                                <div id="qrcodeCanvas" class="w-[164px] h-[164px] flex items-center justify-center text-zinc-400 text-xs text-center font-semibold"></div>
+                                <span id="cardPassIdSub" class="text-[10px] font-mono text-zinc-700 font-bold mt-1.5 tracking-widest">SIN PASE ACTIVO</span>
+                            </div>
+                            <p class="text-[10px] text-white/80 mt-2.5 font-medium text-center">
+                                <i class="fa-solid fa-lock text-[9px]"></i> Firma Digital Ed25519 • Verificación Instantánea
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Acciones de Distribución e Inspector Criptográfico -->
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+                        <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                            <i class="fa-brands fa-apple text-xl"></i>
+                            <span>Agregar a Apple Wallet / Google Wallet</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400 leading-relaxed">
+                            Este código QR contiene la firma criptográfica del condominio. Puedes escanearlo directamente desde la función nativa <strong>"Creación de un pase"</strong> de tu iPhone o enviarlo por WhatsApp a tu invitado.
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            <button onclick="sendPassWhatsApp()" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
+                                <i class="fa-brands fa-whatsapp text-base"></i>
+                                <span>Enviar Pase por WhatsApp</span>
+                            </button>
+                            <button onclick="simulateGoogleWalletSave()" class="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+                                <i class="fa-brands fa-google-pay text-lg"></i>
+                                <span>Guardar en Google Wallet (JWT)</span>
+                            </button>
+                        </div>
+
+                        <!-- Inspector del Token Criptográfico -->
+                        <div class="pt-3 border-t border-zinc-800">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Payload Criptográfico dentro del QR:</span>
+                                <button onclick="copyQrPayload()" class="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1">
+                                    <i class="fa-regular fa-copy"></i> Copiar Token
+                                </button>
+                            </div>
+                            <div id="qrPayloadInspector" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 font-mono text-xs text-emerald-400 break-all"></div>
+                        </div>
+
+                        <!-- Botón directo para probar en Garita (Solo visible para Administración) -->
+                        <div id="walletToGuardiaPromoBox" class="hidden bg-purple-950/30 border border-purple-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-bold text-white">¿Quieres probar cómo lo ve el guardia en la tranca?</div>
+                                <div class="text-[11px] text-purple-200">Simula el escaneo de este pase o abre la cámara real en Portería.</div>
+                            </div>
+                            <button onclick="switchTab('guardia')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 transition">
+                                Ir a Portería →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             VISTA 3: TERMINAL DE PORTERÍA / GUARDIA ("A PRUEBA DE BALAS")
+             ========================================== -->
+        <section id="view-guardia" class="hidden space-y-6">
+            <!-- Alerta Roja si un Trabajador/Obrero sigue adentro después de las 18:00 -->
+            <div id="workerOvertimeAlert" class="hidden bg-red-600 text-white rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl animate-pulse-fast">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-black/30 flex items-center justify-center text-2xl shrink-0">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-mono uppercase font-black bg-black/30 px-2 py-0.5 rounded inline-block">🚨 ALERTA DE SEGURIDAD — HORARIO LÍMITE 18:00 HRS</div>
+                        <h3 id="workerOvertimeDetail" class="text-base font-extrabold mt-1">Proveedor / Obrero permanece dentro del condominio fuera de horario.</h3>
+                    </div>
+                </div>
+                <button onclick="forceWorkerCheckout()" class="px-4 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-extrabold text-xs shrink-0 shadow-lg">
+                    Registrar Salida Inmediata
+                </button>
+            </div>
+
+            <!-- 3 Botones Gigantes de Alto Contraste para Garita -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button id="btnGuardEntrada" onclick="setGuardMode('ENTRADA')" class="p-6 rounded-2xl border-2 border-emerald-400 bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 flex items-center justify-between transition transform active:scale-95">
+                    <div class="text-left">
+                        <span class="text-xs font-mono uppercase font-bold opacity-90 block">MODO 1 • TRANCA PRINCIPAL</span>
+                        <span class="text-2xl font-black tracking-tight">ESCANEAR ENTRADA</span>
+                    </div>
+                    <i class="fa-solid fa-qrcode text-4xl opacity-90"></i>
+                </button>
+
+                <button id="btnGuardPre" onclick="setGuardMode('PREAUTORIZADOS')" class="p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95">
+                    <div class="text-left">
+                        <span id="preAuthCountBadge" class="text-xs font-mono uppercase font-bold text-amber-400 block">1 EN ESPERA</span>
+                        <span class="text-2xl font-black tracking-tight">TAXI / DELIVERY</span>
+                    </div>
+                    <i class="fa-solid fa-motorcycle text-4xl text-amber-400"></i>
+                </button>
+
+                <button id="btnGuardSalida" onclick="setGuardMode('SALIDA')" class="p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95">
+                    <div class="text-left">
+                        <span class="text-xs font-mono uppercase font-bold text-sky-400 block">MODO 3 • LIBERAR PASE</span>
+                        <span class="text-2xl font-black tracking-tight">REGISTRAR SALIDA</span>
+                    </div>
+                    <i class="fa-solid fa-door-open text-4xl text-sky-400"></i>
+                </button>
+            </div>
+
+            <!-- Panel Operativo del Guardia: Izquierda Escáner / Derecha Pantalla Gigante Semáforo -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Controles de Escaneo (5 cols) -->
+                <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase text-zinc-400 block">MODO ACTIVO EN GARITA:</span>
+                            <h3 id="guardCurrentModeLabel" class="text-base font-black text-emerald-400">ENTRADA</h3>
+                        </div>
+                        <button id="cameraToggleBtn" onclick="toggleCameraScanner()" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow">
+                            <i class="fa-solid fa-video"></i>
+                            <span>Activar Cámara QR</span>
+                        </button>
+                    </div>
+
+                    <!-- Visor de Cámara Web / Celular + Banner de Pausa de 5 Segundos -->
+                    <div id="cameraReaderWrapper" class="hidden space-y-2">
+                        <div id="scannerCooldownBanner" class="hidden bg-amber-500 text-zinc-950 font-black text-xs px-3 py-2 rounded-xl flex items-center justify-between">
+                            <span>⏳ Pausa anti-doble lectura activa...</span>
+                            <span id="cooldownSecondsText" class="font-mono text-sm">5s</span>
+                        </div>
+                        <div id="qr-reader" class="w-full rounded-xl overflow-hidden border border-zinc-700 bg-black"></div>
+                    </div>
+
+                    <!-- Entrada con Pistola Lectora USB o Código Manual -->
+                    <form onsubmit="handleManualTokenSubmit(event)" class="flex gap-2">
+                        <input type="text" id="manualTokenInput" placeholder="Pistola lectora QR o ID (ej. PASE-SCZ-030)..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-purple-500">
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs shrink-0">
+                            Validar
+                        </button>
+                    </form>
+
+                    <!-- Lista de Pases para Simular Escaneo en 1 Toque -->
+                    <div class="pt-2 border-t border-zinc-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold uppercase text-zinc-400">Toca un pase para simular lectura en tranca:</span>
+                            <button type="button" onclick="trigger18HrsCheck()" class="text-[11px] text-orange-400 hover:underline font-bold">
+                                ⏰ Simular 18:00 hrs
+                            </button>
+                        </div>
+                        <div id="guardQuickSimButtons" class="grid grid-cols-1 gap-2 max-h-[260px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- Pantalla Semáforo de Respuesta Instantánea (7 cols) -->
+                <div class="lg:col-span-7">
+                    <div id="guardResultScreen" class="h-full min-h-[340px] rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-800 text-zinc-400 flex items-center justify-center text-3xl mb-3">
+                            <i class="fa-solid fa-camera-viewfinder"></i>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-white">Terminal de Portería Lista</h2>
+                        <p class="text-xs text-zinc-400 max-w-md mt-1">
+                            Apunta la cámara al Apple Wallet / Google Wallet del visitante o selecciona un pase a la izquierda para verificar su firma digital Ed25519.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitor en Vivo: Quién está ADENTRO del Condominio ahora mismo -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-users-viewfinder text-emerald-400"></i>
+                        <span>Visitantes y Proveedores Actualmente ADENTRO del Condominio</span>
+                    </h3>
+                    <span id="insideCounterBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        1 Adentro Ahora
+                    </span>
+                </div>
+                <div id="insideVisitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             VISTA 4: PANEL DE ADMINISTRACIÓN Y DIRECTORIO
+             ========================================== -->
+        <section id="view-admin" class="hidden space-y-6">
+            <!-- Tarjetas KPI de Resumen del Condominio -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-zinc-400 font-semibold">Padrón de Unidades</span>
+                        <div id="adminTotalHousesCount" class="text-2xl font-black text-white mt-0.5">6</div>
+                        <span class="text-[11px] text-emerald-400 font-mono">PIN Inicial por defecto: 0000</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-house-chimney"></i>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-zinc-400 font-semibold">Control de Morosidad</span>
+                        <div id="adminMorososSummaryText" class="text-xl font-black text-red-400 mt-0.5">2 Domicilios en mora</div>
+                        <span class="text-[11px] text-zinc-400">Bloqueo automático de QR rápido</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-zinc-400 font-semibold">Eventos en Bitácora</span>
+                        <div id="adminTotalLogs" class="text-2xl font-black text-white mt-0.5">0</div>
+                        <span class="text-[11px] text-sky-400 font-mono">Auditoría multi-día exportable</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN A: GESTIÓN DE DOMICILIOS Y MOROSOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Formulario: Agregar Nuevo Domicilio (4 cols) -->
+                <div class="lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4 h-fit">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-house-medical text-purple-400"></i>
+                        <span>Agregar Nuevo Domicilio</span>
+                    </h2>
+
+                    <form onsubmit="handleAdminCreateHouse(event)" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="text-xs font-medium text-zinc-300 block mb-1">N° Casa / Lote</label>
+                                <input type="text" id="adminNewHouseNumber" required placeholder="Ej. 52" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-zinc-300 block mb-1">Manzano / Calle</label>
+                                <input type="text" id="adminNewHouseStreet" placeholder="Ej. Manzano C" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-medium text-zinc-300 block mb-1">Apellido o Familia Propietaria</label>
+                            <input type="text" id="adminNewHouseFamily" required placeholder="Ej. Familia Gutiérrez" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="text-xs font-medium text-zinc-300 block mb-1">PIN Inicial</label>
+                                <input type="text" id="adminNewHousePin" value="0000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono font-bold focus:outline-none focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-zinc-300 block mb-1">Estado Expensas</label>
+                                <select id="adminNewHouseMoraStatus" onchange="toggleNewHouseMoraDetail()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                                    <option value="AL_DIA">✅ Al Día</option>
+                                    <option value="MOROSO">⛔ En Mora</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="adminNewHouseMoraDetailBox" class="hidden">
+                            <label class="text-xs font-medium text-red-300 block mb-1">Detalle de Deuda / Meses en Mora</label>
+                            <input type="text" id="adminNewHouseMoraNote" placeholder="Ej. Debe 2 meses de expensas" class="w-full bg-zinc-950 border border-red-500/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Registrar Domicilio en Padrón</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Listado y Filtro de Domicilios / Deudores (8 cols) -->
+                <div class="lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-building-user text-purple-400"></i>
+                                <span>Padrón de Domicilios y Control de Morosos</span>
+                            </h2>
+                            <p class="text-xs text-zinc-400">Marca o levanta la mora de expensas en tiempo real o restablece el PIN a 0000.</p>
+                        </div>
+
+                        <!-- Filtros Rápidos: Todos / Morosos / Al Día + Controles de Datos -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                                <button id="btnFilterHousesAll" onclick="setAdminHouseFilter('TODOS')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 text-white transition">
+                                    Todos
+                                </button>
+                                <button id="btnFilterHousesMora" onclick="setAdminHouseFilter('MOROSOS')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">
+                                    ⛔ Deudores
+                                </button>
+                                <button id="btnFilterHousesOk" onclick="setAdminHouseFilter('ALDIA')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">
+                                    ✅ Al Día
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="resetToDemoData()" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-purple-300 border border-zinc-800 text-[11px] font-bold transition" title="Cargar 6 casas y pases de ejemplo">
+                                    <i class="fa-solid fa-database"></i> Datos Demo
+                                </button>
+                                <button type="button" onclick="clearAllCondoData()" class="px-2.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-red-950/50 text-zinc-400 hover:text-red-300 border border-zinc-800 text-[11px] font-bold transition" title="Dejar el sistema en 0 casas para demostración desde cero">
+                                    <i class="fa-solid fa-broom"></i> Limpiar Todo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="text" id="adminHouseSearchInput" oninput="renderAdminHouses()" placeholder="Buscar por número de casa, familia o manzano..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+
+                    <div id="adminHousesList" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN B: BITÁCORA INTERACTIVA DE MOVIMIENTOS POR DÍA -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-purple-400"></i>
+                            <span>Bitácora Oficial de Portería (Historial por Días)</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400">Selecciona un día para inspeccionar todas las entradas, salidas, taxis y rechazos por mora.</p>
+                    </div>
+
+                    <!-- Controles de Filtro por Fecha, Casa y Exportación CSV -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5">
+                            <i class="fa-regular fa-calendar text-purple-400 text-xs"></i>
+                            <span class="text-[11px] text-zinc-400 font-semibold">Ir a fecha:</span>
+                            <input type="date" id="bitacoraDateInput" value="2026-10-25" onchange="handleBitacoraDatePicker(this.value)" class="bg-transparent text-xs text-white font-mono focus:outline-none">
+                        </div>
+
+                        <select id="bitacoraEventFilter" onchange="renderAdminLogs()" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                            <option value="TODOS">📋 Todos los Eventos</option>
+                            <option value="ENTRADA">🟢 Solo Entradas</option>
+                            <option value="SALIDA">🔵 Solo Salidas</option>
+                            <option value="TAXI">🟡 Taxis y Deliveries</option>
+                            <option value="ALERTA">🔴 Rechazos / Mora</option>
+                        </select>
+
+                        <input type="text" id="bitacoraSearchInput" oninput="renderAdminLogs()" placeholder="Filtrar visitante o Casa..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+
+                        <button type="button" onclick="exportBitacoraCSV()" class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition" title="Descargar reporte en CSV / Excel">
+                            <i class="fa-solid fa-file-csv"></i>
+                            <span>Exportar CSV</span>
+                        </button>
+
+                        <button type="button" onclick="clearBitacoraLogs()" class="px-3 py-2 rounded-xl bg-zinc-950 hover:bg-red-950/50 text-zinc-400 hover:text-red-300 border border-zinc-800 text-xs font-bold flex items-center gap-1.5 transition" title="Dejar la bitácora en cero como nueva">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reiniciar Bitácora</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pestañas de Días (Hoy, Ayer, Fechas Anteriores, Todos) -->
+                <div id="bitacoraDaysTabs" class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar"></div>
+
+                <!-- Resumen del Día Seleccionado -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-zinc-950 border border-zinc-800/80 rounded-xl p-3">
+                    <div>
+                        <span class="text-[10px] uppercase text-zinc-500 font-bold block">Vista Seleccionada</span>
+                        <span id="bitacoraSelectedDayLabel" class="text-xs font-extrabold text-purple-300">Hoy (25/10/2026)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase text-zinc-500 font-bold block">Entradas QR</span>
+                        <span id="bitacoraDayEntriesCount" class="text-sm font-black text-emerald-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase text-zinc-500 font-bold block">Taxis / Deliveries</span>
+                        <span id="bitacoraDayTaxisCount" class="text-sm font-black text-amber-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase text-zinc-500 font-bold block">Salidas Registradas</span>
+                        <span id="bitacoraDayExitsCount" class="text-sm font-black text-sky-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Tabla de Movimientos -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]">
+                                <th class="py-2.5 px-3">Fecha</th>
+                                <th class="py-2.5 px-3">Hora</th>
+                                <th class="py-2.5 px-3">Evento</th>
+                                <th class="py-2.5 px-3">Visitante / Vehículo</th>
+                                <th class="py-2.5 px-3">Casa</th>
+                                <th class="py-2.5 px-3">Categoría</th>
+                                <th class="py-2.5 px-3">Portería</th>
+                                <th class="py-2.5 px-3 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAuditTableBody" class="divide-y divide-zinc-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==========================================
+         MODAL 1: PRE-AUTORIZAR TAXI / DELIVERY (30 MIN)
+         ========================================== -->
+    <div id="taxiModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle text-amber-400"></i>
+                    Pre-Autorizar Taxi o Delivery (30 min)
+                </h3>
+                <button onclick="closeTaxiModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-zinc-400">
+                Aparecerá al instante en la pantalla del guardia para que le tome foto rápida a la placa y abra la tranca sin llamarte por citófono.
+            </p>
+            <form onsubmit="handleCreateFastPass(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Servicio / Empresa</label>
+                    <select id="fastServiceInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                        <option value="PedidosYa (Moto)">🛵 PedidosYa (Moto)</option>
+                        <option value="Yango / Uber / InDrive">🚕 Yango / Uber / InDrive</option>
+                        <option value="Yaigo / PatioService">🍔 Delivery Restaurante</option>
+                        <option value="Camión de Agua / Gas">🚚 Agua / Gas / Courrier</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Placa o Referencia Rápida</label>
+                    <input type="text" id="fastPlateInput" required placeholder="Ej. Placa 4521 o Nombre del conductor" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase tracking-wider">
+                    Enviar Aviso Inmediato a Portería
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 2: LINK DE AUTOREGISTRO PARA CHURRASCO / JUNTE
+         ========================================== -->
+    <div id="churrascoModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-fire-burner text-orange-400"></i>
+                    Link Grupal para Churrasco / Junte
+                </h3>
+                <button onclick="closeChurrascoModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-zinc-400">
+                Pega este link único en tu grupo de WhatsApp. Tus amigos llenan su Nombre y C.I. solos y descargan su pase directo al Wallet (sin que tengas que cargar carnets uno por uno).
+            </p>
+            <div id="churrascoLinkDisplay" class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 font-mono text-xs text-purple-300 break-all">
+                https://visepass.bo/junte/la-hacienda-casa-30
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button onclick="copyChurrascoLink()" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> Copiar Link WhatsApp
+                </button>
+                <button onclick="openGuestSelfRegModal()" class="py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-up-right-from-square"></i> Probar Vista de Invitado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 3: FORMULARIO PÚBLICO DEL INVITADO (AUTOREGISTRO)
+         ========================================== -->
+    <div id="guestSelfRegModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-mono uppercase text-purple-400 font-bold">AUTOREGISTRO DE INVITADO</span>
+                    <h3 id="selfRegModalTitle" class="text-base font-extrabold text-white">Invitación a Casa 30 (Familia Peredo)</h3>
+                </div>
+                <button onclick="closeGuestSelfRegModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="handleGuestSelfRegSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Tu Nombre Completo</label>
+                    <input type="text" id="selfRegName" required placeholder="Ej. Rodrigo Paz" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Número de C.I.</label>
+                        <input type="text" id="selfRegCi" required placeholder="Ej. 7812345 SC" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Placa (Opcional)</label>
+                        <input type="text" id="selfRegPlate" placeholder="Ej. 4120-BGT" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs">
+                    Generar Mi Pase QR para Wallet
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 4: PORTAL INICIAL DE INGRESO POR ROL
+         ========================================== -->
+    <div id="authPortalModal" class="fixed inset-0 z-50 bg-zinc-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30 border border-purple-400/30 shrink-0">
+                        <i class="fa-solid fa-wallet text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-purple-400 font-bold">CONTROL DE ACCESO • LA HACIENDA</span>
+                        <h3 class="text-lg font-black text-white leading-tight">¿Cómo deseas ingresar?</h3>
+                        <p class="text-[11px] text-zinc-400">Selecciona tu perfil para cargar tus permisos</p>
+                    </div>
+                </div>
+                <button id="closeAuthModalBtn" onclick="closeAuthPortalIfAllowed()" class="hidden text-zinc-400 hover:text-white p-1" title="Volver al panel actual">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Pestañas de Rol -->
+            <div class="grid grid-cols-3 gap-1.5 bg-zinc-950 p-1.5 rounded-xl border border-zinc-800">
+                <button id="loginTabResidente" type="button" onclick="selectLoginTab('RESIDENTE')" class="py-2.5 rounded-lg text-xs font-bold bg-purple-600 text-white shadow transition">
+                    🏠 Vecino
+                </button>
+                <button id="loginTabGuardia" type="button" onclick="selectLoginTab('GUARDIA')" class="py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">
+                    🛡️ Portería
+                </button>
+                <button id="loginTabAdmin" type="button" onclick="selectLoginTab('ADMIN')" class="py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">
+                    🏢 Admin
+                </button>
+            </div>
+
+            <div id="loginErrorMsg" class="hidden bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl p-3 text-xs font-bold">
+                ⛔ El PIN ingresado no coincide con este domicilio. (PIN inicial por defecto: 0000).
+            </div>
+
+            <!-- Formulario Residente -->
+            <form id="loginFormResidente" onsubmit="handleLoginResidente(event)" class="space-y-3">
+                <div class="bg-purple-950/30 border border-purple-500/30 rounded-xl p-3 text-[11px] text-purple-200 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-purple-400 mt-0.5"></i>
+                    <span><strong>Permiso Vecino:</strong> Acceso exclusivo a la creación de pases QR, anuncio de Taxis/Deliveries y tu tarjeta Wallet.</span>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Selecciona tu Domicilio / Casa</label>
+                    <select id="loginHouseSelect" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white"></select>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">PIN de Seguridad del Propietario (Por defecto: 0000)</label>
+                    <input type="password" id="loginResidentPin" value="0000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono tracking-widest">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-purple-600/20">
+                    Entrar como Vecino
+                </button>
+            </form>
+
+            <!-- Formulario Guardia -->
+            <form id="loginFormGuardia" onsubmit="handleLoginGuardia(event)" class="hidden space-y-3">
+                <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3 text-[11px] text-emerald-200 flex items-start gap-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 mt-0.5"></i>
+                    <span><strong>Permiso Portería:</strong> Acceso exclusivo a la terminal de escaneo de pases QR, control de entradas/salidas y taxis pre-autorizados.</span>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Puesto / Turno de Guardia</label>
+                    <input type="text" id="guardNameInput" value="Portería Principal (Turno Día)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20">
+                    Entrar como Portería
+                </button>
+            </form>
+
+            <!-- Formulario Administración -->
+            <form id="loginFormAdmin" onsubmit="handleLoginAdmin(event)" class="hidden space-y-3">
+                <div class="bg-sky-950/30 border border-sky-500/30 rounded-xl p-3 text-[11px] text-sky-200 flex items-start gap-2">
+                    <i class="fa-solid fa-building-shield text-sky-400 mt-0.5"></i>
+                    <span><strong>Permiso Administrador:</strong> Acceso total a todos los paneles (Administración, Portería, Tarjeta Wallet y Creación de Pases).</span>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Credencial de Directorio / Administración</label>
+                    <input type="password" id="adminPinInput" value="admin" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg">
+                    Entrar como Administración (Acceso Total)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 5: CAMBIAR PIN DEL PROPIETARIO
+         ========================================== -->
+    <div id="changePinModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i>
+                    Cambiar PIN del Domicilio
+                </h3>
+                <button onclick="closeChangePinModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p id="changePinHouseLabel" class="text-xs text-purple-300 font-bold">Casa 30 (Familia Peredo)</p>
+            <form onsubmit="handleChangeResidentPin(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">PIN Actual (Por defecto es 0000)</label>
+                    <input type="password" id="currentPinInput" required placeholder="0000" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Nuevo PIN Personal (Mínimo 4 dígitos)</label>
+                    <input type="password" id="newPinInput" required placeholder="Ej. 2407" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs">
+                    Guardar Nuevo PIN
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 6: GESTIONAR MORA DE UN DOMICILIO (ADMIN)
+         ========================================== -->
+    <div id="moraEditModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-red-400"></i>
+                    Estado de Expensas y Mora
+                </h3>
+                <button onclick="closeMoraModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p id="moraModalHouseSubtitle" class="text-xs font-bold text-purple-300"></p>
+            <form onsubmit="handleSaveMoraModal(event)" class="space-y-3">
+                <input type="hidden" id="moraModalHouseNumber">
+                <div>
+                    <label class="text-xs text-zinc-300 block mb-1">Estado del Domicilio</label>
+                    <select id="moraModalStatusSelect" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                        <option value="AL_DIA">✅ Expensas Al Día (Acceso QR Habilitado)</option>
+                        <option value="MOROSO">⛔ En Mora / Deudor (Bloquear Pases Rápidos QR)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-300 block mb-1">Motivo / Meses Adeudados</label>
+                    <input type="text" id="moraModalReasonInput" placeholder="Ej. Debe 2 meses de expensas (Agosto y Septiembre)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs">
+                    Actualizar Estado del Domicilio
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 7: FICHA DETALLADA DE MOVIMIENTO EN BITÁCORA
+         ========================================== -->
+    <div id="logDetailModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 id="logModalTitle" class="text-base font-extrabold text-white">Ficha de Auditoría</h3>
+                <button onclick="closeLogDetailModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="logModalBody" class="text-xs space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICACIONES FLOTANTE -->
+    <div id="toastBox" class="hidden fixed bottom-5 right-5 z-50 bg-zinc-900 border border-purple-500/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold">
+        <i class="fa-solid fa-bell text-purple-400"></i>
+        <span id="toastMessage">Notificación</span>
+    </div>
+
+    <!-- ==========================================
+         LÓGICA DE PRODUCCIÓN, PERSISTENCIA Y CLOUD SYNC
+         ========================================== -->
+    <script>
+        /* ==========================================
+           1. UTILIDADES Y HELPERS GENERALES
+           ========================================== */
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function copyTextToClipboard(text, successMessage) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast(successMessage))
+                    .catch(() => fallbackCopyText(text, successMessage));
+            } else {
+                fallbackCopyText(text, successMessage);
+            }
+        }
+
+        function fallbackCopyText(text, successMessage) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.style.position = 'fixed';
+            temp.style.opacity = '0';
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMessage);
+            } catch (err) {
+                showToast('⚠️ No se pudo copiar automáticamente');
+            }
+            document.body.removeChild(temp);
+        }
+
+        function getTodayFormatted() {
+            return '25/10/2026';
+        }
+
+        /* ==========================================
+           2. ESTADO GLOBAL Y DATOS INICIALES POR DEFECTO
+           ========================================== */
+        const STORAGE_KEY = 'visepass_scz_state_v3_clean_logs';
+
+        const DEFAULT_HOUSES = [
+            { number: '30', street: 'Manzano A', family: 'Familia Peredo', pin: '0000', isMorosa: false, moraNote: '' },
+            { number: '12', street: 'Manzano A', family: 'Familia Saucedo', pin: '0000', isMorosa: false, moraNote: '' },
+            { number: '45', street: 'Manzano B', family: 'Familia Justiniano', pin: '0000', isMorosa: true, moraNote: 'Debe 2 meses de expensas (Agosto y Septiembre)' },
+            { number: '08', street: 'Manzano C', family: 'Familia Cronenbold', pin: '0000', isMorosa: false, moraNote: '' },
+            { number: '21', street: 'Manzano B', family: 'Familia Vaca Díez', pin: '0000', isMorosa: true, moraNote: 'Debe 3 meses de expensas + Cuota extraordinaria' },
+            { number: '64', street: 'Manzano D', family: 'Familia Monasterio', pin: '0000', isMorosa: false, moraNote: '' }
+        ];
+
+        const DEFAULT_PASSES = [
+            {
+                id: 'PASE-SCZ-030',
+                condo: 'La Hacienda - Rincon',
+                house: '30',
+                visitorName: 'Sebastian Peredo',
+                ciPlaca: '8945123 SC | 5421-XYZ',
+                passType: 'VISITA SOCIAL',
+                validUntil: '26/10/26',
+                authBy: 'Familia Peredo',
+                status: 'AFUERA',
+                identityVerified: true
+            },
+            {
+                id: 'PASE-SCZ-031',
+                condo: 'La Hacienda - Rincon',
+                house: '30',
+                visitorName: 'María Flores (Hogar)',
+                ciPlaca: '6341298 SC | SIN AUTO',
+                passType: 'PERSONAL HOGAR',
+                validUntil: '31/12/26',
+                authBy: 'Familia Peredo',
+                status: 'AFUERA',
+                identityVerified: true
+            },
+            {
+                id: 'PASE-SCZ-032',
+                condo: 'La Hacienda - Rincon',
+                house: '30',
+                visitorName: 'Don Mario (Piscinero)',
+                ciPlaca: '4981234 SC | MOTO-99',
+                passType: 'PROVEEDOR / OBRA',
+                validUntil: '26/10/26',
+                authBy: 'Familia Peredo',
+                status: 'AFUERA',
+                identityVerified: true
+            },
+            {
+                id: 'PASE-SCZ-045',
+                condo: 'La Hacienda - Rincon',
+                house: '45',
+                visitorName: 'Jorge Aguilera (Invitado)',
+                ciPlaca: '6129834 SC | 3091-KLP',
+                passType: 'VISITA SOCIAL',
+                validUntil: '26/10/26',
+                authBy: 'Familia Justiniano',
+                status: 'AFUERA',
+                identityVerified: false
+            }
+        ];
+
+        const DEFAULT_FAST_PASSES = [
+            {
+                id: 'FAST-101',
+                house: '30',
+                service: 'PedidosYa (Moto)',
+                plateOrName: 'Moto Placa 4521-SC',
+                expiresIn: '28 min',
+                status: 'PENDIENTE'
+            }
+        ];
+
+        // Bitácora completamente limpia (0 registros) lista para estrenar
+        const DEFAULT_AUDIT_LOGS = [];
+
+        let activeRole = 'RESIDENTE';
+        let currentHouse = '30';
+        let currentFamily = 'Familia Peredo';
+        let currentGuardName = 'Portería Principal (Turno Día)';
+
+        let isOfflineMode = false;
+        let guardMode = 'ENTRADA';
+        let selectedPassId = 'PASE-SCZ-030';
+        let html5QrScanner = null;
+        let isCameraRunning = false;
+
+        let adminHouseFilter = 'TODOS';
+        let selectedBitacoraDate = '25/10/2026';
+
+        // Pausa de 5 segundos entre escaneos en Portería
+        let isScannerCoolingDown = false;
+        let cooldownTimerInterval = null;
+
+        let houses = JSON.parse(JSON.stringify(DEFAULT_HOUSES));
+        let passes = JSON.parse(JSON.stringify(DEFAULT_PASSES));
+        let fastPasses = JSON.parse(JSON.stringify(DEFAULT_FAST_PASSES));
+        let auditLogs = JSON.parse(JSON.stringify(DEFAULT_AUDIT_LOGS));
+
+        function loadLocalState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed.houses)) houses = parsed.houses;
+                if (Array.isArray(parsed.passes)) passes = parsed.passes;
+                if (Array.isArray(parsed.fastPasses)) fastPasses = parsed.fastPasses;
+                if (Array.isArray(parsed.auditLogs)) auditLogs = parsed.auditLogs;
+            } catch (err) {
+                console.warn('No se pudo leer almacenamiento local:', err);
+            }
+        }
+
+        function saveLocalState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    houses,
+                    passes,
+                    fastPasses,
+                    auditLogs: auditLogs.slice(0, 150)
+                }));
+            } catch (err) {
+                console.warn('No se pudo guardar en almacenamiento local:', err);
+            }
+        }
+
+        /* ==========================================
+           3. SINCRONIZACIÓN CLOUD FIRESTORE (NO BLOQUEANTE)
+           ========================================== */
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let firebaseSetDoc = null;
+        let firebaseDoc = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'visepass-scz-lahacienda';
+        const STATE_DOC_ID = 'la_hacienda_rincon_clean_v2';
+
+        async function initCloudSync() {
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) return;
+                const firebaseConfig = JSON.parse(__firebase_config);
+
+                const appMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                const authMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                const fsMod = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+                const app = appMod.initializeApp(firebaseConfig);
+                auth = authMod.getAuth(app);
+                db = fsMod.getFirestore(app);
+                firebaseDoc = fsMod.doc;
+                firebaseSetDoc = fsMod.setDoc;
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await authMod.signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await authMod.signInAnonymously(auth);
+                }
+
+                authMod.onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        const stateRef = fsMod.doc(db, 'artifacts', appId, 'public', 'data', 'condo_state', STATE_DOC_ID);
+                        fsMod.onSnapshot(stateRef, (snap) => {
+                            if (snap.exists()) {
+                                const data = snap.data();
+                                if (data.housesJson) houses = JSON.parse(data.housesJson);
+                                if (data.passesJson) passes = JSON.parse(data.passesJson);
+                                if (data.fastPassesJson) fastPasses = JSON.parse(data.fastPassesJson);
+                                if (data.auditLogsJson) auditLogs = JSON.parse(data.auditLogsJson);
+                                syncCurrentHouseHeader();
+                                refreshAllViews();
+                            } else {
+                                pushStateToCloud();
+                            }
+                        }, (err) => {
+                            console.warn("Modo local activo:", err);
+                        });
+                    }
+                });
+            } catch (e) {
+                console.warn("Operando en memoria local rápida:", e);
+            }
+        }
+
+        async function pushStateToCloud() {
+            saveLocalState();
+            syncCurrentHouseHeader();
+            refreshAllViews();
+            if (!db || !currentUser || isOfflineMode || !firebaseDoc || !firebaseSetDoc) return;
+            try {
+                const stateRef = firebaseDoc(db, 'artifacts', appId, 'public', 'data', 'condo_state', STATE_DOC_ID);
+                await firebaseSetDoc(stateRef, {
+                    housesJson: JSON.stringify(houses),
+                    passesJson: JSON.stringify(passes),
+                    fastPassesJson: JSON.stringify(fastPasses),
+                    auditLogsJson: JSON.stringify(auditLogs.slice(0, 150)),
+                    updatedAt: Date.now()
+                });
+            } catch (e) {
+                console.warn("Error sincronizando estado:", e);
+            }
+        }
+
+        function resetToDemoData() {
+            houses = JSON.parse(JSON.stringify(DEFAULT_HOUSES));
+            passes = JSON.parse(JSON.stringify(DEFAULT_PASSES));
+            fastPasses = JSON.parse(JSON.stringify(DEFAULT_FAST_PASSES));
+            auditLogs = JSON.parse(JSON.stringify(DEFAULT_AUDIT_LOGS));
+            currentHouse = '30';
+            currentFamily = 'Familia Peredo';
+            selectedPassId = 'PASE-SCZ-030';
+            pushStateToCloud();
+            showToast('✅ Datos de demostración restaurados (6 casas y pases activos)');
+        }
+
+        function clearAllCondoData() {
+            houses = [];
+            passes = [];
+            fastPasses = [];
+            auditLogs = [];
+            currentHouse = '';
+            currentFamily = 'Sin Domicilios';
+            selectedPassId = '';
+            pushStateToCloud();
+            showToast('🧹 Sistema limpio: 0 domicilios registrados');
+        }
+
+        function clearBitacoraLogs() {
+            auditLogs = [];
+            passes.forEach(p => {
+                p.status = 'AFUERA';
+                delete p.entryTime;
+            });
+            document.getElementById('workerOvertimeAlert')?.classList.add('hidden');
+            document.getElementById('guardAlertBadge')?.classList.add('hidden');
+            pushStateToCloud();
+            showToast('✨ Bitácora reiniciada en cero como nueva');
+        }
+
+        function syncCurrentHouseHeader() {
+            const emptyState = document.getElementById('emptyCondoVecinoState');
+            const activeContent = document.getElementById('activeCondoVecinoContent');
+            const badgeHeader = document.getElementById('activeRoleHeaderBadge');
+
+            if (houses.length === 0) {
+                currentHouse = '';
+                currentFamily = 'Sin Domicilios';
+                if (emptyState) emptyState.classList.remove('hidden');
+                if (activeContent) activeContent.classList.add('hidden');
+                if (badgeHeader && activeRole === 'RESIDENTE') {
+                    badgeHeader.textContent = 'SIN CASAS';
+                }
+                return;
+            }
+
+            if (emptyState) emptyState.classList.add('hidden');
+            if (activeContent) activeContent.classList.remove('hidden');
+
+            let houseObj = houses.find(h => h.number === currentHouse);
+            if (!houseObj) {
+                houseObj = houses[0];
+                currentHouse = houseObj.number;
+            }
+            if (houseObj) {
+                currentFamily = houseObj.family;
+                const titleEl = document.getElementById('residentFamilyTitle');
+                const subEl = document.getElementById('residentHouseSubtitle');
+                const bigEl = document.getElementById('residentHouseBigNumber');
+                const inputEl = document.getElementById('houseInput');
+                const selfRegTitle = document.getElementById('selfRegModalTitle');
+                const linkDisp = document.getElementById('churrascoLinkDisplay');
+
+                if (titleEl) titleEl.textContent = currentFamily;
+                if (subEl) subEl.textContent = `Casa ${currentHouse}`;
+                if (bigEl) bigEl.textContent = currentHouse;
+                if (inputEl) inputEl.value = currentHouse;
+                if (selfRegTitle) selfRegTitle.textContent = `Invitación a Casa ${currentHouse} (${currentFamily})`;
+                if (linkDisp) linkDisp.textContent = `https://visepass.bo/junte/la-hacienda-casa-${currentHouse}`;
+                if (badgeHeader && activeRole === 'RESIDENTE') {
+                    badgeHeader.textContent = `CASA ${currentHouse}`;
+                }
+            }
+        }
+
+        function refreshAllViews() {
+            renderLoginHouseOptions();
+            updateMoraUI();
+            renderVecinoPasses();
+            renderVecinoFastPasses();
+            renderSelectedWalletCard();
+            renderGuardQuickButtons();
+            renderInsideVisitors();
+            renderAdminHouses();
+            renderAdminLogs();
+            if (guardMode === 'PREAUTORIZADOS') {
+                renderGuardPreAuthScreen();
+            }
+        }
+
+        let hasAuthenticatedSession = false;
+
+        function applyRolePermissions() {
+            const tabVecino = document.getElementById('tab-vecino');
+            const tabWallet = document.getElementById('tab-wallet');
+            const tabGuardia = document.getElementById('tab-guardia');
+            const tabAdmin = document.getElementById('tab-admin');
+            const promoBox = document.getElementById('walletToGuardiaPromoBox');
+
+            const setTabVisible = (btn, visible) => {
+                if (!btn) return;
+                if (visible) {
+                    btn.classList.remove('hidden');
+                    btn.classList.add('flex');
+                } else {
+                    btn.classList.add('hidden');
+                    btn.classList.remove('flex');
+                }
+            };
+
+            if (activeRole === 'RESIDENTE') {
+                setTabVisible(tabVecino, true);
+                setTabVisible(tabWallet, true);
+                setTabVisible(tabGuardia, false);
+                setTabVisible(tabAdmin, false);
+                if (promoBox) promoBox.classList.add('hidden');
+            } else if (activeRole === 'GUARDIA') {
+                setTabVisible(tabVecino, false);
+                setTabVisible(tabWallet, false);
+                setTabVisible(tabGuardia, true);
+                setTabVisible(tabAdmin, false);
+                if (promoBox) promoBox.classList.add('hidden');
+            } else if (activeRole === 'ADMIN') {
+                setTabVisible(tabVecino, true);
+                setTabVisible(tabWallet, true);
+                setTabVisible(tabGuardia, true);
+                setTabVisible(tabAdmin, true);
+                if (promoBox) promoBox.classList.remove('hidden');
+            }
+        }
+
+        function getAllowedTabsForRole(role) {
+            if (role === 'RESIDENTE') return ['vecino', 'wallet'];
+            if (role === 'GUARDIA') return ['guardia'];
+            return ['vecino', 'wallet', 'guardia', 'admin'];
+        }
+
+        function renderLoginHouseOptions() {
+            const select = document.getElementById('loginHouseSelect');
+            if (!select) return;
+            if (houses.length === 0) {
+                select.innerHTML = `<option value="">— Primero registra una casa en Administración —</option>`;
+                return;
+            }
+            const previousValue = select.value;
+            select.innerHTML = houses.map(h =>
+                `<option value="${escapeHtml(h.number)}">🏠 Casa ${escapeHtml(h.number)} — ${escapeHtml(h.family)} ${h.isMorosa ? '(⛔ En Mora)' : ''}</option>`
+            ).join('');
+            if (previousValue && houses.some(h => h.number === previousValue)) {
+                select.value = previousValue;
+            }
+        }
+
+        function selectLoginTab(role) {
+            const roles = ['Residente', 'Guardia', 'Admin'];
+            roles.forEach(r => {
+                document.getElementById(`loginForm${r}`).classList.add('hidden');
+                document.getElementById(`loginTab${r}`).className = "py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+            });
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+
+            if (role === 'RESIDENTE') {
+                document.getElementById('loginFormResidente').classList.remove('hidden');
+                document.getElementById('loginTabResidente').className = "py-2.5 rounded-lg text-xs font-bold bg-purple-600 text-white shadow transition";
+            } else if (role === 'GUARDIA') {
+                document.getElementById('loginFormGuardia').classList.remove('hidden');
+                document.getElementById('loginTabGuardia').className = "py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
+            } else if (role === 'ADMIN') {
+                document.getElementById('loginFormAdmin').classList.remove('hidden');
+                document.getElementById('loginTabAdmin').className = "py-2.5 rounded-lg text-xs font-bold bg-zinc-200 text-zinc-950 shadow transition";
+            }
+        }
+
+        function completeSessionLogin() {
+            hasAuthenticatedSession = true;
+            const closeBtn = document.getElementById('closeAuthModalBtn');
+            if (closeBtn) closeBtn.classList.remove('hidden');
+            document.getElementById('authPortalModal').classList.add('hidden');
+            applyRolePermissions();
+        }
+
+        function closeAuthPortalIfAllowed() {
+            if (!hasAuthenticatedSession) return;
+            document.getElementById('authPortalModal').classList.add('hidden');
+        }
+
+        function handleLoginResidente(e) {
+            e.preventDefault();
+            if (houses.length === 0) {
+                selectLoginTab('ADMIN');
+                showToast('ℹ️ Primero entra como Administrador para registrar el primer domicilio');
+                return;
+            }
+            const selectedNumber = document.getElementById('loginHouseSelect').value;
+            const enteredPin = document.getElementById('loginResidentPin').value.trim();
+            const houseObj = houses.find(h => h.number === selectedNumber);
+            const errorBanner = document.getElementById('loginErrorMsg');
+
+            if (!houseObj || houseObj.pin !== enteredPin) {
+                errorBanner.classList.remove('hidden');
+                showToast('⛔ PIN incorrecto para este domicilio');
+                return;
+            }
+
+            errorBanner.classList.add('hidden');
+            currentHouse = houseObj.number;
+            currentFamily = houseObj.family;
+            activeRole = 'RESIDENTE';
+
+            syncCurrentHouseHeader();
+            document.getElementById('activeRoleHeaderBadge').textContent = `VECINO • CASA ${currentHouse}`;
+
+            completeSessionLogin();
+            switchTab('vecino');
+            refreshAllViews();
+            showToast(`🏠 Bienvenido, ${currentFamily} (Casa ${currentHouse})`);
+        }
+
+        function openChangePinModal() {
+            document.getElementById('changePinHouseLabel').textContent = `Casa ${currentHouse} (${currentFamily})`;
+            document.getElementById('currentPinInput').value = '';
+            document.getElementById('newPinInput').value = '';
+            document.getElementById('changePinModal').classList.remove('hidden');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('changePinModal').classList.add('hidden');
+        }
+
+        function handleChangeResidentPin(e) {
+            e.preventDefault();
+            const currentPin = document.getElementById('currentPinInput').value.trim();
+            const newPin = document.getElementById('newPinInput').value.trim();
+            const houseObj = houses.find(h => h.number === currentHouse);
+
+            if (!houseObj) return;
+            if (houseObj.pin !== currentPin) {
+                showToast('⛔ Tu PIN actual ingresado no es correcto');
+                return;
+            }
+            if (newPin.length < 4) {
+                showToast('⚠️ El nuevo PIN debe tener al menos 4 dígitos');
+                return;
+            }
+
+            houseObj.pin = newPin;
+            document.getElementById('loginResidentPin').value = newPin;
+            closeChangePinModal();
+            pushStateToCloud();
+            showToast(`🔐 PIN de Casa ${currentHouse} actualizado con éxito`);
+        }
+
+        function handleLoginGuardia(e) {
+            e.preventDefault();
+            currentGuardName = document.getElementById('guardNameInput').value.trim() || 'Portería Principal';
+            activeRole = 'GUARDIA';
+            document.getElementById('activeRoleHeaderBadge').textContent = 'ROL: PORTERÍA';
+
+            completeSessionLogin();
+            switchTab('guardia');
+            refreshAllViews();
+            showToast(`🛡️ Terminal de Portería activa (${currentGuardName})`);
+        }
+
+        function handleLoginAdmin(e) {
+            e.preventDefault();
+            const adminPin = document.getElementById('adminPinInput').value.trim();
+            if (!adminPin) {
+                showToast('⚠️ Ingresa la credencial de administración');
+                return;
+            }
+            activeRole = 'ADMIN';
+            document.getElementById('activeRoleHeaderBadge').textContent = 'ROL: ADMINISTRADOR (TOTAL)';
+
+            completeSessionLogin();
+            switchTab('admin');
+            refreshAllViews();
+            showToast('🏢 Panel de Administración activo (Acceso a todos los paneles)');
+        }
+
+        function openAuthPortal() {
+            if (isCameraRunning && html5QrScanner) {
+                html5QrScanner.stop().then(() => {
+                    isCameraRunning = false;
+                    const wrapper = document.getElementById('cameraReaderWrapper');
+                    const btn = document.getElementById('cameraToggleBtn');
+                    if (wrapper) wrapper.classList.add('hidden');
+                    if (btn) btn.innerHTML = `<i class="fa-solid fa-video"></i> <span>Activar Cámara QR</span>`;
+                }).catch(() => {});
+            }
+            renderLoginHouseOptions();
+            selectLoginTab(activeRole || 'RESIDENTE');
+            document.getElementById('authPortalModal').classList.remove('hidden');
+        }
+
+        // Funciones Criptográficas (JWS / Ed25519)
+        function generateDeterministicSignature(payloadStr) {
+            let hash = 5381;
+            for (let i = 0; i < payloadStr.length; i++) {
+                hash = ((hash << 5) + hash) + payloadStr.charCodeAt(i);
+            }
+            return 'ed25519_' + Math.abs(hash).toString(16) + 'scz';
+        }
+
+        function buildQrTokenString(passObj) {
+            const safeName = String(passObj.visitorName || '').replace(/\|/g, ' ');
+            const core = `VISEPASS|${passObj.id}|CASA:${passObj.house}|${safeName}|${passObj.passType}|${passObj.validUntil}`;
+            const sig = generateDeterministicSignature(core);
+            return `${core}|SIG:${sig}`;
+        }
+
+        // Navegación entre Vistas con Control de Permisos por Rol
+        function switchTab(tabName) {
+            const allowedTabs = getAllowedTabsForRole(activeRole);
+            if (!allowedTabs.includes(tabName)) {
+                showToast('⛔ Tu rol actual no tiene permiso para acceder a ese panel');
+                tabName = allowedTabs[0];
+            }
+
+            if (tabName !== 'guardia' && isCameraRunning && html5QrScanner) {
+                html5QrScanner.stop().then(() => {
+                    isCameraRunning = false;
+                    const wrapper = document.getElementById('cameraReaderWrapper');
+                    const btn = document.getElementById('cameraToggleBtn');
+                    if (wrapper) wrapper.classList.add('hidden');
+                    if (btn) btn.innerHTML = `<i class="fa-solid fa-video"></i> <span>Activar Cámara QR</span>`;
+                }).catch(() => {});
+            }
+
+            const tabs = ['vecino', 'wallet', 'guardia', 'admin'];
+            tabs.forEach(t => {
+                const viewEl = document.getElementById(`view-${t}`);
+                if (viewEl) viewEl.classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    const isVisible = allowedTabs.includes(t);
+                    btn.className = `${isVisible ? 'flex' : 'hidden'} items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-zinc-400 hover:text-white relative`;
+                }
+            });
+
+            const targetView = document.getElementById(`view-${tabName}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-purple-600 text-white shadow relative";
+            }
+
+            if (tabName === 'wallet') {
+                renderSelectedWalletCard();
+            } else if (tabName === 'guardia') {
+                renderGuardQuickButtons();
+                renderInsideVisitors();
+            } else if (tabName === 'admin') {
+                renderAdminHouses();
+                renderAdminLogs();
+            } else if (tabName === 'vecino') {
+                syncCurrentHouseHeader();
+                updateMoraUI();
+                renderVecinoPasses();
+                renderVecinoFastPasses();
+            }
+        }
+
+        // Módulo Vecino
+        function fillFrequent(name, ci, placa, type) {
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Emisión de pases bloqueada por mora en expensas');
+                return;
+            }
+            document.getElementById('visitorNameInput').value = name;
+            document.getElementById('visitorCiInput').value = `${ci} | ${placa}`;
+            document.getElementById('passTypeInput').value = type;
+            showToast(`Datos de ${name} cargados`);
+        }
+
+        function focusNewPassForm() {
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Función restringida: Domicilio con expensas en mora');
+                return;
+            }
+            document.getElementById('visitorNameInput').focus();
+        }
+
+        function handleCreatePass(e) {
+            e.preventDefault();
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Emisión de pases QR restringida por mora en expensas.');
+                return;
+            }
+
+            const name = document.getElementById('visitorNameInput').value.trim();
+            const ciPlaca = document.getElementById('visitorCiInput').value.trim();
+            const passType = document.getElementById('passTypeInput').value;
+            const validUntil = document.getElementById('validUntilInput').value.trim() || '26/10/26';
+
+            const newId = 'PASE-SCZ-' + Math.floor(100 + Math.random() * 900);
+            const newPass = {
+                id: newId,
+                condo: 'La Hacienda - Rincon',
+                house: currentHouse,
+                visitorName: name,
+                ciPlaca: ciPlaca,
+                passType: passType,
+                validUntil: validUntil,
+                authBy: currentFamily,
+                status: 'AFUERA',
+                identityVerified: false
+            };
+
+            passes.unshift(newPass);
+            selectedPassId = newId;
+
+            document.getElementById('visitorNameInput').value = '';
+            document.getElementById('visitorCiInput').value = '';
+
+            pushStateToCloud();
+            showToast(`✅ Pase de ${name} generado y sincronizado con Portería`);
+            setTimeout(() => switchTab('wallet'), 150);
+        }
+
+        function renderVecinoPasses() {
+            const container = document.getElementById('vecinoPassesList');
+            if (!container) return;
+
+            const housePasses = passes.filter(p => p.house === currentHouse);
+            if (housePasses.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic py-4 text-center">Aún no has emitido pases en Casa ${escapeHtml(currentHouse)}. Usa el formulario de la izquierda para crear el primero.</p>`;
+                return;
+            }
+
+            container.innerHTML = housePasses.map(p => {
+                const badgeColors = {
+                    'VISITA SOCIAL': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                    'RESIDENTE VIP': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                    'PERSONAL HOGAR': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+                    'PROVEEDOR / OBRA': 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                }[p.passType] || 'bg-zinc-800 text-zinc-300';
+
+                const statusBadge = p.status === 'ADENTRO'
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 ADENTRO DEL CONDOMINIO</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">AUTORIZADO (AFUERA)</span>`;
+
+                return `
+                    <div class="bg-zinc-950 border border-zinc-800/90 hover:border-purple-500/40 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${badgeColors}">${escapeHtml(p.passType)}</span>
+                                ${statusBadge}
+                                <span class="text-[11px] font-mono text-zinc-500">${escapeHtml(p.id)}</span>
+                            </div>
+                            <h4 class="font-bold text-white text-sm">${escapeHtml(p.visitorName)}</h4>
+                            <p class="text-xs text-zinc-400">C.I./Placa: ${escapeHtml(p.ciPlaca)} • Válido hasta: ${escapeHtml(p.validUntil)}</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" data-passid="${escapeHtml(p.id)}" onclick="openPassInWalletView(this.dataset.passid)" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
+                                <i class="fa-solid fa-qrcode"></i>
+                                <span>Abrir Tarjeta QR</span>
+                            </button>
+                            <button type="button" data-passid="${escapeHtml(p.id)}" onclick="revokePass(this.dataset.passid)" class="p-2 rounded-xl bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-300 border border-zinc-800 transition" title="Anular Pase">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function revokePass(passId) {
+            passes = passes.filter(p => p.id !== passId);
+            if (selectedPassId === passId) {
+                selectedPassId = passes.length > 0 ? passes[0].id : '';
+            }
+            pushStateToCloud();
+            showToast('🗑️ Pase anulado correctamente');
+        }
+
+        function renderVecinoFastPasses() {
+            const container = document.getElementById('vecinoFastPassList');
+            if (!container) return;
+
+            const allPending = fastPasses.filter(f => f.status === 'PENDIENTE');
+            const badgeEl = document.getElementById('preAuthCountBadge');
+            if (badgeEl) badgeEl.textContent = `${allPending.length} EN ESPERA`;
+
+            const myPending = allPending.filter(f => f.house === currentHouse);
+            if (myPending.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic">No tienes Taxis ni Deliveries anunciados en este momento.</p>`;
+                return;
+            }
+
+            container.innerHTML = myPending.map(f => `
+                <div class="bg-zinc-950 border border-amber-500/30 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                        <div>
+                            <div class="text-xs font-bold text-white">${escapeHtml(f.service)} — <span class="text-amber-300">${escapeHtml(f.plateOrName)}</span></div>
+                            <div class="text-[11px] text-zinc-400">Casa ${escapeHtml(f.house)} • Vigente por ${escapeHtml(f.expiresIn)}</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">En Garita</span>
+                </div>
+            `).join('');
+        }
+
+        function openPassInWalletView(passId) {
+            selectedPassId = passId;
+            switchTab('wallet');
+        }
+
+        /* ==========================================
+           6. RENDERIZADO DE TARJETA WALLET Y QR REAL
+           ========================================== */
+        function renderSelectedWalletCard() {
+            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
+            const qrContainer = document.getElementById('qrcodeCanvas');
+
+            if (!passObj) {
+                document.getElementById('cardCondoName').textContent = 'La Hacienda - Rincon';
+                document.getElementById('cardPassType').textContent = 'SIN PASES EMITIDOS';
+                document.getElementById('cardVisitorName').textContent = 'Pendiente de Emisión';
+                document.getElementById('cardValidUntil').textContent = '--/--/--';
+                document.getElementById('cardHouse').textContent = currentHouse || '--';
+                document.getElementById('cardCiPlaca').textContent = 'Crea un pase en "Mi Casa"';
+                document.getElementById('cardAuthBy').textContent = currentFamily || 'Administración';
+                document.getElementById('cardPassIdSub').textContent = 'SIN-PASE';
+                document.getElementById('qrPayloadInspector').textContent = 'Aún no se ha emitido ningún pase QR.';
+                if (qrContainer) {
+                    qrContainer.innerHTML = '<span class="text-[11px] text-zinc-400 px-3">Emite un pase para generar el QR</span>';
+                }
+                return;
+            }
+
+            selectedPassId = passObj.id;
+            document.getElementById('cardCondoName').textContent = passObj.condo;
+            document.getElementById('cardPassType').textContent = passObj.passType;
+            document.getElementById('cardVisitorName').textContent = passObj.visitorName;
+            document.getElementById('cardValidUntil').textContent = passObj.validUntil;
+            document.getElementById('cardHouse').textContent = passObj.house;
+            document.getElementById('cardCiPlaca').textContent = passObj.ciPlaca;
+            document.getElementById('cardAuthBy').textContent = passObj.authBy;
+            document.getElementById('cardPassIdSub').textContent = passObj.id;
+
+            const cardEl = document.getElementById('walletCardContainer');
+            cardEl.className = "w-full max-w-[360px] rounded-[28px] p-5 shadow-2xl border border-white/20 text-white select-none transition-all duration-300 ";
+            if (passObj.passType === 'RESIDENTE VIP') {
+                cardEl.classList.add('ios-pass-vip');
+            } else if (passObj.passType === 'PERSONAL HOGAR') {
+                cardEl.classList.add('ios-pass-staff');
+            } else if (passObj.passType === 'PROVEEDOR / OBRA') {
+                cardEl.classList.add('ios-pass-worker');
+            } else {
+                cardEl.classList.add('ios-pass-purple');
+            }
+
+            const pill = document.getElementById('cardStatusPill');
+            const houseObj = houses.find(h => h.number === passObj.house);
+
+            if (houseObj && houseObj.isMorosa) {
+                pill.textContent = '⛔ EN MORA';
+                pill.className = 'text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-red-500 text-white';
+            } else if (passObj.status === 'ADENTRO') {
+                pill.textContent = '🟢 ADENTRO';
+                pill.className = 'text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-zinc-950';
+            } else {
+                pill.textContent = 'AUTORIZADO';
+                pill.className = 'text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30';
+            }
+
+            const qrToken = buildQrTokenString(passObj);
+            document.getElementById('qrPayloadInspector').textContent = qrToken;
+
+            if (qrContainer) {
+                qrContainer.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrContainer, {
+                        text: qrToken,
+                        width: 164,
+                        height: 164,
+                        colorDark: "#18181b",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                }
+            }
+        }
+
+        function copyQrPayload() {
+            const text = document.getElementById('qrPayloadInspector').textContent;
+            copyTextToClipboard(text, '📋 Código de seguridad copiado');
+        }
+
+        function sendPassWhatsApp() {
+            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
+            if (!passObj) {
+                showToast('⚠️ Primero emite o selecciona un pase activo');
+                return;
+            }
+            const msg = encodeURIComponent(
+                `Hola *${passObj.visitorName}*, te comparto tu Pase Oficial de Acceso para *${passObj.condo} (Casa ${passObj.house})* autorizado por *${passObj.authBy}*.\n\n` +
+                `📌 *ID de Pase:* ${passObj.id}\n` +
+                `📅 *Válido hasta:* ${passObj.validUntil}\n\n` +
+                `Muéstralo desde tu Apple Wallet / Google Wallet al llegar a portería.`
+            );
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function simulateGoogleWalletSave() {
+            showToast('📲 Tarjeta lista para guardar en Google Wallet');
+        }
+
+        /* ==========================================
+           7. TERMINAL DE PORTERÍA Y LECTURA QR
+           ========================================== */
+        function startScannerCooldown5Seconds() {
+            isScannerCoolingDown = true;
+            let remaining = 5;
+            const banner = document.getElementById('scannerCooldownBanner');
+            const secText = document.getElementById('cooldownSecondsText');
+
+            if (banner && isCameraRunning) {
+                banner.classList.remove('hidden');
+                if (secText) secText.textContent = `${remaining}s`;
+            }
+
+            if (cooldownTimerInterval) clearInterval(cooldownTimerInterval);
+            cooldownTimerInterval = setInterval(() => {
+                remaining -= 1;
+                if (secText) secText.textContent = `${remaining}s`;
+                if (remaining <= 0) {
+                    clearInterval(cooldownTimerInterval);
+                    isScannerCoolingDown = false;
+                    if (banner) banner.classList.add('hidden');
+                }
+            }, 1000);
+        }
+
+        function resetGuardReadyScreen(mode) {
+            const screen = document.getElementById('guardResultScreen');
+            if (!screen) return;
+            const isSalida = mode === 'SALIDA';
+            screen.className = "h-full min-h-[340px] rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center";
+            screen.innerHTML = `
+                <div class="w-16 h-16 rounded-2xl ${isSalida ? 'bg-sky-500/20 text-sky-400' : 'bg-emerald-500/20 text-emerald-400'} flex items-center justify-center text-3xl mb-3">
+                    <i class="fa-solid ${isSalida ? 'fa-door-open' : 'fa-camera-viewfinder'}"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-white">${isSalida ? 'Modo Registrar Salida Activo' : 'Terminal de Portería Lista (Entrada)'}</h2>
+                <p class="text-xs text-zinc-400 max-w-md mt-1">
+                    ${isSalida
+                        ? 'Escanea el código QR del visitante al salir o selecciónalo a la izquierda para liberar su pase.'
+                        : 'Apunta la cámara al Apple Wallet / Google Wallet del visitante o selecciona un pase a la izquierda para verificar su firma digital Ed25519.'}
+                </p>
+            `;
+        }
+
+        function setGuardMode(mode) {
+            guardMode = mode;
+            const modeLabel = document.getElementById('guardCurrentModeLabel');
+            if (modeLabel) {
+                modeLabel.textContent = mode;
+                modeLabel.className = mode === 'ENTRADA'
+                    ? 'text-base font-black text-emerald-400'
+                    : (mode === 'PREAUTORIZADOS' ? 'text-base font-black text-amber-400' : 'text-base font-black text-sky-400');
+            }
+
+            const btnE = document.getElementById('btnGuardEntrada');
+            const btnP = document.getElementById('btnGuardPre');
+            const btnS = document.getElementById('btnGuardSalida');
+            const preBadge = document.getElementById('preAuthCountBadge');
+
+            btnE.className = "p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95";
+            btnP.className = "p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95";
+            btnS.className = "p-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-between transition transform active:scale-95";
+            if (preBadge) preBadge.className = "text-xs font-mono uppercase font-bold text-amber-400 block";
+
+            if (mode === 'ENTRADA') {
+                btnE.className = "p-6 rounded-2xl border-2 border-emerald-400 bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 flex items-center justify-between transition transform active:scale-95";
+                resetGuardReadyScreen('ENTRADA');
+            } else if (mode === 'PREAUTORIZADOS') {
+                btnP.className = "p-6 rounded-2xl border-2 border-amber-300 bg-amber-500 text-zinc-950 shadow-xl shadow-amber-500/20 flex items-center justify-between transition transform active:scale-95";
+                if (preBadge) preBadge.className = "text-xs font-mono uppercase font-black text-zinc-950 block";
+                renderGuardPreAuthScreen();
+            } else if (mode === 'SALIDA') {
+                btnS.className = "p-6 rounded-2xl border-2 border-sky-400 bg-sky-600 text-white shadow-xl shadow-sky-600/20 flex items-center justify-between transition transform active:scale-95";
+                resetGuardReadyScreen('SALIDA');
+            }
+        }
+
+        function renderGuardQuickButtons() {
+            const container = document.getElementById('guardQuickSimButtons');
+            if (!container) return;
+            if (passes.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic py-2">No hay pases emitidos todavía. Cuando un vecino cree un pase, aparecerá aquí para prueba rápida o podrás escanear su QR con la cámara.</p>`;
+                return;
+            }
+            container.innerHTML = passes.map(p => {
+                const houseObj = houses.find(h => h.number === p.house);
+                const moraTag = (houseObj && houseObj.isMorosa) ? `<span class="text-[9px] bg-red-500/20 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded font-bold">⛔ MORA</span>` : '';
+                return `
+                    <button type="button" data-passid="${escapeHtml(p.id)}" onclick="simulateScanById(this.dataset.passid)" class="p-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-left flex items-center justify-between transition">
+                        <div>
+                            <div class="text-xs font-bold text-white flex items-center gap-1.5">${escapeHtml(p.visitorName)} ${moraTag}</div>
+                            <div class="text-[10px] text-zinc-400">Casa ${escapeHtml(p.house)} • ${escapeHtml(p.passType)}</div>
+                        </div>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded ${p.status === 'ADENTRO' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}">
+                            ${escapeHtml(p.status)}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function handleManualTokenSubmit(e) {
+            e.preventDefault();
+            const raw = document.getElementById('manualTokenInput').value.trim();
+            if (!raw) return;
+            document.getElementById('manualTokenInput').value = '';
+
+            const byId = passes.find(p => p.id.toUpperCase() === raw.toUpperCase());
+            if (byId) {
+                processScannedQrToken(buildQrTokenString(byId));
+            } else {
+                processScannedQrToken(raw);
+            }
+        }
+
+        function simulateScanById(passId) {
+            if (isScannerCoolingDown) {
+                showToast('⏳ Pausa anti-doble lectura (5s): espera un momento');
+                return;
+            }
+            const passObj = passes.find(p => p.id === passId);
+            if (!passObj) return;
+            const token = buildQrTokenString(passObj);
+            startScannerCooldown5Seconds();
+            processScannedQrToken(token);
+        }
+
+        function processScannedQrToken(rawToken) {
+            const screen = document.getElementById('guardResultScreen');
+            const modeText = isOfflineMode ? 'OFFLINE (Verificación Criptográfica Local)' : 'EN LÍNEA (Sincronizado)';
+
+            if (!rawToken || !rawToken.startsWith('VISEPASS|')) {
+                renderGuardDenial(
+                    'CÓDIGO QR NO RECONOCIDO',
+                    'El código escaneado no pertenece al padrón oficial de La Hacienda - Rincón.',
+                    rawToken || 'Formato inválido'
+                );
+                return;
+            }
+
+            const parts = rawToken.split('|');
+            const sigPart = parts.pop();
+            const corePayload = parts.join('|');
+            const expectedSig = 'SIG:' + generateDeterministicSignature(corePayload);
+
+            if (sigPart !== expectedSig) {
+                renderGuardDenial(
+                    'FIRMA DIGITAL INVÁLIDA',
+                    'El código QR presenta alteraciones y no coincide con la llave del condominio.',
+                    `Firma rechazada: ${sigPart}`
+                );
+                addAuditLog('ALERTA QR INVÁLIDO', parts[3] || 'Desconocido', parts[2] || '-', 'RECHAZADO', currentGuardName, 'Firma corrupta');
+                return;
+            }
+
+            const passId = parts[1];
+            let passObj = passes.find(p => p.id === passId);
+
+            if (!passObj) {
+                passObj = {
+                    id: passId,
+                    condo: 'La Hacienda - Rincon',
+                    house: (parts[2] || 'CASA:30').replace('CASA:', ''),
+                    visitorName: parts[3] || 'Visitante Autorizado',
+                    ciPlaca: 'Validado vía QR Wallet',
+                    passType: parts[4] || 'VISITA SOCIAL',
+                    validUntil: parts[5] || '26/10/26',
+                    authBy: 'Propietario Verificado',
+                    status: 'AFUERA',
+                    identityVerified: true
+                };
+                passes.push(passObj);
+            }
+
+            // Verificar mora del domicilio
+            const destHouse = houses.find(h => h.number === passObj.house);
+            if (guardMode === 'ENTRADA' && destHouse && destHouse.isMorosa) {
+                renderGuardDenial(
+                    `DOMICILIO EN MORA (CASA ${passObj.house})`,
+                    `La unidad ${passObj.house} (${destHouse.family}) tiene restringido el acceso rápido con QR por expensas pendientes. Anunciar por citófono tradicional.`,
+                    destHouse.moraNote || 'Restricción Administrativa Activa'
+                );
+                addAuditLog('BLOQUEO POR MORA', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, destHouse.moraNote || 'Deudor');
+                pushStateToCloud();
+                return;
+            }
+
+            // MODO SALIDA
+            if (guardMode === 'SALIDA') {
+                passObj.status = 'AFUERA';
+                document.getElementById('workerOvertimeAlert').classList.add('hidden');
+                screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-sky-400 bg-sky-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+                screen.innerHTML = `
+                    <div class="w-16 h-16 rounded-full bg-sky-400 text-zinc-950 flex items-center justify-center text-3xl mb-3 font-black">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+                    <span class="text-xs font-mono uppercase tracking-widest bg-sky-400/20 text-sky-200 px-3 py-1 rounded-full font-bold">
+                        SALIDA REGISTRADA • ${escapeHtml(modeText)}
+                    </span>
+                    <h2 class="text-3xl font-black text-white mt-2">${escapeHtml(passObj.visitorName)}</h2>
+                    <p class="text-lg font-bold text-sky-300 mt-1">Salió de Casa ${escapeHtml(passObj.house)} (${escapeHtml(passObj.passType)})</p>
+                `;
+                addAuditLog('SALIDA QR', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, passObj.ciPlaca);
+                pushStateToCloud();
+                return;
+            }
+
+            // CANDADO ANTI-PASSBACK
+            if (passObj.status === 'ADENTRO') {
+                renderGuardDenial(
+                    'PASE YA UTILIZADO (ACTUALMENTE ADENTRO)',
+                    `${passObj.visitorName} ya registró su ingreso y aún figura dentro del condominio. No se permite el reingreso con captura del mismo QR.`,
+                    `ID: ${passObj.id} • Casa ${passObj.house}`
+                );
+                addAuditLog('BLOQUEO REINGRESO DUPLICADO', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, passObj.ciPlaca);
+                pushStateToCloud();
+                return;
+            }
+
+            // ACCESO AUTORIZADO (VERDE)
+            passObj.status = 'ADENTRO';
+            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
+            passObj.entryTime = nowStr;
+
+            const firstVisitVerifyBox = !passObj.identityVerified ? `
+                <div class="mt-4 w-full bg-amber-400 text-zinc-950 rounded-xl p-3 flex items-center justify-between gap-2 text-left">
+                    <div>
+                        <div class="text-xs font-black uppercase">⚠️ Primera Visita — Verificar C.I.</div>
+                        <div class="text-[11px] font-semibold">Verifica visualmente el documento (${escapeHtml(passObj.ciPlaca)}):</div>
+                    </div>
+                    <button type="button" data-passid="${escapeHtml(passObj.id)}" onclick="confirmFirstVisitIdentity(this.dataset.passid)" class="px-3 py-2 rounded-lg bg-zinc-950 text-white text-xs font-bold shrink-0">
+                        Confirmar C.I. ✅
+                    </button>
+                </div>
+            ` : `
+                <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-xs font-bold">
+                    <i class="fa-solid fa-circle-check"></i> Identidad Verificada • Lector con pausa de 5s
+                </div>
+            `;
+
+            screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+            screen.innerHTML = `
+                <div class="w-16 h-16 rounded-full bg-emerald-400 text-zinc-950 flex items-center justify-center text-4xl mb-2 font-black shadow-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-[11px] font-mono uppercase tracking-widest bg-black/40 text-emerald-300 px-3 py-1 rounded-full font-bold">
+                    PASE VÁLIDO • ${escapeHtml(modeText)}
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white mt-2 leading-tight">${escapeHtml(passObj.visitorName)}</h2>
+                <div class="mt-2 px-4 py-1.5 rounded-xl bg-white text-zinc-950 font-black text-xl tracking-tight shadow">
+                    DESTINO: CASA ${escapeHtml(passObj.house)} • ${escapeHtml(passObj.passType)}
+                </div>
+                <p class="text-xs text-emerald-200 mt-2 font-mono">C.I. / Placa: ${escapeHtml(passObj.ciPlaca)} • Autorizó: ${escapeHtml(passObj.authBy)}</p>
+                ${firstVisitVerifyBox}
+            `;
+
+            addAuditLog('ENTRADA AUTORIZADA', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, passObj.ciPlaca);
+            pushStateToCloud();
+        }
+
+        function renderGuardDenial(title, reason, detail) {
+            const screen = document.getElementById('guardResultScreen');
+            screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-red-500 bg-red-950/95 p-6 flex flex-col items-center justify-center text-center shadow-2xl animate-pulse-fast";
+            screen.innerHTML = `
+                <div class="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center text-4xl mb-3 font-black shadow-lg">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <span class="text-xs font-mono uppercase tracking-widest bg-black/40 text-red-300 px-3 py-1 rounded-full font-bold">
+                    ACCESO DENEGADO EN PORTERÍA
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">${escapeHtml(title)}</h2>
+                <p class="text-sm text-red-100 mt-2 max-w-md font-medium">${escapeHtml(reason)}</p>
+                <div class="mt-4 px-3 py-1.5 rounded-lg bg-black/40 text-red-300 font-mono text-xs">${escapeHtml(detail)}</div>
+            `;
+        }
+
+        function confirmFirstVisitIdentity(passId) {
+            const p = passes.find(item => item.id === passId);
+            if (p) {
+                p.identityVerified = true;
+                pushStateToCloud();
+                showToast(`✅ Identidad de ${p.visitorName} confirmada`);
+            }
+        }
+
+        function renderGuardPreAuthScreen() {
+            const screen = document.getElementById('guardResultScreen');
+            const pending = fastPasses.filter(f => f.status === 'PENDIENTE');
+
+            if (pending.length === 0) {
+                screen.className = "h-full min-h-[340px] rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center";
+                screen.innerHTML = `<p class="text-sm text-zinc-400">No hay Taxis ni Deliveries anunciados en este momento.</p>`;
+                return;
+            }
+
+            screen.className = "h-full min-h-[340px] rounded-2xl border-2 border-amber-400 bg-zinc-900 p-5 flex flex-col justify-start text-left";
+            screen.innerHTML = `
+                <h3 class="text-lg font-black text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle"></i>
+                    Pre-Autorizados por Vecinos (Paso Directo)
+                </h3>
+                <div class="space-y-2.5 w-full">
+                    ${pending.map(f => `
+                        <div class="bg-zinc-950 border border-amber-500/40 rounded-xl p-3.5 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase bg-amber-500 text-zinc-950 font-black px-2 py-0.5 rounded">CASA ${escapeHtml(f.house)}</span>
+                                <div class="text-base font-extrabold text-white mt-1">${escapeHtml(f.service)}</div>
+                                <div class="text-xs text-amber-300 font-semibold">${escapeHtml(f.plateOrName)} • Vigente (${escapeHtml(f.expiresIn)})</div>
+                            </div>
+                            <button type="button" data-fastid="${escapeHtml(f.id)}" onclick="approveFastPass(this.dataset.fastid)" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs shrink-0 shadow-lg">
+                                Autorizar y Abrir Tranca
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function approveFastPass(fastId) {
+            const f = fastPasses.find(item => item.id === fastId);
+            if (!f) return;
+            f.status = 'INGRESÓ';
+            addAuditLog('INGRESO TAXI/DELIVERY', `${f.service} (${f.plateOrName})`, `Casa ${f.house}`, 'PRE-AUTORIZADO', currentGuardName, f.plateOrName);
+            pushStateToCloud();
+            showToast(`🛵 ${f.service} autorizado hacia Casa ${f.house}`);
+        }
+
+        function renderInsideVisitors() {
+            const inside = passes.filter(p => p.status === 'ADENTRO');
+            const badge = document.getElementById('insideCounterBadge');
+            if (badge) badge.textContent = `${inside.length} Adentro Ahora`;
+            const container = document.getElementById('insideVisitorsList');
+            if (!container) return;
+
+            if (inside.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic col-span-3">Ningún visitante ni proveedor dentro del condominio en este momento.</p>`;
+                return;
+            }
+
+            container.innerHTML = inside.map(p => `
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-mono text-emerald-400 font-bold">● ADENTRO (Ingreso: ${escapeHtml(p.entryTime || 'Hoy')})</span>
+                        <h4 class="font-bold text-white text-sm">${escapeHtml(p.visitorName)}</h4>
+                        <p class="text-xs text-zinc-400">Casa ${escapeHtml(p.house)} • ${escapeHtml(p.passType)}</p>
+                    </div>
+                    <button type="button" data-passid="${escapeHtml(p.id)}" onclick="quickCheckoutVisitor(this.dataset.passid)" class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold">
+                        Marcar Salida
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function quickCheckoutVisitor(passId) {
+            const p = passes.find(item => item.id === passId);
+            if (!p) return;
+            p.status = 'AFUERA';
+            document.getElementById('workerOvertimeAlert').classList.add('hidden');
+            addAuditLog('SALIDA REGISTRADA', p.visitorName, `Casa ${p.house}`, p.passType, currentGuardName, p.ciPlaca);
+            pushStateToCloud();
+            showToast(`🚪 Salida registrada para ${p.visitorName}`);
+        }
+
+        // Cámara Web Real en Portería
+        function toggleCameraScanner() {
+            const wrapper = document.getElementById('cameraReaderWrapper');
+            const btn = document.getElementById('cameraToggleBtn');
+
+            if (isCameraRunning && html5QrScanner) {
+                html5QrScanner.stop().then(() => {
+                    isCameraRunning = false;
+                    wrapper.classList.add('hidden');
+                    btn.innerHTML = `<i class="fa-solid fa-video"></i> <span>Activar Cámara QR</span>`;
+                }).catch(() => {});
+                return;
+            }
+
+            wrapper.classList.remove('hidden');
+            btn.innerHTML = `<i class="fa-solid fa-video-slash"></i> <span>Apagar Cámara</span>`;
+
+            html5QrScanner = new Html5Qrcode("qr-reader");
+            html5QrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 220, height: 220 } },
+                (decodedText) => {
+                    if (isScannerCoolingDown) return;
+                    startScannerCooldown5Seconds();
+                    processScannedQrToken(decodedText);
+                    showToast('🎯 ¡Pase QR leído! (Pausa de 5s activa)');
+                },
+                () => {}
+            ).then(() => {
+                isCameraRunning = true;
+            }).catch(() => {
+                showToast('ℹ️ Cámara no detectada en este navegador. Usa el lector manual o la lista inferior.');
+                wrapper.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-video"></i> <span>Activar Cámara QR</span>`;
+            });
+        }
+
+        // Administración de Domicilios, Morosos y Bitácora por Días
+        function toggleNewHouseMoraDetail() {
+            const status = document.getElementById('adminNewHouseMoraStatus').value;
+            const box = document.getElementById('adminNewHouseMoraDetailBox');
+            if (status === 'MOROSO') {
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        function handleAdminCreateHouse(e) {
+            e.preventDefault();
+            const num = document.getElementById('adminNewHouseNumber').value.trim();
+            const street = document.getElementById('adminNewHouseStreet').value.trim() || 'Manzano General';
+            const fam = document.getElementById('adminNewHouseFamily').value.trim();
+            const pin = document.getElementById('adminNewHousePin').value.trim() || '0000';
+            const moraStatus = document.getElementById('adminNewHouseMoraStatus').value;
+            const moraNote = document.getElementById('adminNewHouseMoraNote').value.trim();
+
+            if (!num || !fam) return;
+            if (houses.some(h => h.number.toLowerCase() === num.toLowerCase())) {
+                showToast(`⚠️ El domicilio Casa ${num} ya está registrado`);
+                return;
+            }
+
+            const isMorosa = moraStatus === 'MOROSO';
+            const formattedFamily = fam.toLowerCase().startsWith('familia') ? fam : `Familia ${fam}`;
+            houses.unshift({
+                number: num,
+                street: street,
+                family: formattedFamily,
+                pin: pin,
+                isMorosa: isMorosa,
+                moraNote: isMorosa ? (moraNote || 'Expensas pendientes de pago') : ''
+            });
+
+            if (!currentHouse) {
+                currentHouse = num;
+                currentFamily = formattedFamily;
+            }
+
+            document.getElementById('adminNewHouseNumber').value = '';
+            document.getElementById('adminNewHouseStreet').value = '';
+            document.getElementById('adminNewHouseFamily').value = '';
+            document.getElementById('adminNewHousePin').value = '0000';
+            document.getElementById('adminNewHouseMoraStatus').value = 'AL_DIA';
+            document.getElementById('adminNewHouseMoraNote').value = '';
+            toggleNewHouseMoraDetail();
+
+            pushStateToCloud();
+            showToast(`🏠 Domicilio Casa ${num} (${formattedFamily}) registrado con éxito`);
+        }
+
+        function setAdminHouseFilter(filterMode) {
+            adminHouseFilter = filterMode;
+            const btnAll = document.getElementById('btnFilterHousesAll');
+            const btnMora = document.getElementById('btnFilterHousesMora');
+            const btnOk = document.getElementById('btnFilterHousesOk');
+
+            if (btnAll && btnMora && btnOk) {
+                btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+                btnMora.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+                btnOk.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+
+                if (filterMode === 'TODOS') {
+                    btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 text-white transition";
+                } else if (filterMode === 'MOROSOS') {
+                    btnMora.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white transition";
+                } else if (filterMode === 'ALDIA') {
+                    btnOk.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition";
+                }
+            }
+            renderAdminHouses();
+        }
+
+        function inspectHouseAsAdmin(houseNum) {
+            const h = houses.find(item => item.number === houseNum);
+            if (!h) return;
+            currentHouse = h.number;
+            currentFamily = h.family;
+            document.getElementById('activeRoleHeaderBadge').textContent = `CASA ${currentHouse}`;
+            syncCurrentHouseHeader();
+            switchTab('vecino');
+            showToast(`🏠 Viendo el panel de Casa ${h.number} (${h.family})`);
+        }
+
+        function renderAdminHouses() {
+            const countEl = document.getElementById('adminTotalHousesCount');
+            if (countEl) countEl.textContent = houses.length;
+
+            const morososCount = houses.filter(h => h.isMorosa).length;
+            const moraSummaryEl = document.getElementById('adminMorososSummaryText');
+            if (moraSummaryEl) {
+                moraSummaryEl.textContent = morososCount === 1 ? '1 Domicilio en mora' : `${morososCount} Domicilios en mora`;
+            }
+
+            const container = document.getElementById('adminHousesList');
+            if (!container) return;
+
+            const searchVal = (document.getElementById('adminHouseSearchInput')?.value || '').toLowerCase().trim();
+
+            const filtered = houses.filter(h => {
+                if (adminHouseFilter === 'MOROSOS' && !h.isMorosa) return false;
+                if (adminHouseFilter === 'ALDIA' && h.isMorosa) return false;
+                if (searchVal) {
+                    const matchNum = h.number.toLowerCase().includes(searchVal);
+                    const matchFam = h.family.toLowerCase().includes(searchVal);
+                    const matchStr = (h.street || '').toLowerCase().includes(searchVal);
+                    return matchNum || matchFam || matchStr;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-xs text-zinc-400 border border-dashed border-zinc-800 rounded-xl">El padrón del condominio está vacío. Usa el formulario de la izquierda ("Agregar Nuevo Domicilio") para registrar la primera casa.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(h => `
+                <div class="bg-zinc-950 border ${h.isMorosa ? 'border-red-500/60 bg-red-950/10' : 'border-zinc-800'} rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+                    <div class="flex items-start sm:items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl ${h.isMorosa ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-purple-600/20 border-purple-500/30 text-purple-300'} border flex flex-col items-center justify-center shrink-0">
+                            <span class="text-[8px] font-bold uppercase leading-none">CASA</span>
+                            <span class="font-black text-sm leading-tight">${escapeHtml(h.number)}</span>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-white text-sm">Casa ${escapeHtml(h.number)} — ${escapeHtml(h.family)}</h4>
+                                <span class="text-[10px] text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">${escapeHtml(h.street || 'Condominio')}</span>
+                                ${h.isMorosa
+                                    ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">⛔ EN MORA / DEUDOR</span>`
+                                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ Expensas Al Día</span>`
+                                }
+                            </div>
+                            ${h.isMorosa ? `<p class="text-xs text-red-300 font-semibold mt-1"><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(h.moraNote || 'Expensas pendientes (+2 meses)')}</p>` : ''}
+                            <p class="text-[11px] text-zinc-400 font-mono mt-0.5">PIN Propietario: <strong class="text-purple-300">${escapeHtml(h.pin)}</strong></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button type="button" data-house="${escapeHtml(h.number)}" onclick="openMoraModal(this.dataset.house)" class="px-3 py-1.5 rounded-lg ${h.isMorosa ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30'} text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid ${h.isMorosa ? 'fa-check' : 'fa-ban'}"></i>
+                            <span>${h.isMorosa ? 'Levantar Mora / Editar' : 'Marcar Moroso'}</span>
+                        </button>
+                        <button type="button" data-house="${escapeHtml(h.number)}" onclick="inspectHouseAsAdmin(this.dataset.house)" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition" title="Ver panel de esta casa">
+                            <i class="fa-solid fa-eye text-sky-400"></i> Ver Casa
+                        </button>
+                        <button type="button" data-house="${escapeHtml(h.number)}" onclick="resetHousePinToDefault(this.dataset.house)" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition" title="Resetear PIN a 0000">
+                            <i class="fa-solid fa-rotate-left text-purple-400"></i> PIN 0000
+                        </button>
+                        <button type="button" data-house="${escapeHtml(h.number)}" onclick="deleteHouseFromCondo(this.dataset.house)" class="p-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-300 border border-zinc-800 transition" title="Eliminar Domicilio">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openMoraModal(houseNum) {
+            const h = houses.find(item => item.number === houseNum);
+            if (!h) return;
+            document.getElementById('moraModalHouseNumber').value = h.number;
+            document.getElementById('moraModalHouseSubtitle').textContent = `Domicilio: Casa ${h.number} — ${h.family} (${h.street || 'General'})`;
+            document.getElementById('moraModalStatusSelect').value = h.isMorosa ? 'MOROSO' : 'AL_DIA';
+            document.getElementById('moraModalReasonInput').value = h.moraNote || 'Debe 2 meses de expensas';
+            document.getElementById('moraEditModal').classList.remove('hidden');
+        }
+
+        function closeMoraModal() {
+            document.getElementById('moraEditModal').classList.add('hidden');
+        }
+
+        function handleSaveMoraModal(e) {
+            e.preventDefault();
+            const houseNum = document.getElementById('moraModalHouseNumber').value;
+            const status = document.getElementById('moraModalStatusSelect').value;
+            const reason = document.getElementById('moraModalReasonInput').value.trim();
+
+            const h = houses.find(item => item.number === houseNum);
+            if (!h) return;
+
+            h.isMorosa = (status === 'MOROSO');
+            h.moraNote = h.isMorosa ? (reason || 'Expensas pendientes de pago') : '';
+
+            closeMoraModal();
+            pushStateToCloud();
+            showToast(h.isMorosa ? `⛔ Casa ${houseNum} marcada en mora` : `✅ Casa ${houseNum} habilitada (Al Día)`);
+        }
+
+        function resetHousePinToDefault(houseNum) {
+            const h = houses.find(item => item.number === houseNum);
+            if (!h) return;
+            h.pin = '0000';
+            pushStateToCloud();
+            showToast(`🔄 PIN de Casa ${houseNum} restablecido a 0000`);
+        }
+
+        function deleteHouseFromCondo(houseNum) {
+            houses = houses.filter(h => h.number !== houseNum);
+            passes = passes.filter(p => p.house !== houseNum);
+            fastPasses = fastPasses.filter(f => f.house !== houseNum);
+            if (currentHouse === houseNum) {
+                currentHouse = houses.length > 0 ? houses[0].number : '';
+            }
+            if (!passes.some(p => p.id === selectedPassId)) {
+                selectedPassId = passes.length > 0 ? passes[0].id : '';
+            }
+            syncCurrentHouseHeader();
+            pushStateToCloud();
+            showToast(`🗑️ Casa ${houseNum} y sus pases eliminados del padrón`);
+        }
+
+        function updateMoraUI() {
+            const banner = document.getElementById('moraBannerVecino');
+            const detail = document.getElementById('moraBannerVecinoDetail');
+            const createCard = document.getElementById('createPassCard');
+            const fieldset = document.getElementById('newPassFieldset');
+            const lockBadge = document.getElementById('formMoraLockBadge');
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+
+            if (!banner) return;
+            if (myHouseObj && myHouseObj.isMorosa) {
+                banner.classList.remove('hidden');
+                if (detail) {
+                    detail.textContent = `${myHouseObj.moraNote || 'Cuotas de expensas pendientes'}. Tus visitas deberán anunciarse por citófono tradicional en portería hasta regularizar el pago.`;
+                }
+                if (createCard) createCard.classList.add('opacity-60');
+                if (fieldset) fieldset.disabled = true;
+                if (lockBadge) lockBadge.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+                if (createCard) createCard.classList.remove('opacity-60');
+                if (fieldset) fieldset.disabled = false;
+                if (lockBadge) lockBadge.classList.add('hidden');
+            }
+        }
+
+        function toggleOfflineMode() {
+            isOfflineMode = !isOfflineMode;
+            const btnDesktop = document.getElementById('networkStatusBtnDesktop');
+
+            if (isOfflineMode) {
+                btnDesktop.className = "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40";
+                document.getElementById('netDot').className = "w-2 h-2 rounded-full bg-amber-400";
+                document.getElementById('netText').textContent = "Modo Offline (Ed25519 Local)";
+                showToast('📡 Modo Offline: Validación criptográfica local activa');
+            } else {
+                btnDesktop.className = "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+                document.getElementById('netDot').className = "w-2 h-2 rounded-full bg-emerald-400";
+                document.getElementById('netText').textContent = "En Línea (Cloud Sync)";
+                pushStateToCloud();
+                showToast('🌐 Sincronizado en tiempo real con la nube');
+            }
+        }
+
+        function trigger18HrsCheck() {
+            const workerInside = passes.find(p => p.passType === 'PROVEEDOR / OBRA' && p.status === 'ADENTRO');
+            const alertBox = document.getElementById('workerOvertimeAlert');
+            if (workerInside) {
+                document.getElementById('workerOvertimeDetail').textContent =
+                    `${workerInside.visitorName} en Casa ${workerInside.house} ingresó a las ${workerInside.entryTime || '14:15'} y permanece dentro del condominio.`;
+                alertBox.classList.remove('hidden');
+                document.getElementById('guardAlertBadge').classList.remove('hidden');
+                showToast('🚨 Alerta de horario límite 18:00 enviada a Portería');
+            } else {
+                showToast('✅ Ningún trabajador externo permanece dentro del predio');
+            }
+        }
+
+        function forceWorkerCheckout() {
+            const workerInside = passes.find(p => p.passType === 'PROVEEDOR / OBRA' && p.status === 'ADENTRO');
+            if (workerInside) {
+                quickCheckoutVisitor(workerInside.id);
+            }
+            document.getElementById('workerOvertimeAlert').classList.add('hidden');
+            document.getElementById('guardAlertBadge').classList.add('hidden');
+        }
+
+        // Bitácora Interactiva por Días y Exportación CSV
+        function addAuditLog(event, visitor, house, type, mode, ciPlaca = 'Verificado en Garita') {
+            const now = new Date().toLocaleTimeString('es-BO', { hour12: false });
+            const today = getTodayFormatted();
+            const newLog = {
+                id: 'LOG-' + Math.floor(1000 + Math.random() * 9000),
+                date: today,
+                time: now,
+                event,
+                visitor,
+                ciPlaca,
+                house,
+                type,
+                mode
+            };
+            auditLogs.unshift(newLog);
+            selectedBitacoraDate = today;
+            renderAdminLogs();
+        }
+
+        function selectBitacoraDay(dateStr) {
+            selectedBitacoraDate = dateStr;
+            const dateInput = document.getElementById('bitacoraDateInput');
+            if (dateInput && dateStr !== 'TODOS' && dateStr.includes('/')) {
+                const [dd, mm, yyyy] = dateStr.split('/');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            renderAdminLogs();
+        }
+
+        function handleBitacoraDatePicker(isoVal) {
+            if (!isoVal) return;
+            const [yyyy, mm, dd] = isoVal.split('-');
+            selectedBitacoraDate = `${dd}/${mm}/${yyyy}`;
+            renderAdminLogs();
+        }
+
+        function renderAdminLogs() {
+            const totalEl = document.getElementById('adminTotalLogs');
+            if (totalEl) totalEl.textContent = auditLogs.length;
+
+            const uniqueDays = [];
+            auditLogs.forEach(l => {
+                const d = l.date || '25/10/2026';
+                if (!uniqueDays.includes(d)) uniqueDays.push(d);
+            });
+            if (!uniqueDays.includes('25/10/2026')) uniqueDays.unshift('25/10/2026');
+
+            if (selectedBitacoraDate !== 'TODOS' && !uniqueDays.includes(selectedBitacoraDate)) {
+                uniqueDays.unshift(selectedBitacoraDate);
+            }
+
+            const daysTabsContainer = document.getElementById('bitacoraDaysTabs');
+            if (daysTabsContainer) {
+                const allBtnActive = selectedBitacoraDate === 'TODOS';
+                let tabsHtml = `
+                    <button type="button" onclick="selectBitacoraDay('TODOS')" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 border ${allBtnActive ? 'bg-purple-600 text-white border-purple-400 shadow-lg' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'}">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Todos los Días</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] bg-black/30 font-mono">${auditLogs.length}</span>
+                    </button>
+                `;
+
+                tabsHtml += uniqueDays.map(dayStr => {
+                    const countForDay = auditLogs.filter(l => (l.date || '25/10/2026') === dayStr).length;
+                    const isSelected = selectedBitacoraDate === dayStr;
+                    let friendlyLabel = dayStr;
+                    if (dayStr === '25/10/2026') friendlyLabel = `Hoy (${dayStr})`;
+                    else if (dayStr === '24/10/2026') friendlyLabel = `Ayer (${dayStr})`;
+
+                    return `
+                        <button type="button" data-day="${escapeHtml(dayStr)}" onclick="selectBitacoraDay(this.dataset.day)" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 border ${isSelected ? 'bg-purple-600 text-white border-purple-400 shadow-lg' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'}">
+                            <i class="fa-regular fa-calendar-check"></i>
+                            <span>${escapeHtml(friendlyLabel)}</span>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-black/30 font-mono">${countForDay}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                daysTabsContainer.innerHTML = tabsHtml;
+            }
+
+            const eventFilter = document.getElementById('bitacoraEventFilter')?.value || 'TODOS';
+            const searchTxt = (document.getElementById('bitacoraSearchInput')?.value || '').toLowerCase().trim();
+
+            const dayLogs = auditLogs.filter(l => {
+                const lDate = l.date || '25/10/2026';
+                if (selectedBitacoraDate !== 'TODOS' && lDate !== selectedBitacoraDate) return false;
+                return true;
+            });
+
+            const labelEl = document.getElementById('bitacoraSelectedDayLabel');
+            if (labelEl) {
+                labelEl.textContent = selectedBitacoraDate === 'TODOS'
+                    ? 'Historial Completo'
+                    : (selectedBitacoraDate === '25/10/2026' ? 'Hoy (25/10/2026)' : selectedBitacoraDate);
+            }
+            const entriesCount = dayLogs.filter(l => l.event.includes('ENTRADA')).length;
+            const taxisCount = dayLogs.filter(l => l.event.includes('TAXI') || l.type.includes('PRE-AUTORIZADO')).length;
+            const exitsCount = dayLogs.filter(l => l.event.includes('SALIDA')).length;
+
+            if (document.getElementById('bitacoraDayEntriesCount')) document.getElementById('bitacoraDayEntriesCount').textContent = entriesCount;
+            if (document.getElementById('bitacoraDayTaxisCount')) document.getElementById('bitacoraDayTaxisCount').textContent = taxisCount;
+            if (document.getElementById('bitacoraDayExitsCount')) document.getElementById('bitacoraDayExitsCount').textContent = exitsCount;
+
+            const filteredLogs = dayLogs.filter(l => {
+                if (eventFilter === 'ENTRADA' && !l.event.includes('ENTRADA')) return false;
+                if (eventFilter === 'SALIDA' && !l.event.includes('SALIDA')) return false;
+                if (eventFilter === 'TAXI' && !l.event.includes('TAXI') && !l.type.includes('PRE-AUTORIZADO')) return false;
+                if (eventFilter === 'ALERTA' && !l.event.includes('ALERTA') && !l.event.includes('BLOQUEO')) return false;
+
+                if (searchTxt) {
+                    const matchVis = (l.visitor || '').toLowerCase().includes(searchTxt);
+                    const matchHouse = (l.house || '').toLowerCase().includes(searchTxt);
+                    const matchType = (l.type || '').toLowerCase().includes(searchTxt);
+                    return matchVis || matchHouse || matchType;
+                }
+                return true;
+            });
+
+            const tbody = document.getElementById('adminAuditTableBody');
+            if (!tbody) return;
+
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-xs text-zinc-500 italic">
+                            No hay movimientos registrados para la fecha o filtro seleccionado (${escapeHtml(selectedBitacoraDate)}).
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredLogs.map((l, idx) => {
+                let badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                if (l.event.includes('SALIDA')) badgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                else if (l.event.includes('TAXI')) badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                else if (l.event.includes('ALERTA') || l.event.includes('BLOQUEO')) badgeClass = 'bg-red-500/20 text-red-300 border-red-500/30';
+
+                const logId = l.id || `LOG-IDX-${idx}`;
+                return `
+                    <tr data-logid="${escapeHtml(logId)}" data-idx="${idx}" onclick="openLogDetailModal(this.dataset.logid, Number(this.dataset.idx))" class="hover:bg-zinc-800/60 cursor-pointer transition">
+                        <td class="py-3 px-3 font-mono text-zinc-300 font-semibold">${escapeHtml(l.date || '25/10/2026')}</td>
+                        <td class="py-3 px-3 font-mono text-zinc-400">${escapeHtml(l.time)}</td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badgeClass}">${escapeHtml(l.event)}</span>
+                        </td>
+                        <td class="py-3 px-3 font-bold text-white">${escapeHtml(l.visitor)}</td>
+                        <td class="py-3 px-3 text-purple-300 font-bold">${escapeHtml(l.house)}</td>
+                        <td class="py-3 px-3 text-zinc-400">${escapeHtml(l.type)}</td>
+                        <td class="py-3 px-3 font-mono text-emerald-400 text-[11px]">${escapeHtml(l.mode)}</td>
+                        <td class="py-3 px-3 text-right">
+                            <button type="button" class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-purple-600 text-zinc-200 hover:text-white text-[11px] font-bold transition">
+                                Ver Ficha
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportBitacoraCSV() {
+            const dayLogs = auditLogs.filter(l => {
+                const lDate = l.date || '25/10/2026';
+                return selectedBitacoraDate === 'TODOS' || lDate === selectedBitacoraDate;
+            });
+
+            if (dayLogs.length === 0) {
+                showToast('ℹ️ No hay registros en esta fecha para exportar');
+                return;
+            }
+
+            const headers = ['ID', 'Fecha', 'Hora', 'Evento', 'Visitante', 'CI_Placa', 'Domicilio', 'Categoria', 'Guardia'];
+            const rows = dayLogs.map(l => [
+                l.id || '',
+                l.date || '25/10/2026',
+                l.time || '',
+                `"${(l.event || '').replace(/"/g, '""')}"`,
+                `"${(l.visitor || '').replace(/"/g, '""')}"`,
+                `"${(l.ciPlaca || '').replace(/"/g, '""')}"`,
+                `"${(l.house || '').replace(/"/g, '""')}"`,
+                `"${(l.type || '').replace(/"/g, '""')}"`,
+                `"${(l.mode || '').replace(/"/g, '""')}"`
+            ].join(','));
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Bitacora_VisePass_${selectedBitacoraDate.replace(/\//g, '-')}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('📊 Reporte CSV descargado con éxito');
+        }
+
+        function openLogDetailModal(logId, fallbackIdx) {
+            const logItem = auditLogs.find(l => l.id === logId) || auditLogs[fallbackIdx];
+            if (!logItem) return;
+
+            document.getElementById('logModalTitle').textContent = `${logItem.event}`;
+            const body = document.getElementById('logModalBody');
+            body.innerHTML = `
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-2">
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">ID de Transacción:</span>
+                        <strong class="font-mono text-zinc-300">${escapeHtml(logItem.id || 'LOG-VERIFICADO')}</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">Fecha y Hora Exacta:</span>
+                        <strong class="font-mono text-white">${escapeHtml(logItem.date || '25/10/2026')} — ${escapeHtml(logItem.time)}</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">Visitante / Identificación:</span>
+                        <strong class="text-white">${escapeHtml(logItem.visitor)}</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">C.I. / Placa / Detalle:</span>
+                        <strong class="font-mono text-amber-300">${escapeHtml(logItem.ciPlaca || 'Validado con Firma QR')}</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">Domicilio Destino:</span>
+                        <strong class="text-purple-300">${escapeHtml(logItem.house)}</strong>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">Categoría de Pase:</span>
+                        <strong class="text-zinc-200">${escapeHtml(logItem.type)}</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-zinc-400">Terminal / Guardia:</span>
+                        <strong class="text-emerald-400">${escapeHtml(logItem.mode)}</strong>
+                    </div>
+                </div>
+            `;
+            document.getElementById('logDetailModal').classList.remove('hidden');
+        }
+
+        function closeLogDetailModal() {
+            document.getElementById('logDetailModal').classList.add('hidden');
+        }
+
+        function openTaxiModal() {
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Pre-autorización rápida restringida por mora en expensas');
+                return;
+            }
+            document.getElementById('taxiModal').classList.remove('hidden');
+        }
+        function closeTaxiModal() {
+            document.getElementById('taxiModal').classList.add('hidden');
+        }
+        function handleCreateFastPass(e) {
+            e.preventDefault();
+            const service = document.getElementById('fastServiceInput').value;
+            const plate = document.getElementById('fastPlateInput').value.trim();
+            fastPasses.unshift({
+                id: 'FAST-' + Math.floor(100 + Math.random() * 900),
+                house: currentHouse,
+                service,
+                plateOrName: plate,
+                expiresIn: '30 min',
+                status: 'PENDIENTE'
+            });
+            document.getElementById('fastPlateInput').value = '';
+            closeTaxiModal();
+            pushStateToCloud();
+            showToast('🛵 Aviso enviado en vivo a la pantalla de Portería');
+        }
+
+        function openChurrascoModal() {
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Link grupal restringido por mora en expensas');
+                return;
+            }
+            syncCurrentHouseHeader();
+            document.getElementById('churrascoModal').classList.remove('hidden');
+        }
+        function closeChurrascoModal() {
+            document.getElementById('churrascoModal').classList.add('hidden');
+        }
+        function copyChurrascoLink() {
+            const url = `https://visepass.bo/junte/la-hacienda-casa-${currentHouse}`;
+            copyTextToClipboard(url, '🔗 Link de invitación copiado para WhatsApp');
+        }
+
+        function openGuestSelfRegModal() {
+            closeChurrascoModal();
+            document.getElementById('guestSelfRegModal').classList.remove('hidden');
+        }
+        function closeGuestSelfRegModal() {
+            document.getElementById('guestSelfRegModal').classList.add('hidden');
+        }
+        function handleGuestSelfRegSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('selfRegName').value.trim();
+            const ci = document.getElementById('selfRegCi').value.trim();
+            const plate = document.getElementById('selfRegPlate').value.trim() || 'SIN AUTO';
+
+            const newId = 'PASE-SCZ-' + Math.floor(100 + Math.random() * 900);
+            const newPass = {
+                id: newId,
+                condo: 'La Hacienda - Rincon',
+                house: currentHouse,
+                visitorName: name,
+                ciPlaca: `${ci} | ${plate}`,
+                passType: 'VISITA SOCIAL',
+                validUntil: '26/10/26',
+                authBy: `${currentFamily} (Link Evento)`,
+                status: 'AFUERA',
+                identityVerified: false
+            };
+
+            passes.unshift(newPass);
+            selectedPassId = newId;
+
+            document.getElementById('selfRegName').value = '';
+            document.getElementById('selfRegCi').value = '';
+            document.getElementById('selfRegPlate').value = '';
+
+            closeGuestSelfRegModal();
+            pushStateToCloud();
+            switchTab('wallet');
+            showToast(`🎉 Pase generado para ${name}`);
+        }
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            document.getElementById('toastMessage').textContent = msg;
+            box.classList.remove('hidden');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => box.classList.add('hidden'), 3400);
+        }
+
+        /* ==========================================
+           8. INICIALIZACIÓN Y EVENTOS GLOBALES
+           ========================================== */
+        const MODAL_IDS = [
+            'taxiModal',
+            'churrascoModal',
+            'guestSelfRegModal',
+            'authPortalModal',
+            'changePinModal',
+            'moraEditModal',
+            'logDetailModal'
+        ];
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                MODAL_IDS.forEach(id => {
+                    if (id === 'authPortalModal' && !hasAuthenticatedSession) return;
+                    const el = document.getElementById(id);
+                    if (el && !el.classList.contains('hidden')) {
+                        el.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            MODAL_IDS.forEach(id => {
+                const modalEl = document.getElementById(id);
+                if (modalEl) {
+                    modalEl.addEventListener('click', (e) => {
+                        if (id === 'authPortalModal' && !hasAuthenticatedSession) return;
+                        if (e.target === modalEl) {
+                            modalEl.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+
+            loadLocalState();
+            syncCurrentHouseHeader();
+            applyRolePermissions();
+            refreshAllViews();
+            selectLoginTab('RESIDENTE');
+            document.getElementById('authPortalModal').classList.remove('hidden');
+            initCloudSync();
+        });
+    </script>
+</body>
+</html>
