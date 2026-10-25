@@ -524,7 +524,45 @@
                                 ⏰ Simular 18:00 hrs
                             </button>
                         </div>
-                        <div id="guardQuickSimButtons" class="grid grid-cols-1 gap-2 max-h-[260px] overflow-y-auto pr-1"></div>
+                        <div id="guardQuickSimButtons" class="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <!-- Recuadro Secundario: Registro Manual para Persona sin Teléfono / sin QR -->
+                    <div class="pt-3 border-t border-zinc-800">
+                        <div class="bg-zinc-950/90 border border-zinc-800/90 rounded-xl p-3 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-zinc-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                                    <span>Registro Manual (Visitante sin teléfono)</span>
+                                </span>
+                                <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">Auxiliar</span>
+                            </div>
+                            <form onsubmit="handleGuardManualRecordSubmit(event)" class="space-y-2">
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <select id="manualGuardActionType" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-[11px] text-white font-bold focus:outline-none focus:border-amber-500">
+                                        <option value="ENTRADA">🟢 Anotar Entrada</option>
+                                        <option value="SALIDA">🔵 Anotar Salida</option>
+                                    </select>
+                                    <input type="text" id="manualGuardHouse" required placeholder="N° Casa (ej. 12)" list="manualGuardHousesDatalist" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-[11px] text-white focus:outline-none focus:border-amber-500">
+                                    <datalist id="manualGuardHousesDatalist"></datalist>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <input type="text" id="manualGuardVisitorName" required placeholder="Nombre y Apellido" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-[11px] text-white focus:outline-none focus:border-amber-500">
+                                    <input type="text" id="manualGuardCiPlaca" required placeholder="C.I. o Placa" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-[11px] text-white focus:outline-none focus:border-amber-500">
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <select id="manualGuardCategory" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-[11px] text-zinc-300 focus:outline-none focus:border-amber-500">
+                                        <option value="VISITA SOCIAL">Visita Social</option>
+                                        <option value="PROVEEDOR / OBRA">Proveedor / Obra</option>
+                                        <option value="PERSONAL HOGAR">Personal Hogar</option>
+                                        <option value="TAXI / DELIVERY">Taxi / Delivery</option>
+                                    </select>
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-[11px] shrink-0 transition">
+                                        Anotar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -674,6 +712,9 @@
                                 </button>
                             </div>
                             <div class="flex flex-wrap items-center gap-1">
+                                <button type="button" onclick="openChangeAdminPassModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition" title="Cambiar contraseña de Administración y Portería">
+                                    <i class="fa-solid fa-key"></i> Contraseña Admin
+                                </button>
                                 <button type="button" onclick="exportBackupJSON()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition" title="Descargar copia de seguridad de casas, pases y bitácora">
                                     <i class="fa-solid fa-download"></i> Guardar Respaldo
                                 </button>
@@ -957,11 +998,22 @@
             <form id="loginFormGuardia" onsubmit="handleLoginGuardia(event)" class="hidden space-y-3">
                 <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3 text-[11px] text-emerald-200 flex items-start gap-2">
                     <i class="fa-solid fa-shield-halved text-emerald-400 mt-0.5"></i>
-                    <span><strong>Permiso Portería:</strong> Acceso exclusivo a la terminal de escaneo de pases QR, control de entradas/salidas y taxis pre-autorizados.</span>
+                    <span><strong>Permiso Portería:</strong> Acceso exclusivo a la terminal de escaneo de pases QR, control de entradas/salidas y registro en garita.</span>
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-zinc-300 block mb-1">Puesto / Turno de Guardia</label>
-                    <input type="text" id="guardNameInput" value="Portería Principal (Turno Día)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Selecciona Puesto / Turno de Portería</label>
+                    <select id="guardNameInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="Portería Principal">🛡️ Portería Principal</option>
+                        <option value="Turno Día">☀️ Turno Día</option>
+                        <option value="Turno Noche">🌙 Turno Noche</option>
+                    </select>
+                </div>
+                <div id="guardPasswordFieldBox">
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Contraseña de Acceso (Portería / Administración)</label>
+                    <input type="password" id="guardPasswordInput" placeholder="Ingresa la contraseña configurada..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500">
+                    <p id="guardFirstTimeHint" class="hidden text-[11px] text-amber-300 mt-1">
+                        ⚠️ Aún no se ha configurado la contraseña en Administración. Entra primero a la pestaña <strong>🏢 Admin</strong> para crearla.
+                    </p>
                 </div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20">
                     Entrar como Portería
@@ -972,14 +1024,69 @@
             <form id="loginFormAdmin" onsubmit="handleLoginAdmin(event)" class="hidden space-y-3">
                 <div class="bg-sky-950/30 border border-sky-500/30 rounded-xl p-3 text-[11px] text-sky-200 flex items-start gap-2">
                     <i class="fa-solid fa-building-shield text-sky-400 mt-0.5"></i>
-                    <span><strong>Permiso Administrador:</strong> Acceso total a todos los paneles (Administración, Portería, Tarjeta Wallet y Creación de Pases).</span>
+                    <span><strong>Permiso Administrador:</strong> Acceso total a todos los paneles. Protegido con contraseña privada para que ningún vecino pueda ingresar.</span>
+                </div>
+
+                <!-- Vista A: Configuración por Primera Vez -->
+                <div id="adminFirstTimeSetupBox" class="space-y-3 bg-amber-950/20 border border-amber-500/40 rounded-xl p-3.5">
+                    <div class="flex items-center gap-2 text-amber-300 text-xs font-extrabold">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Configuración Inicial (Primera Vez)</span>
+                    </div>
+                    <p class="text-[11px] text-zinc-300 leading-relaxed">
+                        Crea la contraseña maestra de <strong>Administración y Portería</strong>. Quedará guardada para que solo tú y portería tengan acceso, y ningún vecino pueda entrar a estos paneles.
+                    </p>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Crear Contraseña de Administración</label>
+                        <input type="password" id="adminFirstSetupPass" placeholder="Escribe tu nueva contraseña..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Confirmar Contraseña</label>
+                        <input type="password" id="adminFirstSetupConfirm" placeholder="Repite la contraseña..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <!-- Vista B: Ingreso Regular con Contraseña ya configurada -->
+                <div id="adminRegularLoginBox" class="hidden space-y-2">
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Contraseña de Administración</label>
+                    <input type="password" id="adminPinInput" placeholder="Ingresa tu contraseña de administrador..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-sky-500">
+                </div>
+
+                <button id="adminLoginSubmitBtn" type="submit" class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg">
+                    Guardar Contraseña y Entrar como Administración
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL EXTRA: CAMBIAR CONTRASEÑA DE ADMINISTRACIÓN
+         ========================================== -->
+    <div id="changeAdminPassModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-amber-400"></i>
+                    Cambiar Contraseña Admin / Portería
+                </h3>
+                <button type="button" onclick="closeChangeAdminPassModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-zinc-400">
+                Esta contraseña protege el acceso a los paneles de <strong>Administración</strong> y <strong>Portería</strong> para que ningún vecino pueda ingresar.
+            </p>
+            <form onsubmit="handleSaveNewAdminPassword(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-zinc-300 block mb-1">Contraseña Actual</label>
+                    <input type="password" id="currentAdminPassModalInput" required placeholder="Ingresa la contraseña actual" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono">
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-zinc-300 block mb-1">Credencial de Directorio / Administración</label>
-                    <input type="password" id="adminPinInput" value="admin" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono">
+                    <label class="text-xs text-zinc-300 block mb-1">Nueva Contraseña (mínimo 4 caracteres)</label>
+                    <input type="password" id="newAdminPassModalInput" required placeholder="Escribe la nueva contraseña" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white font-mono">
                 </div>
-                <button type="submit" class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg">
-                    Entrar como Administración (Acceso Total)
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase">
+                    Actualizar Contraseña
                 </button>
             </form>
         </div>
@@ -1217,6 +1324,7 @@
         let cooldownTimerInterval = null;
 
         // Estado inicial 100% limpio (0 casas, 0 pases, 0 taxis y 0 bitácora) listo para configurar desde cero
+        let adminPassword = '';
         let houses = [];
         let passes = [];
         let fastPasses = [];
@@ -1227,6 +1335,7 @@
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
+                if (typeof parsed.adminPassword === 'string') adminPassword = parsed.adminPassword;
                 if (Array.isArray(parsed.houses)) houses = parsed.houses;
                 if (Array.isArray(parsed.passes)) passes = parsed.passes;
                 if (Array.isArray(parsed.fastPasses)) fastPasses = parsed.fastPasses;
@@ -1239,6 +1348,7 @@
         function saveLocalState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    adminPassword,
                     houses,
                     passes,
                     fastPasses,
@@ -1259,7 +1369,8 @@
                 const payload = {
                     version: 'VisePass_SCZ_v4',
                     exportedAt: new Date().toISOString(),
-                    condominium: CONDO_CONFIG.name,
+                    condominium: 'La Hacienda - Rincón',
+                    adminPassword,
                     houses,
                     passes,
                     fastPasses,
@@ -1275,9 +1386,9 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showToast('Respaldo descargado', `${houses.length} casas y ${passes.length} pases guardados en archivo.`, 'emerald');
+                showToast(`💾 Respaldo descargado (${houses.length} casas y ${passes.length} pases)`);
             } catch (err) {
-                showToast('Error al exportar', 'No se pudo generar el archivo de respaldo.', 'rose');
+                showToast('⚠️ Error al generar el archivo de respaldo');
             }
         }
 
@@ -1289,20 +1400,21 @@
                 try {
                     const parsed = JSON.parse(e.target.result);
                     if (!parsed || !Array.isArray(parsed.houses)) {
-                        showToast('Archivo inválido', 'El archivo seleccionado no es un respaldo válido de VisePass.', 'rose');
+                        showToast('⚠️ El archivo seleccionado no es un respaldo válido');
                         return;
                     }
+                    if (typeof parsed.adminPassword === 'string') adminPassword = parsed.adminPassword;
                     houses = parsed.houses;
                     passes = Array.isArray(parsed.passes) ? parsed.passes : [];
                     fastPasses = Array.isArray(parsed.fastPasses) ? parsed.fastPasses : [];
                     auditLogs = Array.isArray(parsed.auditLogs) ? parsed.auditLogs : [];
-                    selectedWalletPassId = passes[0]?.id || null;
+                    selectedPassId = passes[0]?.id || '';
                     saveLocalState();
                     pushStateToCloud();
                     refreshAllViews();
-                    showToast('Respaldo restaurado', `Se cargaron ${houses.length} casas y ${passes.length} pases correctamente.`, 'emerald');
+                    showToast(`✅ Respaldo restaurado (${houses.length} casas y ${passes.length} pases)`);
                 } catch (err) {
-                    showToast('Error al cargar', 'No se pudo leer el archivo JSON de respaldo.', 'rose');
+                    showToast('⚠️ No se pudo leer el archivo JSON de respaldo');
                 } finally {
                     event.target.value = '';
                 }
@@ -1532,6 +1644,12 @@
 
         function renderLoginHouseOptions() {
             const select = document.getElementById('loginHouseSelect');
+            const datalist = document.getElementById('manualGuardHousesDatalist');
+            if (datalist) {
+                datalist.innerHTML = houses.map(h =>
+                    `<option value="${escapeHtml(h.number)}">Casa ${escapeHtml(h.number)} — ${escapeHtml(h.family)}</option>`
+                ).join('');
+            }
             if (!select) return;
             if (houses.length === 0) {
                 select.innerHTML = `<option value="">— Primero registra una casa en Administración —</option>`;
@@ -1546,6 +1664,33 @@
             }
         }
 
+        function updateAdminAndGuardLoginUI() {
+            const firstTimeBox = document.getElementById('adminFirstTimeSetupBox');
+            const regularBox = document.getElementById('adminRegularLoginBox');
+            const submitBtn = document.getElementById('adminLoginSubmitBtn');
+            const guardHint = document.getElementById('guardFirstTimeHint');
+            const isConfigured = Boolean(adminPassword && adminPassword.trim().length > 0);
+
+            if (firstTimeBox && regularBox && submitBtn) {
+                if (!isConfigured) {
+                    firstTimeBox.classList.remove('hidden');
+                    regularBox.classList.add('hidden');
+                    submitBtn.textContent = 'Guardar Contraseña y Entrar a Administración';
+                } else {
+                    firstTimeBox.classList.add('hidden');
+                    regularBox.classList.remove('hidden');
+                    submitBtn.textContent = 'Entrar como Administración (Acceso Total)';
+                }
+            }
+            if (guardHint) {
+                if (!isConfigured) {
+                    guardHint.classList.remove('hidden');
+                } else {
+                    guardHint.classList.add('hidden');
+                }
+            }
+        }
+
         function selectLoginTab(role) {
             const roles = ['Residente', 'Guardia', 'Admin'];
             roles.forEach(r => {
@@ -1553,6 +1698,7 @@
                 document.getElementById(`loginTab${r}`).className = "py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
             });
             document.getElementById('loginErrorMsg').classList.add('hidden');
+            updateAdminAndGuardLoginUI();
 
             if (role === 'RESIDENTE') {
                 document.getElementById('loginFormResidente').classList.remove('hidden');
@@ -1560,9 +1706,13 @@
             } else if (role === 'GUARDIA') {
                 document.getElementById('loginFormGuardia').classList.remove('hidden');
                 document.getElementById('loginTabGuardia').className = "py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
+                const guardPassEl = document.getElementById('guardPasswordInput');
+                if (guardPassEl) guardPassEl.value = '';
             } else if (role === 'ADMIN') {
                 document.getElementById('loginFormAdmin').classList.remove('hidden');
                 document.getElementById('loginTabAdmin').className = "py-2.5 rounded-lg text-xs font-bold bg-zinc-200 text-zinc-950 shadow transition";
+                const adminPassEl = document.getElementById('adminPinInput');
+                if (adminPassEl) adminPassEl.value = '';
             }
         }
 
@@ -1579,6 +1729,14 @@
             document.getElementById('authPortalModal').classList.add('hidden');
         }
 
+        function showLoginError(message) {
+            const errorBanner = document.getElementById('loginErrorMsg');
+            if (errorBanner) {
+                errorBanner.textContent = message;
+                errorBanner.classList.remove('hidden');
+            }
+        }
+
         function handleLoginResidente(e) {
             e.preventDefault();
             if (houses.length === 0) {
@@ -1589,15 +1747,14 @@
             const selectedNumber = document.getElementById('loginHouseSelect').value;
             const enteredPin = document.getElementById('loginResidentPin').value.trim();
             const houseObj = houses.find(h => h.number === selectedNumber);
-            const errorBanner = document.getElementById('loginErrorMsg');
 
             if (!houseObj || houseObj.pin !== enteredPin) {
-                errorBanner.classList.remove('hidden');
+                showLoginError('⛔ El PIN ingresado no coincide con este domicilio.');
                 showToast('⛔ PIN incorrecto para este domicilio');
                 return;
             }
 
-            errorBanner.classList.add('hidden');
+            document.getElementById('loginErrorMsg').classList.add('hidden');
             currentHouse = houseObj.number;
             currentFamily = houseObj.family;
             activeRole = 'RESIDENTE';
@@ -1647,9 +1804,23 @@
 
         function handleLoginGuardia(e) {
             e.preventDefault();
-            currentGuardName = document.getElementById('guardNameInput').value.trim() || 'Portería Principal';
+            if (!adminPassword) {
+                selectLoginTab('ADMIN');
+                showLoginError('⚠️ Primero configura la contraseña por primera vez en la pestaña Admin.');
+                showToast('⚠️ Configura primero la contraseña en Administración');
+                return;
+            }
+            const enteredPass = (document.getElementById('guardPasswordInput')?.value || '').trim();
+            if (enteredPass !== adminPassword) {
+                showLoginError('⛔ Contraseña incorrecta. Acceso exclusivo para Portería y Administración.');
+                showToast('⛔ Contraseña de Portería incorrecta');
+                return;
+            }
+
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+            currentGuardName = document.getElementById('guardNameInput').value || 'Portería Principal';
             activeRole = 'GUARDIA';
-            document.getElementById('activeRoleHeaderBadge').textContent = 'ROL: PORTERÍA';
+            document.getElementById('activeRoleHeaderBadge').textContent = `PORTERÍA • ${currentGuardName.toUpperCase()}`;
 
             completeSessionLogin();
             switchTab('guardia');
@@ -1659,11 +1830,37 @@
 
         function handleLoginAdmin(e) {
             e.preventDefault();
-            const adminPin = document.getElementById('adminPinInput').value.trim();
-            if (!adminPin) {
-                showToast('⚠️ Ingresa la credencial de administración');
-                return;
+            if (!adminPassword) {
+                const pass1 = (document.getElementById('adminFirstSetupPass')?.value || '').trim();
+                const pass2 = (document.getElementById('adminFirstSetupConfirm')?.value || '').trim();
+                if (pass1.length < 4) {
+                    showLoginError('⚠️ La nueva contraseña debe tener al menos 4 caracteres.');
+                    showToast('⚠️ La contraseña debe tener al menos 4 caracteres');
+                    return;
+                }
+                if (pass1 !== pass2) {
+                    showLoginError('⛔ Las contraseñas no coinciden. Verifícalas e intenta de nuevo.');
+                    showToast('⛔ Las contraseñas no coinciden');
+                    return;
+                }
+                adminPassword = pass1;
+                document.getElementById('adminFirstSetupPass').value = '';
+                document.getElementById('adminFirstSetupConfirm').value = '';
+                saveLocalState();
+                pushStateToCloud();
+                updateAdminAndGuardLoginUI();
+                showToast('🔐 Contraseña de Administración creada y guardada');
+            } else {
+                const enteredPin = (document.getElementById('adminPinInput')?.value || '').trim();
+                if (enteredPin !== adminPassword) {
+                    showLoginError('⛔ Contraseña de Administración incorrecta. Acceso restringido.');
+                    showToast('⛔ Contraseña incorrecta');
+                    return;
+                }
+                document.getElementById('adminPinInput').value = '';
             }
+
+            document.getElementById('loginErrorMsg').classList.add('hidden');
             activeRole = 'ADMIN';
             document.getElementById('activeRoleHeaderBadge').textContent = 'ROL: ADMINISTRADOR (TOTAL)';
 
@@ -1671,6 +1868,121 @@
             switchTab('admin');
             refreshAllViews();
             showToast('🏢 Panel de Administración activo (Acceso a todos los paneles)');
+        }
+
+        function openChangeAdminPassModal() {
+            const curEl = document.getElementById('currentAdminPassModalInput');
+            const newEl = document.getElementById('newAdminPassModalInput');
+            if (curEl) curEl.value = '';
+            if (newEl) newEl.value = '';
+            document.getElementById('changeAdminPassModal')?.classList.remove('hidden');
+        }
+
+        function closeChangeAdminPassModal() {
+            document.getElementById('changeAdminPassModal')?.classList.add('hidden');
+        }
+
+        function handleSaveNewAdminPassword(e) {
+            e.preventDefault();
+            const currentVal = (document.getElementById('currentAdminPassModalInput')?.value || '').trim();
+            const newVal = (document.getElementById('newAdminPassModalInput')?.value || '').trim();
+
+            if (adminPassword && currentVal !== adminPassword) {
+                showToast('⛔ La contraseña actual ingresada no es correcta');
+                return;
+            }
+            if (newVal.length < 4) {
+                showToast('⚠️ La nueva contraseña debe tener al menos 4 caracteres');
+                return;
+            }
+            adminPassword = newVal;
+            saveLocalState();
+            pushStateToCloud();
+            updateAdminAndGuardLoginUI();
+            closeChangeAdminPassModal();
+            showToast('🔐 Contraseña de Administración y Portería actualizada');
+        }
+
+        function handleGuardManualRecordSubmit(e) {
+            e.preventDefault();
+            const actionType = document.getElementById('manualGuardActionType')?.value || 'ENTRADA';
+            const houseNum = (document.getElementById('manualGuardHouse')?.value || '').trim();
+            const visitorName = (document.getElementById('manualGuardVisitorName')?.value || '').trim();
+            const ciPlaca = (document.getElementById('manualGuardCiPlaca')?.value || '').trim();
+            const category = document.getElementById('manualGuardCategory')?.value || 'VISITA SOCIAL';
+
+            if (!houseNum || !visitorName || !ciPlaca) {
+                showToast('⚠️ Completa Casa, Nombre y C.I./Placa');
+                return;
+            }
+
+            const screen = document.getElementById('guardResultScreen');
+            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
+
+            if (actionType === 'ENTRADA') {
+                const manualId = 'MANUAL-' + Math.floor(100 + Math.random() * 900);
+                const newManualPass = {
+                    id: manualId,
+                    condo: 'La Hacienda - Rincon',
+                    house: houseNum,
+                    visitorName: visitorName,
+                    ciPlaca: ciPlaca,
+                    passType: category,
+                    validUntil: getTodayFormatted(),
+                    authBy: 'Anuncio Manual en Portería',
+                    status: 'ADENTRO',
+                    entryTime: nowStr,
+                    identityVerified: true
+                };
+                passes.unshift(newManualPass);
+
+                if (screen) {
+                    screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+                    screen.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-emerald-400 text-zinc-950 flex items-center justify-center text-3xl mb-2 font-black shadow-lg">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <span class="text-[11px] font-mono uppercase tracking-widest bg-black/40 text-emerald-300 px-3 py-1 rounded-full font-bold">
+                            ENTRADA MANUAL ANOTADA (SIN TELÉFONO)
+                        </span>
+                        <h2 class="text-3xl font-black text-white mt-2">${escapeHtml(visitorName)}</h2>
+                        <div class="mt-2 px-4 py-1.5 rounded-xl bg-white text-zinc-950 font-black text-lg tracking-tight shadow">
+                            DESTINO: CASA ${escapeHtml(houseNum)} • ${escapeHtml(category)}
+                        </div>
+                        <p class="text-xs text-emerald-200 mt-2 font-mono">C.I. / Placa: ${escapeHtml(ciPlaca)} • Turno: ${escapeHtml(currentGuardName)}</p>
+                    `;
+                }
+                addAuditLog('ENTRADA MANUAL (SIN TEL.)', visitorName, `Casa ${houseNum}`, category, currentGuardName, ciPlaca);
+                showToast(`📝 Entrada manual registrada: ${visitorName} → Casa ${houseNum}`);
+            } else {
+                const existingInside = passes.find(p =>
+                    p.status === 'ADENTRO' &&
+                    (p.visitorName.toLowerCase() === visitorName.toLowerCase() || p.house.toLowerCase() === houseNum.toLowerCase())
+                );
+                if (existingInside) {
+                    existingInside.status = 'AFUERA';
+                }
+                if (screen) {
+                    screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-sky-400 bg-sky-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+                    screen.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-sky-400 text-zinc-950 flex items-center justify-center text-3xl mb-2 font-black shadow-lg">
+                            <i class="fa-solid fa-door-open"></i>
+                        </div>
+                        <span class="text-[11px] font-mono uppercase tracking-widest bg-sky-400/20 text-sky-200 px-3 py-1 rounded-full font-bold">
+                            SALIDA MANUAL ANOTADA (SIN TELÉFONO)
+                        </span>
+                        <h2 class="text-3xl font-black text-white mt-2">${escapeHtml(visitorName)}</h2>
+                        <p class="text-lg font-bold text-sky-300 mt-1">Salió de Casa ${escapeHtml(houseNum)} (${escapeHtml(category)})</p>
+                        <p class="text-xs text-sky-200 mt-1 font-mono">C.I. / Placa: ${escapeHtml(ciPlaca)} • Turno: ${escapeHtml(currentGuardName)}</p>
+                    `;
+                }
+                addAuditLog('SALIDA MANUAL (SIN TEL.)', visitorName, `Casa ${houseNum}`, category, currentGuardName, ciPlaca);
+                showToast(`🚪 Salida manual registrada: ${visitorName}`);
+            }
+
+            document.getElementById('manualGuardVisitorName').value = '';
+            document.getElementById('manualGuardCiPlaca').value = '';
+            pushStateToCloud();
         }
 
         function openAuthPortal() {
@@ -1684,6 +1996,7 @@
                 }).catch(() => {});
             }
             renderLoginHouseOptions();
+            updateAdminAndGuardLoginUI();
             selectLoginTab(activeRole || 'RESIDENTE');
             document.getElementById('authPortalModal').classList.remove('hidden');
         }
@@ -3033,6 +3346,7 @@
             'guestSelfRegModal',
             'authPortalModal',
             'changePinModal',
+            'changeAdminPassModal',
             'moraEditModal',
             'logDetailModal'
         ];
