@@ -400,14 +400,18 @@
                             Este código QR contiene la firma criptográfica del condominio. Puedes escanearlo directamente desde la función nativa <strong>"Creación de un pase"</strong> de tu iPhone o enviarlo por WhatsApp a tu invitado.
                         </p>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <button onclick="sendPassWhatsApp()" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                            <button onclick="sendPassWhatsApp()" class="py-3 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
                                 <i class="fa-brands fa-whatsapp text-base"></i>
-                                <span>Enviar Pase por WhatsApp</span>
+                                <span>Enviar por WhatsApp</span>
                             </button>
-                            <button onclick="simulateGoogleWalletSave()" class="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+                            <button onclick="downloadPassCardImage()" class="py-3 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition">
+                                <i class="fa-solid fa-image text-sm"></i>
+                                <span>Descargar Imagen QR</span>
+                            </button>
+                            <button onclick="simulateGoogleWalletSave()" class="py-3 px-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs flex items-center justify-center gap-2 transition">
                                 <i class="fa-brands fa-google-pay text-lg"></i>
-                                <span>Guardar en Google Wallet (JWT)</span>
+                                <span>Guardar en Wallet</span>
                             </button>
                         </div>
 
@@ -1332,7 +1336,37 @@
         }
 
         function getTodayFormatted() {
-            return '25/10/2026';
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
+        function getYesterdayFormatted() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
+        function getTomorrowShortFormatted() {
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yy = String(d.getFullYear()).slice(-2);
+            return `${dd}/${mm}/${yy}`;
+        }
+
+        function getTodayISO() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            return `${yyyy}-${mm}-${dd}`;
         }
 
         /* ==========================================
@@ -1426,7 +1460,7 @@
         let isCameraRunning = false;
 
         let adminHouseFilter = 'TODOS';
-        let selectedBitacoraDate = '25/10/2026';
+        let selectedBitacoraDate = getTodayFormatted();
 
         // Pausa de 5 segundos entre escaneos en Portería
         let isScannerCoolingDown = false;
@@ -2545,13 +2579,136 @@
                 showToast('⚠️ Primero emite o selecciona un pase activo');
                 return;
             }
+            const qrToken = buildQrTokenString(passObj);
             const msg = encodeURIComponent(
                 `Hola *${passObj.visitorName}*, te comparto tu Pase Oficial de Acceso para *${passObj.condo} (Casa ${passObj.house})* autorizado por *${passObj.authBy}*.\n\n` +
                 `📌 *ID de Pase:* ${passObj.id}\n` +
-                `📅 *Válido hasta:* ${passObj.validUntil}\n\n` +
-                `Muéstralo desde tu Apple Wallet / Google Wallet al llegar a portería.`
+                `🪪 *C.I. / Placa:* ${passObj.ciPlaca}\n` +
+                `📅 *Válido hasta:* ${passObj.validUntil}\n` +
+                `🔐 *Token QR:* ${qrToken}\n\n` +
+                `Muéstralo junto con la imagen QR en portería al llegar.`
             );
             window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function downloadPassCardImage() {
+            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
+            if (!passObj) {
+                showToast('⚠️ Primero emite o selecciona un pase activo para descargar su imagen');
+                return;
+            }
+            const qrWrap = document.getElementById('qrcodeCanvas');
+            const qrSourceCanvas = qrWrap ? qrWrap.querySelector('canvas') : null;
+            const qrSourceImg = qrWrap ? qrWrap.querySelector('img') : null;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 720;
+            canvas.height = 1040;
+            const ctx = canvas.getContext('2d');
+
+            // Fondo degradado según tipo de pase
+            const grad = ctx.createLinearGradient(0, 0, 720, 1040);
+            if (passObj.passType === 'RESIDENTE VIP') {
+                grad.addColorStop(0, '#b45309');
+                grad.addColorStop(1, '#78350f');
+            } else if (passObj.passType === 'PERSONAL HOGAR') {
+                grad.addColorStop(0, '#047857');
+                grad.addColorStop(1, '#064e3b');
+            } else if (passObj.passType === 'PROVEEDOR / OBRA') {
+                grad.addColorStop(0, '#c2410c');
+                grad.addColorStop(1, '#7c2d12');
+            } else {
+                grad.addColorStop(0, '#6d28d9');
+                grad.addColorStop(1, '#312e81');
+            }
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 720, 1040);
+
+            // Cabecera
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px Inter, Arial, sans-serif';
+            ctx.fillText(passObj.condo || 'La Hacienda - Rincón', 48, 72);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = 'bold 16px Inter, Arial, sans-serif';
+            ctx.fillText(`TIPO: ${passObj.passType}`, 48, 104);
+
+            // Línea divisoria
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(48, 128);
+            ctx.lineTo(672, 128);
+            ctx.stroke();
+
+            // Caja de datos del visitante
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.fillRect(48, 155, 624, 120);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = 'bold 15px Inter, Arial, sans-serif';
+            ctx.fillText('VISITANTE AUTORIZADO', 72, 190);
+            ctx.fillText('VÁLIDO HASTA', 520, 190);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 32px Inter, Arial, sans-serif';
+            ctx.fillText(String(passObj.visitorName).slice(0, 26), 72, 238);
+            ctx.font = 'bold 26px Inter, Arial, sans-serif';
+            ctx.fillText(String(passObj.validUntil), 520, 238);
+
+            // Caja de Casa y CI/Placa
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.fillRect(48, 295, 624, 120);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = 'bold 15px Inter, Arial, sans-serif';
+            ctx.fillText('CASA DESTINO', 72, 330);
+            ctx.fillText('DOCUMENTO C.I. / PLACA', 260, 330);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 44px Inter, Arial, sans-serif';
+            ctx.fillText(`#${passObj.house}`, 72, 385);
+            ctx.font = 'bold 24px Inter, Arial, sans-serif';
+            ctx.fillText(String(passObj.ciPlaca).slice(0, 30), 260, 382);
+
+            // Caja de Autorizado por
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.fillRect(48, 435, 624, 75);
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = 'bold 15px Inter, Arial, sans-serif';
+            ctx.fillText(`AUTORIZADO POR: ${passObj.authBy}`, 72, 480);
+
+            // Recuadro blanco central para el QR
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(160, 545, 400, 410);
+
+            const finishExport = () => {
+                ctx.fillStyle = '#18181b';
+                ctx.font = 'bold 20px JetBrains Mono, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(passObj.id, 360, 930);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = 'bold 16px Inter, Arial, sans-serif';
+                ctx.fillText('Presenta esta tarjeta QR al guardia en Portería • VisePass SCZ', 360, 995);
+
+                const dataUrl = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = `Pase_${passObj.id}_Casa_${passObj.house}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast(`🖼️ Imagen del pase de ${passObj.visitorName} descargada (lista para enviar por WhatsApp)`);
+            };
+
+            if (qrSourceCanvas) {
+                ctx.drawImage(qrSourceCanvas, 196, 565, 328, 328);
+                finishExport();
+            } else if (qrSourceImg && qrSourceImg.complete) {
+                ctx.drawImage(qrSourceImg, 196, 565, 328, 328);
+                finishExport();
+            } else {
+                finishExport();
+            }
         }
 
         function simulateGoogleWalletSave() {
@@ -3277,12 +3434,14 @@
             const totalEl = document.getElementById('adminTotalLogs');
             if (totalEl) totalEl.textContent = auditLogs.length;
 
+            const todayStr = getTodayFormatted();
+            const yesterdayStr = getYesterdayFormatted();
             const uniqueDays = [];
             auditLogs.forEach(l => {
-                const d = l.date || '25/10/2026';
+                const d = l.date || todayStr;
                 if (!uniqueDays.includes(d)) uniqueDays.push(d);
             });
-            if (!uniqueDays.includes('25/10/2026')) uniqueDays.unshift('25/10/2026');
+            if (!uniqueDays.includes(todayStr)) uniqueDays.unshift(todayStr);
 
             if (selectedBitacoraDate !== 'TODOS' && !uniqueDays.includes(selectedBitacoraDate)) {
                 uniqueDays.unshift(selectedBitacoraDate);
@@ -3300,11 +3459,11 @@
                 `;
 
                 tabsHtml += uniqueDays.map(dayStr => {
-                    const countForDay = auditLogs.filter(l => (l.date || '25/10/2026') === dayStr).length;
+                    const countForDay = auditLogs.filter(l => (l.date || todayStr) === dayStr).length;
                     const isSelected = selectedBitacoraDate === dayStr;
                     let friendlyLabel = dayStr;
-                    if (dayStr === '25/10/2026') friendlyLabel = `Hoy (${dayStr})`;
-                    else if (dayStr === '24/10/2026') friendlyLabel = `Ayer (${dayStr})`;
+                    if (dayStr === todayStr) friendlyLabel = `Hoy (${dayStr})`;
+                    else if (dayStr === yesterdayStr) friendlyLabel = `Ayer (${dayStr})`;
 
                     return `
                         <button type="button" data-day="${escapeHtml(dayStr)}" onclick="selectBitacoraDay(this.dataset.day)" class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 border ${isSelected ? 'bg-purple-600 text-white border-purple-400 shadow-lg' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'}">
@@ -3322,7 +3481,7 @@
             const searchTxt = (document.getElementById('bitacoraSearchInput')?.value || '').toLowerCase().trim();
 
             const dayLogs = auditLogs.filter(l => {
-                const lDate = l.date || '25/10/2026';
+                const lDate = l.date || todayStr;
                 if (selectedBitacoraDate !== 'TODOS' && lDate !== selectedBitacoraDate) return false;
                 return true;
             });
@@ -3331,7 +3490,7 @@
             if (labelEl) {
                 labelEl.textContent = selectedBitacoraDate === 'TODOS'
                     ? 'Historial Completo'
-                    : (selectedBitacoraDate === '25/10/2026' ? 'Hoy (25/10/2026)' : selectedBitacoraDate);
+                    : (selectedBitacoraDate === todayStr ? `Hoy (${todayStr})` : selectedBitacoraDate);
             }
             const entriesCount = dayLogs.filter(l => l.event.includes('ENTRADA')).length;
             const taxisCount = dayLogs.filter(l => l.event.includes('TAXI') || l.type.includes('PRE-AUTORIZADO')).length;
@@ -3379,7 +3538,7 @@
                 const logId = l.id || `LOG-IDX-${idx}`;
                 return `
                     <tr data-logid="${escapeHtml(logId)}" data-idx="${idx}" onclick="openLogDetailModal(this.dataset.logid, Number(this.dataset.idx))" class="hover:bg-zinc-800/60 cursor-pointer transition">
-                        <td class="py-3 px-3 font-mono text-zinc-300 font-semibold">${escapeHtml(l.date || '25/10/2026')}</td>
+                        <td class="py-3 px-3 font-mono text-zinc-300 font-semibold">${escapeHtml(l.date || todayStr)}</td>
                         <td class="py-3 px-3 font-mono text-zinc-400">${escapeHtml(l.time)}</td>
                         <td class="py-3 px-3">
                             <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badgeClass}">${escapeHtml(l.event)}</span>
@@ -3399,8 +3558,9 @@
         }
 
         function exportBitacoraCSV() {
+            const todayStr = getTodayFormatted();
             const dayLogs = auditLogs.filter(l => {
-                const lDate = l.date || '25/10/2026';
+                const lDate = l.date || todayStr;
                 return selectedBitacoraDate === 'TODOS' || lDate === selectedBitacoraDate;
             });
 
@@ -3412,7 +3572,7 @@
             const headers = ['ID', 'Fecha', 'Hora', 'Evento', 'Visitante', 'CI_Placa', 'Domicilio', 'Categoria', 'Guardia'];
             const rows = dayLogs.map(l => [
                 l.id || '',
-                l.date || '25/10/2026',
+                l.date || todayStr,
                 l.time || '',
                 `"${(l.event || '').replace(/"/g, '""')}"`,
                 `"${(l.visitor || '').replace(/"/g, '""')}"`,
@@ -3449,7 +3609,7 @@
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
                         <span class="text-zinc-400">Fecha y Hora Exacta:</span>
-                        <strong class="font-mono text-white">${escapeHtml(logItem.date || '25/10/2026')} — ${escapeHtml(logItem.time)}</strong>
+                        <strong class="font-mono text-white">${escapeHtml(logItem.date || getTodayFormatted())} — ${escapeHtml(logItem.time)}</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
                         <span class="text-zinc-400">Visitante / Identificación:</span>
@@ -3547,7 +3707,7 @@
                 visitorName: name,
                 ciPlaca: `${ci} | ${plate}`,
                 passType: 'VISITA SOCIAL',
-                validUntil: '26/10/26',
+                validUntil: getTomorrowShortFormatted(),
                 authBy: `${currentFamily} (Link Evento)`,
                 status: 'AFUERA',
                 identityVerified: false
@@ -3613,6 +3773,14 @@
                     });
                 }
             });
+
+            const validUntilEl = document.getElementById('validUntilInput');
+            if (validUntilEl) validUntilEl.value = getTomorrowShortFormatted();
+
+            const bitacoraDateEl = document.getElementById('bitacoraDateInput');
+            if (bitacoraDateEl) bitacoraDateEl.value = getTodayISO();
+
+            selectedBitacoraDate = getTodayFormatted();
 
             loadLocalState();
             syncCurrentHouseHeader();
