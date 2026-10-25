@@ -860,6 +860,53 @@
                 </div>
             </div>
 
+            <!-- APARTADO LISTA NEGRA: PERSONAS Y VEHÍCULOS CON INGRESO PROHIBIDO -->
+            <div id="adminBlacklistSection" class="bg-zinc-900 border border-red-500/30 rounded-2xl p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-ban text-red-400"></i>
+                            <span>Lista Negra — Personas y Vehículos con Ingreso Prohibido</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400">Si alguien registrado aquí intenta entrar con código QR o anotándose manualmente en Portería, saltará una alerta roja bloqueando su paso.</p>
+                    </div>
+                    <span id="adminBlacklistCountBadge" class="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30 shrink-0">
+                        0 Bloqueados
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <!-- Formulario Agregar a Lista Negra (5 cols) -->
+                    <form onsubmit="handleAdminAddBlacklist(event)" class="lg:col-span-5 bg-zinc-950 border border-red-500/30 rounded-xl p-4 space-y-2.5">
+                        <div class="text-xs font-extrabold text-red-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-slash"></i>
+                            <span>Bloquear Persona o Vehículo</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] text-zinc-300 block mb-1">Nombre Completo</label>
+                                <input type="text" id="blacklistNameInput" required placeholder="Ej. Mario Vargas" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-zinc-300 block mb-1">C.I. y/o Placa</label>
+                                <input type="text" id="blacklistCiInput" required placeholder="Ej. 5841200 SC" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-red-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-zinc-300 block mb-1">Motivo de la Prohibición (Lo verá el Guardia)</label>
+                            <input type="text" id="blacklistReasonInput" required placeholder="Ej. Ex-trabajador despedido / Incidente en Casa 12" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                        </div>
+                        <button type="submit" class="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow transition">
+                            <i class="fa-solid fa-ban"></i>
+                            <span>Prohibir Ingreso en Portería</span>
+                        </button>
+                    </form>
+
+                    <!-- Listado de Bloqueados (7 cols) -->
+                    <div id="adminBlacklistContainer" class="lg:col-span-7 space-y-2 max-h-[210px] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
             <!-- SECCIÓN B: BITÁCORA INTERACTIVA DE MOVIMIENTOS POR DÍA -->
             <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -1473,6 +1520,7 @@
         let passes = [];
         let fastPasses = [];
         let auditLogs = [];
+        let blacklist = [];
 
         function loadLocalState() {
             try {
@@ -1485,6 +1533,7 @@
                 if (Array.isArray(parsed.passes)) passes = parsed.passes;
                 if (Array.isArray(parsed.fastPasses)) fastPasses = parsed.fastPasses;
                 if (Array.isArray(parsed.auditLogs)) auditLogs = parsed.auditLogs;
+                if (Array.isArray(parsed.blacklist)) blacklist = parsed.blacklist;
             } catch (err) {
                 console.warn('No se pudo leer almacenamiento local:', err);
             }
@@ -1498,7 +1547,8 @@
                     houses,
                     passes,
                     fastPasses,
-                    auditLogs: auditLogs.slice(0, 150)
+                    auditLogs: auditLogs.slice(0, 150),
+                    blacklist
                 }));
                 const badge = document.getElementById('autoSaveStatusBadge');
                 if (badge) {
@@ -1521,7 +1571,8 @@
                     houses,
                     passes,
                     fastPasses,
-                    auditLogs
+                    auditLogs,
+                    blacklist
                 };
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -1556,6 +1607,7 @@
                     passes = Array.isArray(parsed.passes) ? parsed.passes : [];
                     fastPasses = Array.isArray(parsed.fastPasses) ? parsed.fastPasses : [];
                     auditLogs = Array.isArray(parsed.auditLogs) ? parsed.auditLogs : [];
+                    blacklist = Array.isArray(parsed.blacklist) ? parsed.blacklist : [];
                     selectedPassId = passes[0]?.id || '';
                     saveLocalState();
                     pushStateToCloud();
@@ -1731,6 +1783,7 @@
         function refreshAllViews() {
             renderLoginHouseOptions();
             renderAdminSecuritySection();
+            renderAdminBlacklist();
             updateMoraUI();
             renderVecinoPasses();
             renderVecinoFastPasses();
@@ -1863,6 +1916,87 @@
             updateAdminAndGuardLoginUI();
             renderAdminSecuritySection();
             showToast('🔐 Contraseña maestra de Administración blindada y actualizada');
+        }
+
+        function findBlacklistMatch(nameStr, ciPlacaStr) {
+            if (!Array.isArray(blacklist) || blacklist.length === 0) return null;
+            const normName = String(nameStr || '').toLowerCase().trim();
+            const normCi = String(ciPlacaStr || '').toLowerCase().trim();
+
+            return blacklist.find(item => {
+                const bName = String(item.name || '').toLowerCase().trim();
+                const bCi = String(item.ciPlaca || '').toLowerCase().trim();
+                const matchName = bName.length >= 3 && normName.length >= 3 && (normName.includes(bName) || bName.includes(normName));
+                const matchCi = bCi.length >= 3 && normCi.length >= 3 && (normCi.includes(bCi) || bCi.includes(normCi));
+                return matchName || matchCi;
+            }) || null;
+        }
+
+        function renderAdminBlacklist() {
+            const badge = document.getElementById('adminBlacklistCountBadge');
+            if (badge) {
+                badge.textContent = blacklist.length === 1 ? '1 Bloqueado' : `${blacklist.length} Bloqueados`;
+            }
+            const container = document.getElementById('adminBlacklistContainer');
+            if (!container) return;
+
+            if (blacklist.length === 0) {
+                container.innerHTML = `
+                    <div class="h-full min-h-[140px] flex items-center justify-center p-4 text-center text-xs text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                        No hay personas ni vehículos en la Lista Negra actualmente.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = blacklist.map(item => `
+                <div class="bg-zinc-950 border border-red-500/40 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">🚫 PROHIBIDO</span>
+                            <span class="text-xs font-bold text-white">${escapeHtml(item.name)}</span>
+                            <span class="text-[11px] font-mono text-amber-300">(${escapeHtml(item.ciPlaca)})</span>
+                        </div>
+                        <p class="text-[11px] text-red-200 mt-1">Motivo: ${escapeHtml(item.reason)} • <span class="text-zinc-500">Registrado el ${escapeHtml(item.date || getTodayFormatted())}</span></p>
+                    </div>
+                    <button type="button" data-blid="${escapeHtml(item.id)}" onclick="removeFromBlacklist(this.dataset.blid)" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 border border-zinc-800 text-[11px] font-bold shrink-0 transition">
+                        Levantar Bloqueo
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function handleAdminAddBlacklist(e) {
+            e.preventDefault();
+            const name = (document.getElementById('blacklistNameInput')?.value || '').trim();
+            const ciPlaca = (document.getElementById('blacklistCiInput')?.value || '').trim();
+            const reason = (document.getElementById('blacklistReasonInput')?.value || '').trim();
+            if (!name || !ciPlaca || !reason) return;
+
+            blacklist.unshift({
+                id: 'BL-' + Math.floor(1000 + Math.random() * 9000),
+                name,
+                ciPlaca,
+                reason,
+                date: getTodayFormatted()
+            });
+
+            document.getElementById('blacklistNameInput').value = '';
+            document.getElementById('blacklistCiInput').value = '';
+            document.getElementById('blacklistReasonInput').value = '';
+
+            saveLocalState();
+            pushStateToCloud();
+            renderAdminBlacklist();
+            showToast(`🚫 ${name} agregado a la Lista Negra de Portería`);
+        }
+
+        function removeFromBlacklist(blId) {
+            blacklist = blacklist.filter(item => item.id !== blId);
+            saveLocalState();
+            pushStateToCloud();
+            renderAdminBlacklist();
+            showToast('✅ Prohibición levantada de la Lista Negra');
         }
 
         let hasAuthenticatedSession = false;
@@ -2192,6 +2326,19 @@
             const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
 
             if (actionType === 'ENTRADA') {
+                const blockedItem = findBlacklistMatch(visitorName, ciPlaca);
+                if (blockedItem) {
+                    renderGuardDenial(
+                        `🚫 LISTA NEGRA: ${blockedItem.name.toUpperCase()}`,
+                        `Esta persona o vehículo tiene PROHIBIDO el ingreso al condominio por orden de Administración. Motivo: ${blockedItem.reason}`,
+                        `C.I./Placa bloqueada: ${blockedItem.ciPlaca}`
+                    );
+                    addAuditLog('ALERTA LISTA NEGRA (MANUAL)', visitorName, `Casa ${houseNum}`, category, currentGuardName, `Bloqueado: ${blockedItem.reason}`);
+                    pushStateToCloud();
+                    showToast('🚨 ALERTA: Persona registrada en Lista Negra (Ingreso Prohibido)');
+                    return;
+                }
+
                 const manualId = 'MANUAL-' + Math.floor(100 + Math.random() * 900);
                 const newManualPass = {
                     id: manualId,
@@ -2887,6 +3034,19 @@
                     identityVerified: true
                 };
                 passes.push(passObj);
+            }
+
+            // Verificar Lista Negra del condominio
+            const blockedMatch = findBlacklistMatch(passObj.visitorName, passObj.ciPlaca);
+            if (guardMode === 'ENTRADA' && blockedMatch) {
+                renderGuardDenial(
+                    `🚫 PERSONA EN LISTA NEGRA (${blockedMatch.name.toUpperCase()})`,
+                    `Esta persona o vehículo tiene PROHIBIDO el ingreso al condominio por orden de Administración. Motivo: ${blockedMatch.reason}`,
+                    `C.I./Placa bloqueada: ${blockedMatch.ciPlaca}`
+                );
+                addAuditLog('ALERTA LISTA NEGRA (QR)', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `Bloqueado: ${blockedMatch.reason}`);
+                pushStateToCloud();
+                return;
             }
 
             // Verificar mora del domicilio
