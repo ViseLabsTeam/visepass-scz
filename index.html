@@ -482,40 +482,52 @@
                 </button>
             </div>
 
-            <!-- 4 BOTONES GRANDES SUPERIORES PARA EL GUARDIA (CADA COSA EN SU PANTALLA, CERO CONFUSIÓN) -->
+            <!-- 4 BOTONES GRANDES SUPERIORES PARA EL GUARDIA (ORDEN: 1. Escanear, 2. Anotar, 3. Adentro, 4. Taxis) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-zinc-900 border border-zinc-800 p-2 rounded-2xl shadow-xl">
                 <button id="guardSubTabBtn-scan" type="button" onclick="setGuardSubTab('scan')" class="py-3.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-500 text-zinc-950 shadow-lg transition">
                     <i class="fa-solid fa-qrcode text-base"></i>
                     <span>1. Escanear QR</span>
                 </button>
-                <button id="guardSubTabBtn-taxis" type="button" onclick="setGuardSubTab('taxis')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
-                    <i class="fa-solid fa-motorcycle text-base text-amber-400"></i>
-                    <span>2. Taxis / Delivery</span>
-                    <span id="guardTaxisBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">0</span>
+                <button id="guardSubTabBtn-manual" type="button" onclick="setGuardSubTab('manual')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                    <i class="fa-solid fa-pen-to-square text-base text-amber-400"></i>
+                    <span>2. Anotar sin QR</span>
                 </button>
                 <button id="guardSubTabBtn-inside" type="button" onclick="setGuardSubTab('inside')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
                     <i class="fa-solid fa-users text-base text-sky-400"></i>
                     <span>3. Están Adentro</span>
                     <span id="guardInsideBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">0</span>
                 </button>
-                <button id="guardSubTabBtn-manual" type="button" onclick="setGuardSubTab('manual')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
-                    <i class="fa-solid fa-pen-to-square text-base text-purple-400"></i>
-                    <span>4. Anotar sin QR</span>
+                <button id="guardSubTabBtn-taxis" type="button" onclick="setGuardSubTab('taxis')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                    <i class="fa-solid fa-motorcycle text-base text-amber-400"></i>
+                    <span>4. Taxis / Delivery</span>
+                    <span id="guardTaxisBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">0</span>
                 </button>
             </div>
 
             <!-- ==============================================
-                 SUB-VISTA 1: ESCANEAR QR (LA PANTALLA PRINCIPAL ULTRA LIMPIA)
+                 SUB-VISTA 1: ESCANEAR QR (CON SELECTOR ENTRADA / SALIDA)
                  ============================================== -->
             <div id="guardSubView-scan" class="space-y-4">
+                <!-- SELECTOR DE ACCIÓN: ENTRADA (TRANCA INGRESO) O SALIDA (TRANCA EGRESO) -->
+                <div class="grid grid-cols-2 gap-2 p-1.5 bg-zinc-950 rounded-2xl border-2 border-zinc-800">
+                    <button id="guardScanModeBtn-ENTRADA" type="button" onclick="setGuardScanAction('ENTRADA')" class="py-3 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg transition">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-base"></i>
+                        <span>🟢 MARCAR ENTRADA</span>
+                    </button>
+                    <button id="guardScanModeBtn-SALIDA" type="button" onclick="setGuardScanAction('SALIDA')" class="py-3 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                        <span>🔵 MARCAR SALIDA</span>
+                    </button>
+                </div>
+
                 <!-- AVISO GIGANTE DE ESTADO (VERDE ENTRA / AZUL SALE / ROJO PROHIBIDO) -->
                 <div id="scanLiveBanner" class="rounded-2xl border-2 border-zinc-700 bg-zinc-950 px-4 py-3.5 flex items-center gap-3 transition-all duration-300">
                     <div id="scanLiveIcon" class="w-12 h-12 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center text-2xl shrink-0">
                         <i class="fa-solid fa-qrcode"></i>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div id="scanLiveTitle" class="text-base sm:text-lg font-black text-zinc-200 leading-tight">Listo para Escanear</div>
-                        <div id="scanLiveSub" class="text-xs text-zinc-400 font-semibold truncate">Toca el botón verde para encender la cámara y apunta al QR del visitante</div>
+                        <div id="scanLiveTitle" class="text-base sm:text-lg font-black text-zinc-200 leading-tight">Modo Entrada Activo</div>
+                        <div id="scanLiveSub" class="text-xs text-zinc-400 font-semibold truncate">Apunta la cámara al pase del visitante que llega a la tranca</div>
                     </div>
                 </div>
 
@@ -525,7 +537,7 @@
                         <!-- Botón Gigante de Cámara -->
                         <button id="cameraToggleBtn" type="button" onclick="toggleCameraScanner()" class="w-full py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/25 border-2 border-emerald-400 transition transform active:scale-95">
                             <i class="fa-solid fa-camera text-2xl"></i>
-                            <span>ENCENDER CÁMARA Y LEER QR</span>
+                            <span>ENCENDER CÁMARA PARA ENTRADA</span>
                         </button>
 
                         <!-- Visor de la Cámara -->
@@ -577,7 +589,7 @@
                                     🔴 ROJO: Prohibido
                                 </div>
                                 <div class="p-2.5 rounded-xl bg-sky-950/60 border border-sky-500/40 text-sky-300">
-                                    🔵 AZUL: Ya Salió
+                                    🔵 AZUL: Salida
                                 </div>
                             </div>
                         </div>
@@ -586,56 +598,14 @@
             </div>
 
             <!-- ==============================================
-                 SUB-VISTA 2: TAXIS Y DELIVERIES (MOTO / PEDIDOSYA)
-                 ============================================== -->
-            <div id="guardSubView-taxis" class="hidden space-y-4">
-                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                                <i class="fa-solid fa-motorcycle text-amber-400"></i>
-                                <span>Taxis y Deliveries Anunciados por Vecinos</span>
-                            </h3>
-                            <p class="text-xs text-zinc-400">Cuando llegue la moto o el taxi a la tranca, toca "Dejar Pasar".</p>
-                        </div>
-                        <span id="preAuthCountBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">0 EN ESPERA</span>
-                    </div>
-
-                    <div id="guardFastPassLiveBanner" class="p-0 border-0 bg-transparent">
-                        <div id="guardFastPassLiveList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==============================================
-                 SUB-VISTA 3: QUIÉN ESTÁ ADENTRO (PARA MARCAR SALIDA)
-                 ============================================== -->
-            <div id="guardSubView-inside" class="hidden space-y-4">
-                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                                <i class="fa-solid fa-users text-sky-400"></i>
-                                <span>Personas que Están ADENTRO del Condominio</span>
-                            </h3>
-                            <p class="text-xs text-zinc-400">Cuando salgan por la tranca, toca el botón azul "Marcar Salida".</p>
-                        </div>
-                        <span id="insideCounterBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">0 Adentro Ahora</span>
-                    </div>
-
-                    <div id="insideVisitorsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-                </div>
-            </div>
-
-            <!-- ==============================================
-                 SUB-VISTA 4: ANOTAR VISITANTE SIN QR (MANUAL)
+                 SUB-VISTA 2: ANOTAR VISITANTE SIN QR (MANUAL)
                  ============================================== -->
             <div id="guardSubView-manual" class="hidden space-y-4">
                 <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 max-w-xl mx-auto space-y-4">
                     <div>
                         <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
                             <i class="fa-solid fa-pen-to-square text-amber-400"></i>
-                            <span>Anotar Visitante sin Teléfono / sin QR</span>
+                            <span>2. Anotar Visitante sin Teléfono / sin QR</span>
                         </h3>
                         <p class="text-xs text-zinc-400">Pídele su Carnet y anótalo aquí para registrar su entrada.</p>
                     </div>
@@ -674,6 +644,48 @@
                             <span>Registrar Entrada Manual</span>
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 SUB-VISTA 3: QUIÉN ESTÁ ADENTRO (PARA MARCAR SALIDA)
+                 ============================================== -->
+            <div id="guardSubView-inside" class="hidden space-y-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-users text-sky-400"></i>
+                                <span>3. Personas que Están ADENTRO del Condominio</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400">Cuando salgan por la tranca, toca el botón azul "Marcar Salida".</p>
+                        </div>
+                        <span id="insideCounterBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">0 Adentro Ahora</span>
+                    </div>
+
+                    <div id="insideVisitorsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 SUB-VISTA 4: TAXIS Y DELIVERIES (MOTO / PEDIDOSYA)
+                 ============================================== -->
+            <div id="guardSubView-taxis" class="hidden space-y-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-motorcycle text-amber-400"></i>
+                                <span>4. Taxis y Deliveries Anunciados por Vecinos</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400">Cuando llegue la moto o el taxi a la tranca, toca "Dejar Pasar".</p>
+                        </div>
+                        <span id="preAuthCountBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">0 EN ESPERA</span>
+                    </div>
+
+                    <div id="guardFastPassLiveBanner" class="p-0 border-0 bg-transparent">
+                        <div id="guardFastPassLiveList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                    </div>
                 </div>
             </div>
             <span id="guardCurrentModeLabel" class="hidden">ENTRADA</span>
@@ -3521,10 +3533,11 @@
            7. TERMINAL DE PORTERÍA Y LECTURA QR (SÚPER SIMPLE PARA GUARDIAS)
            ========================================== */
         let currentGuardSubTab = 'scan';
+        let guardScanAction = 'ENTRADA'; // 'ENTRADA' | 'SALIDA'
 
         function setGuardSubTab(tab) {
             currentGuardSubTab = tab || 'scan';
-            const tabs = ['scan', 'taxis', 'inside', 'manual'];
+            const tabs = ['scan', 'manual', 'inside', 'taxis'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`guardSubTabBtn-${t}`);
                 const view = document.getElementById(`guardSubView-${t}`);
@@ -3548,6 +3561,31 @@
                 renderGuardPreAuthScreen();
             } else if (currentGuardSubTab === 'inside') {
                 renderInsideVisitors();
+            }
+        }
+
+        function setGuardScanAction(action) {
+            guardScanAction = action || 'ENTRADA';
+            const btnE = document.getElementById('guardScanModeBtn-ENTRADA');
+            const btnS = document.getElementById('guardScanModeBtn-SALIDA');
+            const cameraBtn = document.getElementById('cameraToggleBtn');
+
+            if (guardScanAction === 'ENTRADA') {
+                if (btnE) btnE.className = "py-3 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg transition";
+                if (btnS) btnS.className = "py-3 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition";
+                if (cameraBtn && !isCameraRunning) {
+                    cameraBtn.className = "w-full py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/25 border-2 border-emerald-400 transition transform active:scale-95";
+                    cameraBtn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA PARA ENTRADA</span>`;
+                }
+                showScanBanner('LISTO', 'Modo Entrada Activo', 'Apunta la cámara al pase del visitante que llega a la tranca');
+            } else {
+                if (btnE) btnE.className = "py-3 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition";
+                if (btnS) btnS.className = "py-3 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-sky-600 text-white shadow-lg transition";
+                if (cameraBtn && !isCameraRunning) {
+                    cameraBtn.className = "w-full py-5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-sky-600/25 border-2 border-sky-400 transition transform active:scale-95";
+                    cameraBtn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA PARA SALIDA</span>`;
+                }
+                showScanBanner('LISTO', 'Modo Salida Activo', 'Apunta la cámara al pase del visitante que se va');
             }
         }
 
@@ -3835,12 +3873,46 @@
                 return;
             }
 
+            // 1. MODO SALIDA (Tranca de Salida / Despacho)
+            if (guardScanAction === 'SALIDA') {
+                if (passObj.status === 'ADENTRO') {
+                    passObj.status = 'AFUERA';
+                    document.getElementById('workerOvertimeAlert')?.classList.add('hidden');
+                    showScanBanner('SALE', `🚪 SALE — CASA ${passObj.house}`, `${passObj.visitorName} • 🪪 ${passObj.ciPlaca || 'S/D'}`);
+                    screen.className = "h-full min-h-[380px] rounded-2xl border-4 border-sky-400 bg-sky-950/95 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+                    screen.innerHTML = `
+                        <div class="w-20 h-20 rounded-full bg-sky-400 text-zinc-950 flex items-center justify-center text-5xl mb-3 font-black shadow-lg">
+                            <i class="fa-solid fa-door-open"></i>
+                        </div>
+                        <span class="text-sm font-black uppercase tracking-widest bg-sky-400 text-zinc-950 px-4 py-1 rounded-full">
+                            🚪 SALIDA REGISTRADA — LIBERAR PASE
+                        </span>
+                        <h2 class="text-3xl sm:text-4xl font-black text-white mt-3">${escapeHtml(passObj.visitorName)}</h2>
+                        <div class="mt-2 px-5 py-2 rounded-2xl bg-white text-zinc-950 font-black text-2xl tracking-tight shadow-xl">
+                            SALIÓ DE: CASA ${escapeHtml(passObj.house)}
+                        </div>
+                        <p class="text-sm text-sky-200 mt-2 font-mono">C.I. / Placa: ${escapeHtml(passObj.ciPlaca)} • ${escapeHtml(passObj.passType)}</p>
+                    `;
+                    addAuditLog('SALIDA QR', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, passObj.ciPlaca);
+                    pushStateToCloud();
+                    return;
+                } else {
+                    renderGuardDenial(
+                        'ESTA PERSONA NO FIGURA ADENTRO',
+                        `Este pase no tiene ingreso activo en este momento (figura AFUERA). No se puede registrar su salida.`,
+                        `${passObj.visitorName} • Casa ${passObj.house} • C.I./Placa: ${passObj.ciPlaca}`
+                    );
+                    return;
+                }
+            }
+
+            // 2. MODO ENTRADA (Tranca de Ingreso)
             // Verificar mora del domicilio
             const destHouse = houses.find(h => h.number === passObj.house);
-            if (passObj.status !== 'ADENTRO' && destHouse && destHouse.isMorosa) {
+            if (destHouse && destHouse.isMorosa) {
                 renderGuardDenial(
                     `CASA ${passObj.house} CON ACCESO QR RESTRINGIDO`,
-                    `La Casa ${passObj.house} (${destHouse.family}) tiene bloqueado el ingreso rápido con QR. Debes anunciar a la visita por citófono.`,
+                    `La Casa ${passObj.house} (${destHouse.family}) tiene bloqueado el ingreso rápido con QR por expensas pendientes. Debes anunciar a la visita por citófono.`,
                     destHouse.moraNote || 'Restricción de Administración'
                 );
                 addAuditLog('BLOQUEO POR MORA', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `${passObj.ciPlaca} (${destHouse.moraNote || 'Deudor'})`);
@@ -3848,36 +3920,19 @@
                 return;
             }
 
-            // SI LA PERSONA YA ESTÁ ADENTRO: SALIDA AUTOMÁTICA al volver a escanear su QR
+            // CANDADO ANTI-PASSBACK ESTRICTO: Si ya está adentro, ¡NO PUEDE ENTRAR DE NUEVO!
             if (passObj.status === 'ADENTRO') {
-                const secondsInside = passObj.entryTs ? (Date.now() - passObj.entryTs) / 1000 : 9999;
-                if (guardMode === 'SALIDA' || secondsInside >= 15) {
-                    quickCheckoutVisitor(passObj.id);
-                    return;
-                }
-                showScanBanner('AVISO', 'YA ENTRÓ HACE UN MOMENTO', `${passObj.visitorName} • Casa ${passObj.house}`);
-                screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-sky-400 bg-sky-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
-                screen.innerHTML = `
-                    <div class="w-16 h-16 rounded-full bg-sky-400 text-zinc-950 flex items-center justify-center text-3xl mb-2 font-black shadow-lg">
-                        <i class="fa-solid fa-door-open"></i>
-                    </div>
-                    <span class="text-xs font-mono uppercase tracking-widest bg-black/40 text-sky-200 px-3 py-1 rounded-full font-bold">
-                        ESTA PERSONA YA ESTÁ ADENTRO DESDE LAS ${escapeHtml(passObj.entryTime || 'HOY')}
-                    </span>
-                    <h2 class="text-3xl font-black text-white mt-2">${escapeHtml(passObj.visitorName)}</h2>
-                    <p class="text-base font-bold text-sky-200 mt-1">Casa ${escapeHtml(passObj.house)} • C.I./Placa: ${escapeHtml(passObj.ciPlaca)}</p>
-                    <p class="text-xs text-zinc-300 max-w-md mt-2">
-                        ¿Está saliendo del condominio en este momento? Toca el botón azul para registrar su salida:
-                    </p>
-                    <button type="button" data-passid="${escapeHtml(passObj.id)}" onclick="quickCheckoutVisitor(this.dataset.passid)" class="mt-4 px-6 py-4 rounded-2xl bg-sky-400 hover:bg-sky-300 text-zinc-950 font-black text-base uppercase tracking-wider shadow-xl flex items-center gap-2">
-                        <i class="fa-solid fa-door-open"></i>
-                        <span>SÍ, MARCAR SALIDA AHORA</span>
-                    </button>
-                `;
+                renderGuardDenial(
+                    '🚫 NO PUEDE ENTRAR — YA SE ENCUENTRA ADENTRO',
+                    `Esta persona ya registró su ingreso a las ${passObj.entryTime || 'horas previas'} y figura actualmente DENTRO del condominio. No se permite volver a entrar con el mismo pase o captura de pantalla duplicada.`,
+                    `ID: ${passObj.id} • ${passObj.visitorName} • C.I./Placa: ${passObj.ciPlaca}`
+                );
+                addAuditLog('BLOQUEO REINGRESO (QR DUPLICADO)', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `${passObj.ciPlaca} (Ya estaba adentro desde ${passObj.entryTime})`);
+                pushStateToCloud();
                 return;
             }
 
-            // ACCESO AUTORIZADO (VERDE GIGANTE Y CLARO PARA EL GUARDIA)
+            // ENTRADA AUTORIZADA (VERDE GIGANTE)
             passObj.status = 'ADENTRO';
             const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             passObj.entryTime = nowStr;
@@ -3895,7 +3950,7 @@
                 </div>
             ` : '';
 
-            screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
+            screen.className = "h-full min-h-[380px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
             screen.innerHTML = `
                 <div class="w-20 h-20 rounded-full bg-emerald-400 text-zinc-950 flex items-center justify-center text-5xl mb-2 font-black shadow-lg">
                     <i class="fa-solid fa-check"></i>
@@ -4087,7 +4142,7 @@
                 html5QrScanner.stop().then(() => {
                     isCameraRunning = false;
                     wrapper.classList.add('hidden');
-                    btn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA Y LEER QR</span>`;
+                    btn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA PARA ${guardScanAction === 'SALIDA' ? 'SALIDA' : 'ENTRADA'}</span>`;
                 }).catch(() => {});
                 return;
             }
@@ -4111,7 +4166,7 @@
             }).catch(() => {
                 showToast('ℹ️ Cámara no detectada. Puedes tocar el nombre del visitante en la lista de abajo.');
                 wrapper.classList.add('hidden');
-                btn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA Y LEER QR</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-camera text-2xl"></i> <span>ENCENDER CÁMARA PARA ${guardScanAction === 'SALIDA' ? 'SALIDA' : 'ENTRADA'}</span>`;
             });
         }
 
