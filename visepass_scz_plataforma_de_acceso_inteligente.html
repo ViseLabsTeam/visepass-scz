@@ -463,9 +463,9 @@
         </section>
 
         <!-- ==========================================
-             VISTA 3: TERMINAL DE PORTERÍA / GUARDIA (SÚPER SIMPLE E INTUITIVA)
+             VISTA 3: TERMINAL DE PORTERÍA / GUARDIA (100% SIMPLE Y ULTRA INTUITIVA)
              ========================================== -->
-        <section id="view-guardia" class="hidden space-y-5">
+        <section id="view-guardia" class="hidden space-y-4">
             <!-- Alerta Roja si un Trabajador/Obrero sigue adentro después de las 18:00 -->
             <div id="workerOvertimeAlert" class="hidden bg-red-600 text-white rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl animate-pulse-fast">
                 <div class="flex items-center gap-3">
@@ -482,183 +482,201 @@
                 </button>
             </div>
 
-            <!-- Cabecera Simple de Portería (Sin modos confusos) -->
-            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl shrink-0">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg sm:text-xl font-black text-white leading-tight">Control de Portería — Fácil en 1 Paso</h2>
-                        <p class="text-xs text-zinc-400">Solo escanea el QR del visitante o anótalo abajo si viene sin código.</p>
-                    </div>
-                </div>
-                <!-- Indicadores claros de estado -->
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <span id="guardCurrentModeLabel" class="hidden">ENTRADA</span>
-                    <div class="px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-black flex items-center gap-2">
-                        <i class="fa-solid fa-motorcycle"></i>
-                        <span id="preAuthCountBadge">0 EN ESPERA</span>
-                    </div>
-                    <div class="px-3.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-black flex items-center gap-2">
-                        <i class="fa-solid fa-users"></i>
-                        <span id="insideCounterBadge">0 Adentro Ahora</span>
-                    </div>
-                </div>
+            <!-- 4 BOTONES GRANDES SUPERIORES PARA EL GUARDIA (CADA COSA EN SU PANTALLA, CERO CONFUSIÓN) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-zinc-900 border border-zinc-800 p-2 rounded-2xl shadow-xl">
+                <button id="guardSubTabBtn-scan" type="button" onclick="setGuardSubTab('scan')" class="py-3.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-500 text-zinc-950 shadow-lg transition">
+                    <i class="fa-solid fa-qrcode text-base"></i>
+                    <span>1. Escanear QR</span>
+                </button>
+                <button id="guardSubTabBtn-taxis" type="button" onclick="setGuardSubTab('taxis')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                    <i class="fa-solid fa-motorcycle text-base text-amber-400"></i>
+                    <span>2. Taxis / Delivery</span>
+                    <span id="guardTaxisBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">0</span>
+                </button>
+                <button id="guardSubTabBtn-inside" type="button" onclick="setGuardSubTab('inside')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                    <i class="fa-solid fa-users text-base text-sky-400"></i>
+                    <span>3. Están Adentro</span>
+                    <span id="guardInsideBadge" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400">0</span>
+                </button>
+                <button id="guardSubTabBtn-manual" type="button" onclick="setGuardSubTab('manual')" class="py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                    <i class="fa-solid fa-pen-to-square text-base text-purple-400"></i>
+                    <span>4. Anotar sin QR</span>
+                </button>
             </div>
 
-            <!-- AVISO AUTOMÁTICO DE TAXIS / DELIVERIES ANUNCIADOS POR VECINOS -->
-            <div id="guardFastPassLiveBanner" class="bg-amber-950/30 border-2 border-amber-500/40 rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
-                        <i class="fa-solid fa-motorcycle text-lg"></i>
-                        <span>🚕 Taxis y Deliveries Anunciados por Vecinos</span>
-                    </h3>
-                    <span class="text-[11px] font-bold text-amber-200/80">Toca "Dejar Pasar" cuando llegue a la tranca</span>
+            <!-- ==============================================
+                 SUB-VISTA 1: ESCANEAR QR (LA PANTALLA PRINCIPAL ULTRA LIMPIA)
+                 ============================================== -->
+            <div id="guardSubView-scan" class="space-y-4">
+                <!-- AVISO GIGANTE DE ESTADO (VERDE ENTRA / AZUL SALE / ROJO PROHIBIDO) -->
+                <div id="scanLiveBanner" class="rounded-2xl border-2 border-zinc-700 bg-zinc-950 px-4 py-3.5 flex items-center gap-3 transition-all duration-300">
+                    <div id="scanLiveIcon" class="w-12 h-12 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center text-2xl shrink-0">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div id="scanLiveTitle" class="text-base sm:text-lg font-black text-zinc-200 leading-tight">Listo para Escanear</div>
+                        <div id="scanLiveSub" class="text-xs text-zinc-400 font-semibold truncate">Toca el botón verde para encender la cámara y apunta al QR del visitante</div>
+                    </div>
                 </div>
-                <div id="guardFastPassLiveList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-            </div>
 
-            <!-- ZONA PRINCIPAL: 1. ESCÁNER QR (IZQUIERDA) + 2. SEMÁFORO GIGANTE (DERECHA) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                <!-- PASO 1: Botón Único Gigante de Cámara QR + Lista de Pases del Día (5 cols) -->
-                <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                            <span class="w-5 h-5 rounded-full bg-emerald-500 text-zinc-950 inline-flex items-center justify-center text-xs font-black">1</span>
-                            <span>ESCANEAR PASE QR</span>
-                        </span>
-                        <span class="text-[11px] text-zinc-400 font-semibold">Entrada / Salida Automática</span>
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    <!-- Columna Izquierda: Cámara (5 cols) -->
+                    <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                        <!-- Botón Gigante de Cámara -->
+                        <button id="cameraToggleBtn" type="button" onclick="toggleCameraScanner()" class="w-full py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/25 border-2 border-emerald-400 transition transform active:scale-95">
+                            <i class="fa-solid fa-camera text-2xl"></i>
+                            <span>ENCENDER CÁMARA Y LEER QR</span>
+                        </button>
 
-                    <!-- BOTÓN ÚNICO GIGANTE PARA ENCENDER CÁMARA -->
-                    <button id="cameraToggleBtn" type="button" onclick="toggleCameraScanner()" class="w-full py-5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/25 border-2 border-emerald-400 transition transform active:scale-95">
-                        <i class="fa-solid fa-camera text-2xl"></i>
-                        <span>ENCENDER CÁMARA Y LEER QR</span>
-                    </button>
-
-                    <!-- AVISO GIGANTE ARRIBA DE LA CÁMARA: ENTRA / SALE / PROHIBIDO -->
-                    <div id="scanLiveBanner" class="rounded-2xl border-2 border-zinc-700 bg-zinc-950 px-4 py-3 flex items-center gap-3 transition-all duration-300">
-                        <div id="scanLiveIcon" class="w-12 h-12 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center text-2xl shrink-0">
-                            <i class="fa-solid fa-qrcode"></i>
+                        <!-- Visor de la Cámara -->
+                        <div id="cameraReaderWrapper" class="hidden space-y-2">
+                            <div id="scannerCooldownBanner" class="hidden bg-amber-500 text-zinc-950 font-black text-xs px-3 py-2 rounded-xl flex items-center justify-between">
+                                <span>⏳ Espera 5 segundos para el siguiente QR...</span>
+                                <span id="cooldownSecondsText" class="font-mono text-sm">5s</span>
+                            </div>
+                            <div id="qr-reader" class="w-full rounded-2xl overflow-hidden border-2 border-emerald-400 bg-black"></div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div id="scanLiveTitle" class="text-base font-black text-zinc-300 leading-tight">Esperando código QR...</div>
-                            <div id="scanLiveSub" class="text-xs text-zinc-500 font-semibold truncate">Apunta la cámara al pase del visitante</div>
-                        </div>
-                    </div>
 
-                    <!-- Visor de Cámara Web / Celular + Banner de Pausa de 5 Segundos -->
-                    <div id="cameraReaderWrapper" class="hidden space-y-2">
-                        <div id="scannerCooldownBanner" class="hidden bg-amber-500 text-zinc-950 font-black text-xs px-3 py-2 rounded-xl flex items-center justify-between">
-                            <span>⏳ Espera 5 segundos para el siguiente QR...</span>
-                            <span id="cooldownSecondsText" class="font-mono text-sm">5s</span>
-                        </div>
-                        <div id="qr-reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500 bg-black"></div>
-                    </div>
-
-                    <!-- Lista de Pases Autorizados Hoy (Por si la pantalla del visitante tiene mucho brillo o no enfoca) -->
-                    <div class="pt-3 border-t border-zinc-800 space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-zinc-200 flex items-center gap-1.5">
-                                <i class="fa-solid fa-list-check text-purple-400"></i>
-                                <span>Pases QR del Día (Toca el nombre para validar):</span>
-                            </span>
-                        </div>
-                        <form onsubmit="handleManualTokenSubmit(event)" class="flex gap-2">
-                            <input type="text" id="manualTokenInput" placeholder="Buscar por código o pistola USB..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs shrink-0">
-                                Buscar
+                        <!-- Botón Plegable: Buscar pase por nombre si la cámara no enfoca -->
+                        <div class="pt-2 border-t border-zinc-800">
+                            <button type="button" onclick="toggleGuardFallbackList()" class="w-full py-2.5 px-3 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 text-xs font-bold flex items-center justify-between transition">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass text-purple-400"></i>
+                                    <span>¿Problemas con la cámara? Buscar por Nombre</span>
+                                </span>
+                                <i id="guardFallbackCaret" class="fa-solid fa-chevron-down text-xs"></i>
                             </button>
-                        </form>
-                        <div id="guardQuickSimButtons" class="grid grid-cols-1 gap-2 max-h-[230px] overflow-y-auto pr-1"></div>
-                    </div>
-                </div>
 
-                <!-- RESULTADO GIGANTE SEMÁFORO (7 cols) -->
-                <div class="lg:col-span-7">
-                    <div id="guardResultScreen" class="h-full min-h-[360px] rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center">
-                        <div class="w-20 h-20 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-4xl mb-4">
-                            <i class="fa-solid fa-qrcode"></i>
+                            <div id="guardFallbackListWrapper" class="hidden mt-3 space-y-2">
+                                <form onsubmit="handleManualTokenSubmit(event)" class="flex gap-2">
+                                    <input type="text" id="manualTokenInput" placeholder="Nombre de la visita o código..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                                    <button type="submit" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0">
+                                        Buscar
+                                    </button>
+                                </form>
+                                <div id="guardQuickSimButtons" class="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-1"></div>
+                            </div>
                         </div>
-                        <h2 class="text-2xl font-black text-white">Listo para Recibir Visitantes</h2>
-                        <p class="text-sm text-zinc-400 max-w-md mt-2 leading-relaxed">
-                            Toca el botón verde <strong>"ENCENDER CÁMARA Y LEER QR"</strong> o toca el nombre del invitado en la lista de la izquierda.
-                        </p>
-                        <div class="mt-5 grid grid-cols-3 gap-2.5 w-full max-w-md text-[11px] font-bold">
-                            <div class="p-2.5 rounded-xl bg-emerald-950/50 border border-emerald-500/30 text-emerald-300">
-                                🟢 VERDE = Dejar Pasar
+                    </div>
+
+                    <!-- Columna Derecha: Resultado Semáforo Gigante (7 cols) -->
+                    <div class="lg:col-span-7">
+                        <div id="guardResultScreen" class="h-full min-h-[380px] rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center">
+                            <div class="w-20 h-20 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-4xl mb-4">
+                                <i class="fa-solid fa-qrcode"></i>
                             </div>
-                            <div class="p-2.5 rounded-xl bg-red-950/50 border border-red-500/30 text-red-300">
-                                🔴 ROJO = Prohibido
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-sky-950/50 border border-sky-500/30 text-sky-300">
-                                🔵 AZUL = Salió
+                            <h2 class="text-2xl font-black text-white">Listo para Recibir Visitantes</h2>
+                            <p class="text-sm text-zinc-400 max-w-md mt-2 leading-relaxed">
+                                Toca el botón verde <strong>"ENCENDER CÁMARA"</strong> y apunta al teléfono de la visita.
+                            </p>
+                            <div class="mt-6 grid grid-cols-3 gap-2.5 w-full max-w-md text-xs font-bold">
+                                <div class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300">
+                                    🟢 VERDE: Deja Pasar
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300">
+                                    🔴 ROJO: Prohibido
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-sky-950/60 border border-sky-500/40 text-sky-300">
+                                    🔵 AZUL: Ya Salió
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ZONA INFERIOR EN 2 COLUMNAS GRANDES Y SIMPLES: 2. SALIDAS + 3. ANOTAR SIN QR -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                <!-- PASO 2: QUIÉN ESTÁ ADENTRO (CON BOTÓN GRANDE "MARCAR SALIDA") (7 cols) -->
-                <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+            <!-- ==============================================
+                 SUB-VISTA 2: TAXIS Y DELIVERIES (MOTO / PEDIDOSYA)
+                 ============================================== -->
+            <div id="guardSubView-taxis" class="hidden space-y-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-base font-black text-white flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full bg-sky-500 text-zinc-950 inline-flex items-center justify-center text-xs font-black">2</span>
-                            <span>Personas ADENTRO Ahora (Toca "Marcar Salida" al irse)</span>
-                        </h3>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-motorcycle text-amber-400"></i>
+                                <span>Taxis y Deliveries Anunciados por Vecinos</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400">Cuando llegue la moto o el taxi a la tranca, toca "Dejar Pasar".</p>
+                        </div>
+                        <span id="preAuthCountBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">0 EN ESPERA</span>
                     </div>
-                    <div id="insideVisitorsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-                </div>
 
-                <!-- PASO 3: ANOTAR VISITANTE SIN QR / SIN TELÉFONO (5 cols) -->
-                <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-black text-white flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full bg-amber-500 text-zinc-950 inline-flex items-center justify-center text-xs font-black">3</span>
-                            <span>Anotar Visitante sin QR (Manual)</span>
-                        </h3>
+                    <div id="guardFastPassLiveBanner" class="p-0 border-0 bg-transparent">
+                        <div id="guardFastPassLiveList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                     </div>
-                    <p class="text-xs text-zinc-400">
-                        Si el visitante no trae código QR, pídele su Carnet y anótalo aquí:
-                    </p>
-                    <form onsubmit="handleGuardManualRecordSubmit(event)" class="space-y-3">
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 SUB-VISTA 3: QUIÉN ESTÁ ADENTRO (PARA MARCAR SALIDA)
+                 ============================================== -->
+            <div id="guardSubView-inside" class="hidden space-y-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-users text-sky-400"></i>
+                                <span>Personas que Están ADENTRO del Condominio</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400">Cuando salgan por la tranca, toca el botón azul "Marcar Salida".</p>
+                        </div>
+                        <span id="insideCounterBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">0 Adentro Ahora</span>
+                    </div>
+
+                    <div id="insideVisitorsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 SUB-VISTA 4: ANOTAR VISITANTE SIN QR (MANUAL)
+                 ============================================== -->
+            <div id="guardSubView-manual" class="hidden space-y-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 max-w-xl mx-auto space-y-4">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                            <span>Anotar Visitante sin Teléfono / sin QR</span>
+                        </h3>
+                        <p class="text-xs text-zinc-400">Pídele su Carnet y anótalo aquí para registrar su entrada.</p>
+                    </div>
+
+                    <form onsubmit="handleGuardManualRecordSubmit(event)" class="space-y-3.5">
                         <input type="hidden" id="manualGuardActionType" value="ENTRADA">
-                        <div class="grid grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-[11px] font-bold text-zinc-300 block mb-1">¿A qué Casa va?</label>
+                                <label class="text-xs font-bold text-zinc-300 block mb-1">¿A qué Casa va?</label>
                                 <input type="text" id="manualGuardHouse" required placeholder="Ej. 30" list="manualGuardHousesDatalist" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
                                 <datalist id="manualGuardHousesDatalist"></datalist>
                             </div>
                             <div>
-                                <label class="text-[11px] font-bold text-zinc-300 block mb-1">Motivo de Visita</label>
+                                <label class="text-xs font-bold text-zinc-300 block mb-1">Motivo de Visita</label>
                                 <select id="manualGuardCategory" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
-                                    <option value="VISITA SOCIAL">Visita Familiar / Amigo</option>
-                                    <option value="PROVEEDOR / OBRA">Trabajador / Técnico</option>
+                                    <option value="VISITA SOCIAL">Visita Social</option>
+                                    <option value="PROVEEDOR / OBRA">Proveedor / Técnico</option>
                                     <option value="PERSONAL HOGAR">Personal del Hogar</option>
                                     <option value="TAXI / DELIVERY">Taxi / Delivery</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            <div>
-                                <label class="text-[11px] font-bold text-zinc-300 block mb-1">Nombre y Apellido</label>
-                                <input type="text" id="manualGuardVisitorName" required placeholder="Ej. Juan Pérez" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-zinc-300 block mb-1">Carnet (C.I.) y/o Placa</label>
-                                <input type="text" id="manualGuardCiPlaca" required placeholder="Ej. 5841203 o 4521-ABC" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
-                            </div>
+
+                        <div>
+                            <label class="text-xs font-bold text-zinc-300 block mb-1">Nombre Completo del Visitante</label>
+                            <input type="text" id="manualGuardVisitorName" required placeholder="Ej. Carlos Mendoza" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
                         </div>
-                        <button type="submit" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-user-check"></i>
+
+                        <div>
+                            <label class="text-xs font-bold text-zinc-300 block mb-1">Carnet de Identidad (C.I.) o Placa del Vehículo</label>
+                            <input type="text" id="manualGuardCiPlaca" required placeholder="Ej. 6821345 SC o Placa 4120-BGT" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-sm uppercase tracking-wider shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-circle-check text-base"></i>
                             <span>Registrar Entrada Manual</span>
                         </button>
                     </form>
                 </div>
             </div>
+            <span id="guardCurrentModeLabel" class="hidden">ENTRADA</span>
         </section>
 
         <!-- ==========================================
@@ -2609,6 +2627,7 @@
 
             document.getElementById('manualGuardVisitorName').value = '';
             document.getElementById('manualGuardCiPlaca').value = '';
+            setGuardSubTab('scan');
             pushStateToCloud();
         }
 
@@ -2694,6 +2713,7 @@
             if (tabName === 'wallet') {
                 renderSelectedWalletCard();
             } else if (tabName === 'guardia') {
+                setGuardSubTab(currentGuardSubTab || 'scan');
                 renderGuardQuickButtons();
                 renderInsideVisitors();
                 renderGuardPreAuthScreen();
@@ -2923,9 +2943,13 @@
                             <p class="text-xs text-zinc-400">C.I./Placa: ${escapeHtml(p.ciPlaca)} • Válido hasta: ${escapeHtml(p.validUntil)}</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" data-passid="${escapeHtml(p.id)}" onclick="openDirectAppleWallet(this.dataset.passid)" class="px-3 py-2 rounded-xl bg-black hover:bg-zinc-900 border border-white/25 text-white font-bold text-xs flex items-center gap-1.5 shadow" title="Guardar en Apple Wallet">
+                                <i class="fa-brands fa-apple text-sm"></i>
+                                <span>Apple Wallet</span>
+                            </button>
                             <button type="button" data-passid="${escapeHtml(p.id)}" onclick="openPassInWalletView(this.dataset.passid)" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
                                 <i class="fa-solid fa-qrcode"></i>
-                                <span>Abrir Tarjeta QR</span>
+                                <span>Ver Tarjeta QR</span>
                             </button>
                             <button type="button" data-passid="${escapeHtml(p.id)}" onclick="revokePass(this.dataset.passid)" class="p-2 rounded-xl bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-300 border border-zinc-800 transition" title="Anular Pase">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
@@ -3416,6 +3440,11 @@
             downloadPassCardImage();
         }
 
+        function openDirectAppleWallet(passId) {
+            if (passId) selectedPassId = passId;
+            openAppleWalletModal();
+        }
+
         function openAppleWalletModal() {
             const passObj = getActivePassForCurrentUser();
             if (!passObj) {
@@ -3491,6 +3520,51 @@
         /* ==========================================
            7. TERMINAL DE PORTERÍA Y LECTURA QR (SÚPER SIMPLE PARA GUARDIAS)
            ========================================== */
+        let currentGuardSubTab = 'scan';
+
+        function setGuardSubTab(tab) {
+            currentGuardSubTab = tab || 'scan';
+            const tabs = ['scan', 'taxis', 'inside', 'manual'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`guardSubTabBtn-${t}`);
+                const view = document.getElementById(`guardSubView-${t}`);
+                if (view) {
+                    if (t === currentGuardSubTab) {
+                        view.classList.remove('hidden');
+                    } else {
+                        view.classList.add('hidden');
+                    }
+                }
+                if (btn) {
+                    if (t === currentGuardSubTab) {
+                        btn.className = "py-3.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-emerald-500 text-zinc-950 shadow-lg transition";
+                    } else {
+                        btn.className = "py-3.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition";
+                    }
+                }
+            });
+
+            if (currentGuardSubTab === 'taxis') {
+                renderGuardPreAuthScreen();
+            } else if (currentGuardSubTab === 'inside') {
+                renderInsideVisitors();
+            }
+        }
+
+        function toggleGuardFallbackList() {
+            const el = document.getElementById('guardFallbackListWrapper');
+            const caret = document.getElementById('guardFallbackCaret');
+            if (!el) return;
+            const isHidden = el.classList.contains('hidden');
+            if (isHidden) {
+                el.classList.remove('hidden');
+                if (caret) caret.className = "fa-solid fa-chevron-up text-xs";
+            } else {
+                el.classList.add('hidden');
+                if (caret) caret.className = "fa-solid fa-chevron-down text-xs";
+            }
+        }
+
         let scanBannerResetTimer = null;
         let guardAudioCtx = null;
 
@@ -3693,6 +3767,7 @@
         }
 
         function processScannedQrToken(rawToken) {
+            setGuardSubTab('scan');
             const screen = document.getElementById('guardResultScreen');
 
             if (!rawToken || !rawToken.startsWith('VISEPASS|')) {
@@ -3876,19 +3951,26 @@
             if (badgeEl) {
                 badgeEl.textContent = pending.length === 1 ? '1 TAXI/DELIVERY ANUNCIADO' : `${pending.length} TAXIS/DELIVERIES`;
             }
+            const taxisBadge = document.getElementById('guardTaxisBadge');
+            if (taxisBadge) {
+                taxisBadge.textContent = pending.length;
+                taxisBadge.className = pending.length > 0
+                    ? "ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-amber-400 text-zinc-950 animate-bounce"
+                    : "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400";
+            }
 
             const banner = document.getElementById('guardFastPassLiveBanner');
             const listEl = document.getElementById('guardFastPassLiveList');
             if (!listEl || !banner) return;
 
             if (pending.length === 0) {
-                banner.className = "bg-zinc-900 border border-zinc-800 rounded-2xl p-3.5 flex items-center justify-between";
-                listEl.className = "hidden";
-                listEl.innerHTML = '';
+                banner.className = "bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center";
+                listEl.className = "block text-xs text-zinc-400 italic py-2";
+                listEl.innerHTML = 'No hay taxis ni deliveries anunciados por vecinos en este momento.';
                 return;
             }
 
-            banner.className = "bg-amber-950/40 border-2 border-amber-400 rounded-2xl p-4 space-y-3 shadow-xl";
+            banner.className = "p-0 border-0 bg-transparent";
             listEl.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
             listEl.innerHTML = pending.map(f => `
                 <div class="bg-zinc-950 border-2 border-amber-400/60 rounded-xl p-4 flex items-center justify-between gap-3 shadow-lg">
@@ -3909,6 +3991,7 @@
             const f = fastPasses.find(item => item.id === fastId);
             if (!f) return;
             f.status = 'INGRESÓ';
+            setGuardSubTab('scan');
             showScanBanner('ENTRA', `✅ ENTRA → CASA ${f.house}`, `${f.service} • ${f.plateOrName}`);
             const screen = document.getElementById('guardResultScreen');
             if (screen) {
@@ -3936,11 +4019,18 @@
             const inside = passes.filter(p => p.status === 'ADENTRO');
             const badge = document.getElementById('insideCounterBadge');
             if (badge) badge.textContent = `${inside.length} Adentro Ahora`;
+            const insideBadge = document.getElementById('guardInsideBadge');
+            if (insideBadge) {
+                insideBadge.textContent = inside.length;
+                insideBadge.className = inside.length > 0
+                    ? "ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-sky-400 text-zinc-950"
+                    : "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400";
+            }
             const container = document.getElementById('insideVisitorsList');
             if (!container) return;
 
             if (inside.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 italic col-span-2 py-4 text-center border border-dashed border-zinc-800 rounded-xl">No hay ningún visitante dentro del condominio en este momento.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic col-span-3 py-6 text-center border border-dashed border-zinc-800 rounded-xl">No hay ningún visitante dentro del condominio en este momento.</p>`;
                 return;
             }
 
@@ -3964,6 +4054,7 @@
             const p = passes.find(item => item.id === passId);
             if (!p) return;
             p.status = 'AFUERA';
+            setGuardSubTab('scan');
             document.getElementById('workerOvertimeAlert')?.classList.add('hidden');
             showScanBanner('SALE', `🚪 SALE — CASA ${p.house}`, `${p.visitorName} • 🪪 ${p.ciPlaca || 'S/D'}`);
             const screen = document.getElementById('guardResultScreen');
