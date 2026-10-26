@@ -537,6 +537,17 @@
                         <span>ENCENDER CÁMARA Y LEER QR</span>
                     </button>
 
+                    <!-- AVISO GIGANTE ARRIBA DE LA CÁMARA: ENTRA / SALE / PROHIBIDO -->
+                    <div id="scanLiveBanner" class="rounded-2xl border-2 border-zinc-700 bg-zinc-950 px-4 py-3 flex items-center gap-3 transition-all duration-300">
+                        <div id="scanLiveIcon" class="w-12 h-12 rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center text-2xl shrink-0">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div id="scanLiveTitle" class="text-base font-black text-zinc-300 leading-tight">Esperando código QR...</div>
+                            <div id="scanLiveSub" class="text-xs text-zinc-500 font-semibold truncate">Apunta la cámara al pase del visitante</div>
+                        </div>
+                    </div>
+
                     <!-- Visor de Cámara Web / Celular + Banner de Pausa de 5 Segundos -->
                     <div id="cameraReaderWrapper" class="hidden space-y-2">
                         <div id="scannerCooldownBanner" class="hidden bg-amber-500 text-zinc-950 font-black text-xs px-3 py-2 rounded-xl flex items-center justify-between">
@@ -2546,9 +2557,11 @@
                     authBy: 'Anuncio Manual en Portería',
                     status: 'ADENTRO',
                     entryTime: nowStr,
+                    entryTs: Date.now(),
                     identityVerified: true
                 };
                 passes.unshift(newManualPass);
+                showScanBanner('ENTRA', `✅ ENTRA → CASA ${houseNum}`, `${visitorName} • 🪪 ${ciPlaca} (Manual)`);
 
                 if (screen) {
                     screen.className = "h-full min-h-[340px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
@@ -3478,6 +3491,96 @@
         /* ==========================================
            7. TERMINAL DE PORTERÍA Y LECTURA QR (SÚPER SIMPLE PARA GUARDIAS)
            ========================================== */
+        let scanBannerResetTimer = null;
+        let guardAudioCtx = null;
+
+        function playGuardBeep(type) {
+            try {
+                if (!guardAudioCtx) guardAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const tones = type === 'ENTRA' ? [880, 1320] : (type === 'SALE' ? [660, 440] : [220, 220, 220]);
+                tones.forEach((freq, i) => {
+                    const osc = guardAudioCtx.createOscillator();
+                    const gain = guardAudioCtx.createGain();
+                    osc.type = type === 'PROHIBIDO' ? 'square' : 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.value = 0.15;
+                    osc.connect(gain);
+                    gain.connect(guardAudioCtx.destination);
+                    const start = guardAudioCtx.currentTime + i * 0.16;
+                    osc.start(start);
+                    osc.stop(start + 0.13);
+                });
+            } catch (e) {}
+            try {
+                if (navigator.vibrate) {
+                    navigator.vibrate(type === 'PROHIBIDO' ? [300, 100, 300, 100, 300] : (type === 'SALE' ? [120, 80, 120] : 200));
+                }
+            } catch (e) {}
+        }
+
+        // Aviso gigante arriba de la cámara: ENTRA (verde) / SALE (azul) / PROHIBIDO (rojo) / AVISO (amarillo)
+        function showScanBanner(type, title, subtitle) {
+            const banner = document.getElementById('scanLiveBanner');
+            const icon = document.getElementById('scanLiveIcon');
+            const titleEl = document.getElementById('scanLiveTitle');
+            const subEl = document.getElementById('scanLiveSub');
+            if (!banner || !icon || !titleEl || !subEl) return;
+
+            const styles = {
+                ENTRA: {
+                    banner: 'border-emerald-400 bg-emerald-600 shadow-xl shadow-emerald-600/30',
+                    icon: 'bg-white text-emerald-600',
+                    iconHtml: '<i class="fa-solid fa-arrow-right-to-bracket"></i>',
+                    title: 'text-white', sub: 'text-emerald-50'
+                },
+                SALE: {
+                    banner: 'border-sky-300 bg-sky-600 shadow-xl shadow-sky-600/30',
+                    icon: 'bg-white text-sky-600',
+                    iconHtml: '<i class="fa-solid fa-arrow-right-from-bracket"></i>',
+                    title: 'text-white', sub: 'text-sky-50'
+                },
+                PROHIBIDO: {
+                    banner: 'border-red-300 bg-red-600 shadow-xl shadow-red-600/40 animate-pulse-fast',
+                    icon: 'bg-white text-red-600',
+                    iconHtml: '<i class="fa-solid fa-ban"></i>',
+                    title: 'text-white', sub: 'text-red-50'
+                },
+                AVISO: {
+                    banner: 'border-amber-300 bg-amber-500 shadow-xl shadow-amber-500/30',
+                    icon: 'bg-zinc-950 text-amber-400',
+                    iconHtml: '<i class="fa-solid fa-triangle-exclamation"></i>',
+                    title: 'text-zinc-950', sub: 'text-zinc-900'
+                },
+                LISTO: {
+                    banner: 'border-zinc-700 bg-zinc-950',
+                    icon: 'bg-zinc-800 text-zinc-400',
+                    iconHtml: '<i class="fa-solid fa-qrcode"></i>',
+                    title: 'text-zinc-300', sub: 'text-zinc-500'
+                }
+            };
+            const st = styles[type] || styles.LISTO;
+
+            banner.className = `rounded-2xl border-2 px-4 py-3 flex items-center gap-3 transition-all duration-300 ${st.banner}`;
+            icon.className = `w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${st.icon}`;
+            icon.innerHTML = st.iconHtml;
+            titleEl.className = `text-lg sm:text-xl font-black leading-tight ${st.title}`;
+            subEl.className = `text-xs sm:text-sm font-bold truncate ${st.sub}`;
+            titleEl.textContent = title;
+            subEl.textContent = subtitle || '';
+
+            if (scanBannerResetTimer) clearTimeout(scanBannerResetTimer);
+            if (type !== 'LISTO') {
+                playGuardBeep(type === 'AVISO' ? 'PROHIBIDO' : type);
+                // En celular: llevar la vista al aviso para que el guardia lo vea sí o sí
+                if (window.innerWidth < 1024) {
+                    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                scanBannerResetTimer = setTimeout(() => {
+                    showScanBanner('LISTO', 'Listo para el siguiente QR', 'Apunta la cámara al pase del visitante');
+                }, 7000);
+            }
+        }
+
         function startScannerCooldown5Seconds() {
             isScannerCoolingDown = true;
             let remaining = 5;
@@ -3670,12 +3773,14 @@
                 return;
             }
 
-            // SI LA PERSONA YA ESTÁ ADENTRO: Ofrecer botón gigante de SALIDA o advertir si intentan reingresar
+            // SI LA PERSONA YA ESTÁ ADENTRO: SALIDA AUTOMÁTICA al volver a escanear su QR
             if (passObj.status === 'ADENTRO') {
-                if (guardMode === 'SALIDA') {
+                const secondsInside = passObj.entryTs ? (Date.now() - passObj.entryTs) / 1000 : 9999;
+                if (guardMode === 'SALIDA' || secondsInside >= 15) {
                     quickCheckoutVisitor(passObj.id);
                     return;
                 }
+                showScanBanner('AVISO', 'YA ENTRÓ HACE UN MOMENTO', `${passObj.visitorName} • Casa ${passObj.house}`);
                 screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-sky-400 bg-sky-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
                 screen.innerHTML = `
                     <div class="w-16 h-16 rounded-full bg-sky-400 text-zinc-950 flex items-center justify-center text-3xl mb-2 font-black shadow-lg">
@@ -3701,7 +3806,8 @@
             passObj.status = 'ADENTRO';
             const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             passObj.entryTime = nowStr;
-
+            passObj.entryTs = Date.now();
+            showScanBanner('ENTRA', `✅ ENTRA → CASA ${passObj.house}`, `${passObj.visitorName} • 🪪 ${passObj.ciPlaca}`);
             const firstVisitVerifyBox = !passObj.identityVerified ? `
                 <div class="mt-4 w-full bg-amber-400 text-zinc-950 rounded-xl p-3 flex items-center justify-between gap-2 text-left">
                     <div>
@@ -3738,6 +3844,7 @@
         }
 
         function renderGuardDenial(title, reason, detail) {
+            showScanBanner('PROHIBIDO', '🚫 NO PUEDE ENTRAR', title);
             const screen = document.getElementById('guardResultScreen');
             if (!screen) return;
             screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-red-500 bg-red-950/95 p-6 flex flex-col items-center justify-center text-center shadow-2xl animate-pulse-fast";
@@ -3802,6 +3909,7 @@
             const f = fastPasses.find(item => item.id === fastId);
             if (!f) return;
             f.status = 'INGRESÓ';
+            showScanBanner('ENTRA', `✅ ENTRA → CASA ${f.house}`, `${f.service} • ${f.plateOrName}`);
             const screen = document.getElementById('guardResultScreen');
             if (screen) {
                 screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-emerald-400 bg-emerald-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
@@ -3857,7 +3965,7 @@
             if (!p) return;
             p.status = 'AFUERA';
             document.getElementById('workerOvertimeAlert')?.classList.add('hidden');
-
+            showScanBanner('SALE', `🚪 SALE — CASA ${p.house}`, `${p.visitorName} • 🪪 ${p.ciPlaca || 'S/D'}`);
             const screen = document.getElementById('guardResultScreen');
             if (screen) {
                 screen.className = "h-full min-h-[360px] rounded-2xl border-4 border-sky-400 bg-sky-950/90 p-6 flex flex-col items-center justify-center text-center shadow-2xl";
