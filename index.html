@@ -236,23 +236,13 @@
                             </span>
                         </div>
 
-                        <!-- Frecuentes en 1 toque -->
+                        <!-- Frecuentes en 1 toque (Exclusivos de cada domicilio) -->
                         <div>
-                            <label class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block mb-1.5">Tus Frecuentes (Cargar en 1 toque):</label>
-                            <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                                <button type="button" onclick="fillFrequent('Sebastian Peredo', '8945123 SC', '5421-XYZ', 'VISITA SOCIAL')" class="px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-medium whitespace-nowrap hover:bg-purple-500/25 transition">
-                                    ⚡ Sebastian Peredo
-                                </button>
-                                <button type="button" onclick="fillFrequent('Vitto (Socio Vise Labs)', '7654321 SC', '4012-ABC', 'VISITA SOCIAL')" class="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium whitespace-nowrap hover:bg-zinc-700 transition">
-                                    👨‍💻 Vitto (Vise Labs)
-                                </button>
-                                <button type="button" onclick="fillFrequent('María Flores (Hogar)', '6341298 SC', 'SIN AUTO', 'PERSONAL HOGAR')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium whitespace-nowrap hover:bg-emerald-500/25 transition">
-                                    🏠 María (Hogar)
-                                </button>
-                                <button type="button" onclick="fillFrequent('Don Mario (Piscinero)', '4981234 SC', 'MOTO-99', 'PROVEEDOR / OBRA')" class="px-2.5 py-1 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-300 text-xs font-medium whitespace-nowrap hover:bg-orange-500/25 transition">
-                                    🏊‍♂️ Don Mario (Piscina)
-                                </button>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Tus Frecuentes de esta Casa (Cargar en 1 toque):</label>
+                                <span class="text-[10px] text-purple-400 font-medium">Solo visibles en tu domicilio</span>
                             </div>
+                            <div id="vecinoFrequentsList" class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar"></div>
                         </div>
 
                         <form id="newPassForm" onsubmit="handleCreatePass(event)" class="space-y-3">
@@ -412,7 +402,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
                             <button onclick="sendPassWhatsApp()" class="py-3 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
                                 <i class="fa-brands fa-whatsapp text-base"></i>
-                                <span>Enviar por WhatsApp</span>
+                                <span>Enviar Foto por WhatsApp</span>
                             </button>
                             <button onclick="downloadPassCardImage()" class="py-3 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition">
                                 <i class="fa-solid fa-image text-sm"></i>
@@ -420,7 +410,7 @@
                             </button>
                             <button onclick="simulateGoogleWalletSave()" class="py-3 px-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs flex items-center justify-center gap-2 transition">
                                 <i class="fa-brands fa-google-pay text-lg"></i>
-                                <span>Guardar en Wallet</span>
+                                <span>Guardar en Teléfono</span>
                             </button>
                         </div>
 
@@ -1342,6 +1332,42 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         MODAL 8: FOTO DEL PASE QR LISTA PARA DESCARGAR / ENVIAR POR WHATSAPP
+         ========================================== -->
+    <div id="passImagePreviewModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-zinc-900 border border-purple-500/40 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl my-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-purple-400"></i>
+                    <span>Foto Oficial del Pase QR</span>
+                </h3>
+                <button type="button" onclick="closePassImagePreviewModal()" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="bg-zinc-950 p-2 rounded-xl border border-zinc-800 flex flex-col items-center">
+                <img id="passPreviewModalImg" src="" alt="Pase QR VisePass" class="w-full max-h-[380px] object-contain rounded-lg shadow-lg" />
+            </div>
+
+            <p class="text-[11px] text-zinc-300 text-center bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 leading-relaxed">
+                📱 <strong>En tu teléfono:</strong> Toca <strong>"Compartir Foto / Guardar"</strong> abajo o <strong>mantén presionada la imagen</strong> durante 1 segundo y elige <em>"Guardar en Fotos"</em> o <em>"Compartir en WhatsApp"</em>.
+            </p>
+
+            <div class="grid grid-cols-1 gap-2">
+                <button type="button" onclick="sharePassPhotoFromModal()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span>Compartir Foto por WhatsApp / Guardar en Fotos</span>
+                </button>
+                <a id="passDirectDownloadAnchor" href="#" download="Pase_VisePass.png" class="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 text-center transition">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Descargar Archivo PNG Directo</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST DE NOTIFICACIONES FLOTANTE -->
     <div id="toastBox" class="hidden fixed bottom-5 right-5 z-50 bg-zinc-900 border border-purple-500/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold">
         <i class="fa-solid fa-bell text-purple-400"></i>
@@ -1822,6 +1848,7 @@
             renderAdminSecuritySection();
             renderAdminBlacklist();
             updateMoraUI();
+            renderVecinoFrequents();
             renderVecinoPasses();
             renderVecinoFastPasses();
             renderSelectedWalletCard();
@@ -2521,12 +2548,131 @@
             } else if (tabName === 'vecino') {
                 syncCurrentHouseHeader();
                 updateMoraUI();
+                renderVecinoFrequents();
                 renderVecinoPasses();
                 renderVecinoFastPasses();
             }
         }
 
-        // Módulo Vecino
+        // Módulo Vecino — Frecuentes exclusivos por cada casa/familia
+        function getHouseFrequents(houseNum) {
+            const houseObj = houses.find(h => h.number === houseNum);
+            if (!houseObj) return [];
+            if (!Array.isArray(houseObj.frequents)) {
+                const seen = new Set();
+                const initialList = [];
+                passes
+                    .filter(p => p.house === houseNum)
+                    .forEach(p => {
+                        const key = String(p.visitorName || '').toLowerCase().trim();
+                        if (key && !seen.has(key)) {
+                            seen.add(key);
+                            initialList.push({
+                                name: p.visitorName,
+                                ciPlaca: p.ciPlaca || '',
+                                passType: p.passType || 'VISITA SOCIAL'
+                            });
+                        }
+                    });
+                houseObj.frequents = initialList;
+            }
+            return houseObj.frequents;
+        }
+
+        function saveVisitorToHouseFrequents(houseNum, name, ciPlaca, passType) {
+            const houseObj = houses.find(h => h.number === houseNum);
+            if (!houseObj || !name) return;
+            const list = getHouseFrequents(houseNum);
+            const normName = String(name).toLowerCase().trim();
+            const existingIdx = list.findIndex(item => String(item.name || '').toLowerCase().trim() === normName);
+            const entry = {
+                name: name.trim(),
+                ciPlaca: (ciPlaca || '').trim(),
+                passType: passType || 'VISITA SOCIAL'
+            };
+            if (existingIdx !== -1) {
+                list.splice(existingIdx, 1);
+            }
+            list.unshift(entry);
+            if (list.length > 12) {
+                list.length = 12;
+            }
+            houseObj.frequents = list;
+        }
+
+        function renderVecinoFrequents() {
+            const container = document.getElementById('vecinoFrequentsList');
+            if (!container) return;
+            if (!currentHouse) {
+                container.innerHTML = `<span class="text-[11px] text-zinc-500 italic py-1">Selecciona un domicilio para ver tus frecuentes.</span>`;
+                return;
+            }
+            const list = getHouseFrequents(currentHouse);
+            if (list.length === 0) {
+                container.innerHTML = `<span class="text-[11px] text-zinc-500 italic py-1">Aún no tienes frecuentes en Casa ${escapeHtml(currentHouse)}. Se guardarán aquí automáticamente cuando crees tus pases.</span>`;
+                return;
+            }
+
+            const styleByType = {
+                'VISITA SOCIAL': {
+                    cls: 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25',
+                    icon: '⚡'
+                },
+                'RESIDENTE VIP': {
+                    cls: 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25',
+                    icon: '👑'
+                },
+                'PERSONAL HOGAR': {
+                    cls: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25',
+                    icon: '🏠'
+                },
+                'PROVEEDOR / OBRA': {
+                    cls: 'bg-orange-500/15 border-orange-500/30 text-orange-300 hover:bg-orange-500/25',
+                    icon: '🛠️'
+                }
+            };
+
+            container.innerHTML = list.map((item, idx) => {
+                const st = styleByType[item.passType] || styleByType['VISITA SOCIAL'];
+                return `
+                    <div class="inline-flex items-center rounded-lg border ${st.cls} transition shrink-0">
+                        <button type="button" onclick="fillFrequentFromHouse(${idx})" class="px-2.5 py-1 text-xs font-medium whitespace-nowrap">
+                            ${st.icon} ${escapeHtml(item.name)}
+                        </button>
+                        <button type="button" onclick="removeHouseFrequent(${idx}, event)" title="Quitar de mis frecuentes" class="pr-2 pl-0.5 py-1 text-[11px] opacity-60 hover:opacity-100 hover:text-red-300">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function fillFrequentFromHouse(idx) {
+            const myHouseObj = houses.find(h => h.number === currentHouse);
+            if (myHouseObj && myHouseObj.isMorosa) {
+                showToast('⛔ Emisión de pases bloqueada por mora en expensas');
+                return;
+            }
+            const list = getHouseFrequents(currentHouse);
+            const item = list[idx];
+            if (!item) return;
+            document.getElementById('visitorNameInput').value = item.name || '';
+            document.getElementById('visitorCiInput').value = item.ciPlaca || '';
+            document.getElementById('passTypeInput').value = item.passType || 'VISITA SOCIAL';
+            showToast(`⚡ Datos de ${item.name} cargados`);
+        }
+
+        function removeHouseFrequent(idx, ev) {
+            if (ev) ev.stopPropagation();
+            const list = getHouseFrequents(currentHouse);
+            if (!list[idx]) return;
+            const removed = list.splice(idx, 1)[0];
+            saveLocalState();
+            pushStateToCloud();
+            renderVecinoFrequents();
+            showToast(`🗑️ ${removed.name} quitado de tus frecuentes`);
+        }
+
         function fillFrequent(name, ci, placa, type) {
             const myHouseObj = houses.find(h => h.number === currentHouse);
             if (myHouseObj && myHouseObj.isMorosa) {
@@ -2534,7 +2680,7 @@
                 return;
             }
             document.getElementById('visitorNameInput').value = name;
-            document.getElementById('visitorCiInput').value = `${ci} | ${placa}`;
+            document.getElementById('visitorCiInput').value = placa ? `${ci} | ${placa}` : ci;
             document.getElementById('passTypeInput').value = type;
             showToast(`Datos de ${name} cargados`);
         }
@@ -2577,12 +2723,14 @@
 
             passes.unshift(newPass);
             selectedPassId = newId;
+            saveVisitorToHouseFrequents(currentHouse, name, ciPlaca, passType);
 
             document.getElementById('visitorNameInput').value = '';
             document.getElementById('visitorCiInput').value = '';
 
+            renderVecinoFrequents();
             pushStateToCloud();
-            showToast(`✅ Pase de ${name} generado y sincronizado con Portería`);
+            showToast(`✅ Pase de ${name} generado y guardado en tus frecuentes`);
             setTimeout(() => switchTab('wallet'), 150);
         }
 
@@ -2636,7 +2784,8 @@
         function revokePass(passId) {
             passes = passes.filter(p => p.id !== passId);
             if (selectedPassId === passId) {
-                selectedPassId = passes.length > 0 ? passes[0].id : '';
+                const housePasses = passes.filter(p => p.house === currentHouse);
+                selectedPassId = housePasses.length > 0 ? housePasses[0].id : (passes.length > 0 ? passes[0].id : '');
             }
             pushStateToCloud();
             showToast('🗑️ Pase anulado correctamente');
@@ -2676,10 +2825,18 @@
         }
 
         /* ==========================================
-           6. RENDERIZADO DE TARJETA WALLET Y QR REAL
+           6. RENDERIZADO DE TARJETA WALLET, DESCARGA MÓVIL Y FOTO WHATSAPP
            ========================================== */
+        function getActivePassForCurrentUser() {
+            if (activeRole === 'RESIDENTE') {
+                const myPasses = passes.filter(p => p.house === currentHouse);
+                return myPasses.find(p => p.id === selectedPassId) || myPasses[0] || null;
+            }
+            return passes.find(p => p.id === selectedPassId) || passes.find(p => p.house === currentHouse) || passes[0] || null;
+        }
+
         function renderSelectedWalletCard() {
-            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
+            const passObj = getActivePassForCurrentUser();
             const qrContainer = document.getElementById('qrcodeCanvas');
 
             if (!passObj) {
@@ -2691,7 +2848,7 @@
                 document.getElementById('cardCiPlaca').textContent = 'Crea un pase en "Mi Casa"';
                 document.getElementById('cardAuthBy').textContent = currentFamily || 'Administración';
                 document.getElementById('cardPassIdSub').textContent = 'SIN-PASE';
-                document.getElementById('qrPayloadInspector').textContent = 'Aún no se ha emitido ningún pase QR.';
+                document.getElementById('qrPayloadInspector').textContent = 'Aún no se ha emitido ningún pase QR en este domicilio.';
                 if (qrContainer) {
                     qrContainer.innerHTML = '<span class="text-[11px] text-zinc-400 px-3">Emite un pase para generar el QR</span>';
                 }
@@ -2757,33 +2914,38 @@
             copyTextToClipboard(text, '📋 Código de seguridad copiado');
         }
 
-        function sendPassWhatsApp() {
-            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
-            if (!passObj) {
-                showToast('⚠️ Primero emite o selecciona un pase activo');
-                return;
+        let lastPassBundle = null;
+        let lastPassBlobUrl = null;
+
+        function dataUrlToBlobSync(dataUrl) {
+            const parts = dataUrl.split(',');
+            const mimeMatch = parts[0].match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+            const bstr = atob(parts[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
             }
-            const qrToken = buildQrTokenString(passObj);
-            const msg = encodeURIComponent(
-                `Hola *${passObj.visitorName}*, te comparto tu Pase Oficial de Acceso para *${passObj.condo} (Casa ${passObj.house})* autorizado por *${passObj.authBy}*.\n\n` +
-                `📌 *ID de Pase:* ${passObj.id}\n` +
-                `🪪 *C.I. / Placa:* ${passObj.ciPlaca}\n` +
-                `📅 *Válido hasta:* ${passObj.validUntil}\n` +
-                `🔐 *Token QR:* ${qrToken}\n\n` +
-                `Muéstralo junto con la imagen QR en portería al llegar.`
-            );
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
+            return new Blob([u8arr], { type: mime });
         }
 
-        function downloadPassCardImage() {
-            const passObj = passes.find(p => p.id === selectedPassId) || passes[0];
-            if (!passObj) {
-                showToast('⚠️ Primero emite o selecciona un pase activo para descargar su imagen');
-                return;
-            }
-            const qrWrap = document.getElementById('qrcodeCanvas');
-            const qrSourceCanvas = qrWrap ? qrWrap.querySelector('canvas') : null;
-            const qrSourceImg = qrWrap ? qrWrap.querySelector('img') : null;
+        function drawRoundedRectPath(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function buildPassCardBundleSync(passObj) {
+            const qrToken = buildQrTokenString(passObj);
 
             const canvas = document.createElement('canvas');
             canvas.width = 720;
@@ -2813,9 +2975,9 @@
             ctx.font = 'bold 28px Inter, Arial, sans-serif';
             ctx.fillText(passObj.condo || 'La Hacienda - Rincón', 48, 72);
 
-            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.fillStyle = 'rgba(255,255,255,0.82)';
             ctx.font = 'bold 16px Inter, Arial, sans-serif';
-            ctx.fillText(`TIPO: ${passObj.passType}`, 48, 104);
+            ctx.fillText(`PASE OFICIAL • ${passObj.passType}`, 48, 104);
 
             // Línea divisoria
             ctx.strokeStyle = 'rgba(255,255,255,0.22)';
@@ -2827,22 +2989,24 @@
 
             // Caja de datos del visitante
             ctx.fillStyle = 'rgba(0,0,0,0.28)';
-            ctx.fillRect(48, 155, 624, 120);
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            drawRoundedRectPath(ctx, 48, 155, 624, 120, 20);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.72)';
             ctx.font = 'bold 15px Inter, Arial, sans-serif';
             ctx.fillText('VISITANTE AUTORIZADO', 72, 190);
             ctx.fillText('VÁLIDO HASTA', 520, 190);
 
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 32px Inter, Arial, sans-serif';
-            ctx.fillText(String(passObj.visitorName).slice(0, 26), 72, 238);
+            ctx.fillText(String(passObj.visitorName || '').slice(0, 25), 72, 238);
             ctx.font = 'bold 26px Inter, Arial, sans-serif';
-            ctx.fillText(String(passObj.validUntil), 520, 238);
+            ctx.fillText(String(passObj.validUntil || ''), 520, 238);
 
             // Caja de Casa y CI/Placa
             ctx.fillStyle = 'rgba(0,0,0,0.28)';
-            ctx.fillRect(48, 295, 624, 120);
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            drawRoundedRectPath(ctx, 48, 295, 624, 120, 20);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.72)';
             ctx.font = 'bold 15px Inter, Arial, sans-serif';
             ctx.fillText('CASA DESTINO', 72, 330);
             ctx.fillText('DOCUMENTO C.I. / PLACA', 260, 330);
@@ -2851,52 +3015,207 @@
             ctx.font = 'bold 44px Inter, Arial, sans-serif';
             ctx.fillText(`#${passObj.house}`, 72, 385);
             ctx.font = 'bold 24px Inter, Arial, sans-serif';
-            ctx.fillText(String(passObj.ciPlaca).slice(0, 30), 260, 382);
+            ctx.fillText(String(passObj.ciPlaca || '').slice(0, 28), 260, 382);
 
             // Caja de Autorizado por
             ctx.fillStyle = 'rgba(0,0,0,0.28)';
-            ctx.fillRect(48, 435, 624, 75);
-            ctx.fillStyle = 'rgba(255,255,255,0.75)';
-            ctx.font = 'bold 15px Inter, Arial, sans-serif';
+            drawRoundedRectPath(ctx, 48, 435, 624, 75, 18);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.font = 'bold 16px Inter, Arial, sans-serif';
             ctx.fillText(`AUTORIZADO POR: ${passObj.authBy}`, 72, 480);
 
             // Recuadro blanco central para el QR
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(160, 545, 400, 410);
+            drawRoundedRectPath(ctx, 160, 540, 400, 415, 28);
+            ctx.fill();
 
-            const finishExport = () => {
-                ctx.fillStyle = '#18181b';
-                ctx.font = 'bold 20px JetBrains Mono, monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(passObj.id, 360, 930);
-
-                ctx.fillStyle = 'rgba(255,255,255,0.85)';
-                ctx.font = 'bold 16px Inter, Arial, sans-serif';
-                ctx.fillText('Presenta esta tarjeta QR al guardia en Portería • VisePass SCZ', 360, 995);
-
-                const dataUrl = canvas.toDataURL('image/png');
-                const a = document.createElement('a');
-                a.href = dataUrl;
-                a.download = `Pase_${passObj.id}_Casa_${passObj.house}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showToast(`🖼️ Imagen del pase de ${passObj.visitorName} descargada (lista para enviar por WhatsApp)`);
-            };
-
-            if (qrSourceCanvas) {
-                ctx.drawImage(qrSourceCanvas, 196, 565, 328, 328);
-                finishExport();
-            } else if (qrSourceImg && qrSourceImg.complete) {
-                ctx.drawImage(qrSourceImg, 196, 565, 328, 328);
-                finishExport();
-            } else {
-                finishExport();
+            // Generar un QR dedicado en alta definición (328x328) de forma síncrona
+            let qrDrawn = false;
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    const tempDiv = document.createElement('div');
+                    new QRCode(tempDiv, {
+                        text: qrToken,
+                        width: 328,
+                        height: 328,
+                        colorDark: "#18181b",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                    const tempCanvas = tempDiv.querySelector('canvas');
+                    if (tempCanvas && tempCanvas.width > 0) {
+                        ctx.drawImage(tempCanvas, 196, 562, 328, 328);
+                        qrDrawn = true;
+                    }
+                } catch (e) {}
             }
+
+            if (!qrDrawn) {
+                const qrWrap = document.getElementById('qrcodeCanvas');
+                const qrSourceCanvas = qrWrap ? qrWrap.querySelector('canvas') : null;
+                const qrSourceImg = qrWrap ? qrWrap.querySelector('img') : null;
+                if (qrSourceCanvas && qrSourceCanvas.width > 0) {
+                    ctx.drawImage(qrSourceCanvas, 196, 562, 328, 328);
+                } else if (qrSourceImg && qrSourceImg.complete && qrSourceImg.naturalWidth > 0) {
+                    ctx.drawImage(qrSourceImg, 196, 562, 328, 328);
+                }
+            }
+
+            ctx.fillStyle = '#18181b';
+            ctx.font = 'bold 20px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(passObj.id, 360, 932);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.88)';
+            ctx.font = 'bold 16px Inter, Arial, sans-serif';
+            ctx.fillText('Presenta esta tarjeta QR al guardia en Portería • VisePass SCZ', 360, 995);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const blob = dataUrlToBlobSync(dataUrl);
+            const safeVisitor = String(passObj.visitorName || 'Visita').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `Pase_${passObj.id}_Casa_${passObj.house}_${safeVisitor}.png`;
+            let file = null;
+            try {
+                file = new File([blob], filename, { type: 'image/png' });
+            } catch (e) {}
+
+            if (lastPassBlobUrl) {
+                try { URL.revokeObjectURL(lastPassBlobUrl); } catch (e) {}
+            }
+            lastPassBlobUrl = URL.createObjectURL(blob);
+
+            const whatsappText =
+                `Hola *${passObj.visitorName}*, te comparto tu *Pase Oficial QR de Acceso* para *${passObj.condo} (Casa ${passObj.house})* autorizado por *${passObj.authBy}*.\n\n` +
+                `📌 *ID de Pase:* ${passObj.id}\n` +
+                `🪪 *C.I. / Placa:* ${passObj.ciPlaca}\n` +
+                `📅 *Válido hasta:* ${passObj.validUntil}\n\n` +
+                `Muéstrale esta foto con el código QR al guardia en portería al llegar.`;
+
+            lastPassBundle = {
+                passObj,
+                canvas,
+                dataUrl,
+                blob,
+                 blobUrl: lastPassBlobUrl,
+                file,
+                filename,
+                whatsappText
+            };
+            return lastPassBundle;
+        }
+
+        function openPassImagePreviewModalWithBundle(bundle) {
+            if (!bundle) return;
+            const imgEl = document.getElementById('passPreviewModalImg');
+            const dlAnchor = document.getElementById('passDirectDownloadAnchor');
+            const modalEl = document.getElementById('passImagePreviewModal');
+            if (imgEl) imgEl.src = bundle.dataUrl;
+            if (dlAnchor) {
+                dlAnchor.href = bundle.blobUrl || bundle.dataUrl;
+                dlAnchor.download = bundle.filename;
+            }
+            if (modalEl) modalEl.classList.remove('hidden');
+        }
+
+        function closePassImagePreviewModal() {
+            const modalEl = document.getElementById('passImagePreviewModal');
+            if (modalEl) modalEl.classList.add('hidden');
+        }
+
+        async function sharePassPhotoFromModal() {
+            const passObj = getActivePassForCurrentUser();
+            if (!passObj) return;
+            const bundle = lastPassBundle || buildPassCardBundleSync(passObj);
+            if (bundle.file && navigator.canShare && navigator.canShare({ files: [bundle.file] })) {
+                try {
+                    await navigator.share({
+                        files: [bundle.file],
+                        title: `Pase QR ${passObj.id} — Casa ${passObj.house}`,
+                        text: bundle.whatsappText
+                    });
+                    showToast('✅ Foto del pase compartida / guardada');
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                }
+            }
+            const a = document.createElement('a');
+            a.href = bundle.blobUrl || bundle.dataUrl;
+            a.download = bundle.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('🖼️ Imagen PNG descargada en tu dispositivo');
+        }
+
+        async function sendPassWhatsApp() {
+            const passObj = getActivePassForCurrentUser();
+            if (!passObj) {
+                showToast('⚠️ Primero emite o selecciona un pase activo');
+                return;
+            }
+            const bundle = buildPassCardBundleSync(passObj);
+
+            // En celulares (iOS Safari / Android Chrome): compartir directamente el archivo de FOTO PNG + texto a WhatsApp
+            if (bundle.file && navigator.canShare && navigator.canShare({ files: [bundle.file] })) {
+                try {
+                    await navigator.share({
+                        files: [bundle.file],
+                        title: `Pase QR ${passObj.id} — Casa ${passObj.house}`,
+                        text: bundle.whatsappText
+                    });
+                    showToast(`📲 Foto del pase de ${passObj.visitorName} lista en WhatsApp`);
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                }
+            }
+
+            // En computadora o navegador sin Web Share de archivos: descargar la foto PNG + mostrar vista previa + abrir WhatsApp
+            const a = document.createElement('a');
+            a.href = bundle.blobUrl || bundle.dataUrl;
+            a.download = bundle.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            openPassImagePreviewModalWithBundle(bundle);
+            const encodedMsg = encodeURIComponent(bundle.whatsappText);
+            window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+            showToast(`🖼️ Foto del pase descargada y WhatsApp abierto`);
+        }
+
+        function downloadPassCardImage() {
+            const passObj = getActivePassForCurrentUser();
+            if (!passObj) {
+                showToast('⚠️ Primero emite o selecciona un pase activo para descargar su imagen');
+                return;
+            }
+            const bundle = buildPassCardBundleSync(passObj);
+
+            // Descarga directa con Blob URL (compatible con Android Chrome y PC)
+            const a = document.createElement('a');
+            a.href = bundle.blobUrl || bundle.dataUrl;
+            a.download = bundle.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Abrir también la tarjeta en pantalla para que en iPhone / App de Inicio pueda guardarla en Fotos o compartirla en 1 toque
+            openPassImagePreviewModalWithBundle(bundle);
+            showToast(`🖼️ Tarjeta QR de ${passObj.visitorName} lista para guardar o compartir`);
         }
 
         function simulateGoogleWalletSave() {
-            showToast('📲 Tarjeta lista para guardar en Google Wallet');
+            const passObj = getActivePassForCurrentUser();
+            if (!passObj) {
+                showToast('⚠️ Primero emite o selecciona un pase activo');
+                return;
+            }
+            const bundle = buildPassCardBundleSync(passObj);
+            openPassImagePreviewModalWithBundle(bundle);
+            showToast('📲 Guarda la tarjeta en tu teléfono o compártela');
         }
 
         /* ==========================================
@@ -3912,12 +4231,14 @@
 
             passes.unshift(newPass);
             selectedPassId = newId;
+            saveVisitorToHouseFrequents(currentHouse, name, `${ci} | ${plate}`, 'VISITA SOCIAL');
 
             document.getElementById('selfRegName').value = '';
             document.getElementById('selfRegCi').value = '';
             document.getElementById('selfRegPlate').value = '';
 
             closeGuestSelfRegModal();
+            renderVecinoFrequents();
             pushStateToCloud();
             switchTab('wallet');
             showToast(`🎉 Pase generado para ${name}`);
@@ -3943,7 +4264,8 @@
             'changePinModal',
             'changeAdminPassModal',
             'moraEditModal',
-            'logDetailModal'
+            'logDetailModal',
+            'passImagePreviewModal'
         ];
 
         document.addEventListener('keydown', (e) => {
