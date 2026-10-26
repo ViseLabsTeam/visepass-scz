@@ -933,7 +933,7 @@
                             <option value="ALERTA">🔴 Rechazos / Mora</option>
                         </select>
 
-                        <input type="text" id="bitacoraSearchInput" oninput="renderAdminLogs()" placeholder="Filtrar visitante o Casa..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                        <input type="text" id="bitacoraSearchInput" oninput="renderAdminLogs()" placeholder="Buscar nombre, C.I., placa o casa..." class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
 
                         <button type="button" onclick="exportBitacoraCSV()" class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition" title="Descargar reporte en CSV / Excel">
                             <i class="fa-solid fa-file-csv"></i>
@@ -970,19 +970,20 @@
                     </div>
                 </div>
 
-                <!-- Tabla de Movimientos -->
+                <!-- Tabla de Movimientos Completa (Seguridad Total) -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
                             <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]">
-                                <th class="py-2.5 px-3">Fecha</th>
-                                <th class="py-2.5 px-3">Hora</th>
+                                <th class="py-2.5 px-3">Día y Fecha</th>
+                                <th class="py-2.5 px-3">Hora (Seg.)</th>
                                 <th class="py-2.5 px-3">Evento</th>
-                                <th class="py-2.5 px-3">Visitante / Vehículo</th>
-                                <th class="py-2.5 px-3">Casa</th>
+                                <th class="py-2.5 px-3">Nombre Completo</th>
+                                <th class="py-2.5 px-3">C.I. / Placa Vehículo</th>
+                                <th class="py-2.5 px-3">Casa / Familia</th>
                                 <th class="py-2.5 px-3">Categoría</th>
                                 <th class="py-2.5 px-3">Portería</th>
-                                <th class="py-2.5 px-3 text-right">Acción</th>
+                                <th class="py-2.5 px-3 text-right">Ficha</th>
                             </tr>
                         </thead>
                         <tbody id="adminAuditTableBody" class="divide-y divide-zinc-800/60"></tbody>
@@ -1132,7 +1133,7 @@
             </div>
 
             <div id="loginErrorMsg" class="hidden bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl p-3 text-xs font-bold">
-                ⛔ El PIN ingresado no coincide con este domicilio. (PIN inicial por defecto: 0000).
+                ⛔ El PIN ingresado no coincide con este domicilio.
             </div>
 
             <!-- Formulario Residente -->
@@ -1146,8 +1147,8 @@
                     <select id="loginHouseSelect" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white"></select>
                 </div>
                 <div>
-                    <label class="text-xs font-medium text-zinc-300 block mb-1">PIN de Seguridad del Propietario (Por defecto: 0000)</label>
-                    <input type="password" id="loginResidentPin" value="0000" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono tracking-widest">
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">PIN de Seguridad del Propietario</label>
+                    <input type="password" id="loginResidentPin" value="" placeholder="Ingresa el PIN de tu domicilio..." autocomplete="off" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono tracking-widest focus:outline-none focus:border-purple-500">
                 </div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-purple-600/20">
                     Entrar como Vecino
@@ -2171,6 +2172,8 @@
             if (role === 'RESIDENTE') {
                 document.getElementById('loginFormResidente').classList.remove('hidden');
                 document.getElementById('loginTabResidente').className = "py-2.5 rounded-lg text-xs font-bold bg-purple-600 text-white shadow transition";
+                const resPinEl = document.getElementById('loginResidentPin');
+                if (resPinEl) resPinEl.value = '';
             } else if (role === 'GUARDIA') {
                 document.getElementById('loginFormGuardia').classList.remove('hidden');
                 document.getElementById('loginTabGuardia').className = "py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
@@ -2223,6 +2226,7 @@
             }
 
             document.getElementById('loginErrorMsg').classList.add('hidden');
+            document.getElementById('loginResidentPin').value = '';
             currentHouse = houseObj.number;
             currentFamily = houseObj.family;
             activeRole = 'RESIDENTE';
@@ -2264,7 +2268,7 @@
             }
 
             houseObj.pin = newPin;
-            document.getElementById('loginResidentPin').value = newPin;
+            document.getElementById('loginResidentPin').value = '';
             closeChangePinModal();
             pushStateToCloud();
             showToast(`🔐 PIN de Casa ${currentHouse} actualizado con éxito`);
@@ -2387,7 +2391,7 @@
             }
 
             const screen = document.getElementById('guardResultScreen');
-            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
+            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
             if (actionType === 'ENTRADA') {
                 const blockedItem = findBlacklistMatch(visitorName, ciPlaca);
@@ -2397,7 +2401,7 @@
                         `Esta persona o vehículo tiene PROHIBIDO el ingreso al condominio por orden de Administración. Motivo: ${blockedItem.reason}`,
                         `C.I./Placa bloqueada: ${blockedItem.ciPlaca}`
                     );
-                    addAuditLog('ALERTA LISTA NEGRA (MANUAL)', visitorName, `Casa ${houseNum}`, category, currentGuardName, `Bloqueado: ${blockedItem.reason}`);
+                    addAuditLog('ALERTA LISTA NEGRA (MANUAL)', visitorName, `Casa ${houseNum}`, category, currentGuardName, `${ciPlaca} (Bloqueado: ${blockedItem.reason})`);
                     pushStateToCloud();
                     showToast('🚨 ALERTA: Persona registrada en Lista Negra (Ingreso Prohibido)');
                     return;
@@ -2495,7 +2499,9 @@
 
         function buildQrTokenString(passObj) {
             const safeName = String(passObj.visitorName || '').replace(/\|/g, ' ');
-            const core = `VISEPASS|${passObj.id}|CASA:${passObj.house}|${safeName}|${passObj.passType}|${passObj.validUntil}`;
+            const safeCiPlaca = String(passObj.ciPlaca || 'S/D').replace(/\|/g, '/');
+            const safeAuth = String(passObj.authBy || 'Propietario').replace(/\|/g, ' ');
+            const core = `VISEPASS|${passObj.id}|CASA:${passObj.house}|${safeName}|${passObj.passType}|${passObj.validUntil}|${safeCiPlaca}|${safeAuth}`;
             const sig = generateDeterministicSignature(core);
             return `${core}|SIG:${sig}`;
         }
@@ -3374,6 +3380,8 @@
             }
 
             const passId = parts[1];
+            const scannedCiPlaca = parts[6] ? String(parts[6]).replace(/\s*\/\s*/g, ' | ') : '';
+            const scannedAuthBy = parts[7] || '';
             let passObj = passes.find(p => p.id === passId);
 
             if (!passObj) {
@@ -3382,14 +3390,21 @@
                     condo: 'La Hacienda - Rincon',
                     house: (parts[2] || 'CASA:30').replace('CASA:', ''),
                     visitorName: parts[3] || 'Visitante Autorizado',
-                    ciPlaca: 'Validado vía QR Wallet',
+                    ciPlaca: scannedCiPlaca || 'Validado vía QR Wallet',
                     passType: parts[4] || 'VISITA SOCIAL',
                     validUntil: parts[5] || '26/10/26',
-                    authBy: 'Propietario Verificado',
+                    authBy: scannedAuthBy || 'Propietario Verificado',
                     status: 'AFUERA',
                     identityVerified: true
                 };
                 passes.push(passObj);
+            } else {
+                if ((!passObj.ciPlaca || passObj.ciPlaca === 'Validado vía QR Wallet') && scannedCiPlaca) {
+                    passObj.ciPlaca = scannedCiPlaca;
+                }
+                if ((!passObj.authBy || passObj.authBy === 'Propietario Verificado') && scannedAuthBy) {
+                    passObj.authBy = scannedAuthBy;
+                }
             }
 
             // Verificar Lista Negra del condominio
@@ -3400,7 +3415,7 @@
                     `Esta persona o vehículo tiene PROHIBIDO el ingreso al condominio por orden de Administración. Motivo: ${blockedMatch.reason}`,
                     `C.I./Placa bloqueada: ${blockedMatch.ciPlaca}`
                 );
-                addAuditLog('ALERTA LISTA NEGRA (QR)', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `Bloqueado: ${blockedMatch.reason}`);
+                addAuditLog('ALERTA LISTA NEGRA (QR)', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `${passObj.ciPlaca} (Bloqueado: ${blockedMatch.reason})`);
                 pushStateToCloud();
                 return;
             }
@@ -3413,7 +3428,7 @@
                     `La unidad ${passObj.house} (${destHouse.family}) tiene restringido el acceso rápido con QR por expensas pendientes. Anunciar por citófono tradicional.`,
                     destHouse.moraNote || 'Restricción Administrativa Activa'
                 );
-                addAuditLog('BLOQUEO POR MORA', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, destHouse.moraNote || 'Deudor');
+                addAuditLog('BLOQUEO POR MORA', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, `${passObj.ciPlaca} (${destHouse.moraNote || 'Deudor'})`);
                 pushStateToCloud();
                 return;
             }
@@ -3432,6 +3447,7 @@
                     </span>
                     <h2 class="text-3xl font-black text-white mt-2">${escapeHtml(passObj.visitorName)}</h2>
                     <p class="text-lg font-bold text-sky-300 mt-1">Salió de Casa ${escapeHtml(passObj.house)} (${escapeHtml(passObj.passType)})</p>
+                    <p class="text-xs text-sky-200 mt-1 font-mono">C.I. / Placa: ${escapeHtml(passObj.ciPlaca)}</p>
                 `;
                 addAuditLog('SALIDA QR', passObj.visitorName, `Casa ${passObj.house}`, passObj.passType, currentGuardName, passObj.ciPlaca);
                 pushStateToCloud();
@@ -3452,7 +3468,7 @@
 
             // ACCESO AUTORIZADO (VERDE)
             passObj.status = 'ADENTRO';
-            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
+            const nowStr = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             passObj.entryTime = nowStr;
 
             const firstVisitVerifyBox = !passObj.identityVerified ? `
@@ -3571,13 +3587,14 @@
             }
 
             container.innerHTML = inside.map(p => `
-                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between gap-2">
                     <div>
                         <span class="text-[10px] font-mono text-emerald-400 font-bold">● ADENTRO (Ingreso: ${escapeHtml(p.entryTime || 'Hoy')})</span>
                         <h4 class="font-bold text-white text-sm">${escapeHtml(p.visitorName)}</h4>
+                        <p class="text-[11px] font-mono text-amber-300 mt-0.5">🪪 C.I./Placa: ${escapeHtml(p.ciPlaca || 'S/D')}</p>
                         <p class="text-xs text-zinc-400">Casa ${escapeHtml(p.house)} • ${escapeHtml(p.passType)}</p>
                     </div>
-                    <button type="button" data-passid="${escapeHtml(p.id)}" onclick="quickCheckoutVisitor(this.dataset.passid)" class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold">
+                    <button type="button" data-passid="${escapeHtml(p.id)}" onclick="quickCheckoutVisitor(this.dataset.passid)" class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold shrink-0">
                         Marcar Salida
                     </button>
                 </div>
@@ -3909,18 +3926,96 @@
             document.getElementById('guardAlertBadge').classList.add('hidden');
         }
 
-        // Bitácora Interactiva por Días y Exportación CSV
-        function addAuditLog(event, visitor, house, type, mode, ciPlaca = 'Verificado en Garita') {
-            const now = new Date().toLocaleTimeString('es-BO', { hour12: false });
+        // Bitácora Interactiva por Días, Fecha/Hora/Segundos, C.I./Placa y Exportación CSV
+        function getDayOfWeekFromDateStr(dateStr) {
+            const daysFull = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            if (dateStr && dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+                    if (!isNaN(d.getTime())) {
+                        return daysFull[d.getDay()];
+                    }
+                }
+            }
+            return daysFull[new Date().getDay()];
+        }
+
+        function resolveLogCompleteData(l) {
+            const todayStr = getTodayFormatted();
+            const dateStr = l.date || todayStr;
+            const dayName = l.dayName || getDayOfWeekFromDateStr(dateStr);
+            const timeStr = l.time || new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+            // Buscar pase asociado para recuperar C.I./Placa, ID de pase y Familia si faltaban
+            const normVis = String(l.visitor || '').toLowerCase().trim();
+            const rawHouseNum = String(l.house || '').replace(/casa\s*/i, '').split(' ')[0].trim();
+            const matchedPass = passes.find(p =>
+                String(p.visitorName || '').toLowerCase().trim() === normVis &&
+                (!rawHouseNum || String(p.house) === rawHouseNum)
+            ) || passes.find(p => String(p.visitorName || '').toLowerCase().trim() === normVis);
+
+            let ciPlaca = l.ciPlaca || '';
+            if ((!ciPlaca || ciPlaca === 'Verificado en Garita' || ciPlaca === 'Validado vía QR Wallet') && matchedPass && matchedPass.ciPlaca) {
+                ciPlaca = matchedPass.ciPlaca;
+            }
+            if (!ciPlaca) {
+                ciPlaca = 'Sin dato registrado';
+            }
+
+            const matchedHouse = houses.find(h => h.number === rawHouseNum);
+            const familyName = l.family || (matchedPass ? matchedPass.authBy : '') || (matchedHouse ? matchedHouse.family : '');
+            const houseDisplay = rawHouseNum
+                ? (familyName && !String(l.house).includes(familyName) ? `Casa ${rawHouseNum} (${familyName})` : (l.house || `Casa ${rawHouseNum}`))
+                : (l.house || '-');
+
+            const passId = l.passId || (matchedPass ? matchedPass.id : 'REG-GARITA');
+
+            return {
+                id: l.id || 'LOG-VERIFICADO',
+                dayName,
+                date: dateStr,
+                time: timeStr,
+                event: l.event || 'MOVIMIENTO',
+                visitor: l.visitor || 'Visitante',
+                ciPlaca,
+                house: l.house || '',
+                houseDisplay,
+                familyName: familyName || 'Propietario',
+                passId,
+                type: l.type || 'VISITA',
+                mode: l.mode || 'Turno Portería'
+            };
+        }
+
+        function addAuditLog(event, visitor, house, type, mode, ciPlaca = '') {
+            const now = new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             const today = getTodayFormatted();
+            const dayName = getDayOfWeekFromDateStr(today);
+
+            const normVis = String(visitor || '').toLowerCase().trim();
+            const rawHouseNum = String(house || '').replace(/casa\s*/i, '').split(' ')[0].trim();
+            const matchedPass = passes.find(p =>
+                String(p.visitorName || '').toLowerCase().trim() === normVis &&
+                (!rawHouseNum || String(p.house) === rawHouseNum)
+            );
+            const matchedHouse = houses.find(h => h.number === rawHouseNum);
+
+            const resolvedCiPlaca = (ciPlaca && ciPlaca !== 'Verificado en Garita')
+                ? ciPlaca
+                : (matchedPass && matchedPass.ciPlaca ? matchedPass.ciPlaca : (ciPlaca || 'Verificado en Garita'));
+
             const newLog = {
                 id: 'LOG-' + Math.floor(1000 + Math.random() * 9000),
+                dayName,
                 date: today,
                 time: now,
                 event,
                 visitor,
-                ciPlaca,
+                ciPlaca: resolvedCiPlaca,
                 house,
+                family: matchedPass ? matchedPass.authBy : (matchedHouse ? matchedHouse.family : ''),
+                passId: matchedPass ? matchedPass.id : '',
                 type,
                 mode
             };
@@ -4017,16 +4112,18 @@
             if (document.getElementById('bitacoraDayExitsCount')) document.getElementById('bitacoraDayExitsCount').textContent = exitsCount;
 
             const filteredLogs = dayLogs.filter(l => {
-                if (eventFilter === 'ENTRADA' && !l.event.includes('ENTRADA')) return false;
-                if (eventFilter === 'SALIDA' && !l.event.includes('SALIDA')) return false;
-                if (eventFilter === 'TAXI' && !l.event.includes('TAXI') && !l.type.includes('PRE-AUTORIZADO')) return false;
-                if (eventFilter === 'ALERTA' && !l.event.includes('ALERTA') && !l.event.includes('BLOQUEO')) return false;
+                const info = resolveLogCompleteData(l);
+                if (eventFilter === 'ENTRADA' && !info.event.includes('ENTRADA')) return false;
+                if (eventFilter === 'SALIDA' && !info.event.includes('SALIDA')) return false;
+                if (eventFilter === 'TAXI' && !info.event.includes('TAXI') && !info.type.includes('PRE-AUTORIZADO')) return false;
+                if (eventFilter === 'ALERTA' && !info.event.includes('ALERTA') && !info.event.includes('BLOQUEO')) return false;
 
                 if (searchTxt) {
-                    const matchVis = (l.visitor || '').toLowerCase().includes(searchTxt);
-                    const matchHouse = (l.house || '').toLowerCase().includes(searchTxt);
-                    const matchType = (l.type || '').toLowerCase().includes(searchTxt);
-                    return matchVis || matchHouse || matchType;
+                    const matchVis = info.visitor.toLowerCase().includes(searchTxt);
+                    const matchCi = info.ciPlaca.toLowerCase().includes(searchTxt);
+                    const matchHouse = info.houseDisplay.toLowerCase().includes(searchTxt);
+                    const matchType = info.type.toLowerCase().includes(searchTxt);
+                    return matchVis || matchCi || matchHouse || matchType;
                 }
                 return true;
             });
@@ -4037,7 +4134,7 @@
             if (filteredLogs.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" class="py-8 text-center text-xs text-zinc-500 italic">
+                        <td colspan="9" class="py-8 text-center text-xs text-zinc-500 italic">
                             No hay movimientos registrados para la fecha o filtro seleccionado (${escapeHtml(selectedBitacoraDate)}).
                         </td>
                     </tr>
@@ -4046,24 +4143,37 @@
             }
 
             tbody.innerHTML = filteredLogs.map((l, idx) => {
+                const info = resolveLogCompleteData(l);
                 let badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-                if (l.event.includes('SALIDA')) badgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
-                else if (l.event.includes('TAXI')) badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-                else if (l.event.includes('ALERTA') || l.event.includes('BLOQUEO')) badgeClass = 'bg-red-500/20 text-red-300 border-red-500/30';
+                if (info.event.includes('SALIDA')) badgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                else if (info.event.includes('TAXI')) badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                else if (info.event.includes('ALERTA') || info.event.includes('BLOQUEO')) badgeClass = 'bg-red-500/20 text-red-300 border-red-500/30';
 
                 const logId = l.id || `LOG-IDX-${idx}`;
                 return `
                     <tr data-logid="${escapeHtml(logId)}" data-idx="${idx}" onclick="openLogDetailModal(this.dataset.logid, Number(this.dataset.idx))" class="hover:bg-zinc-800/60 cursor-pointer transition">
-                        <td class="py-3 px-3 font-mono text-zinc-300 font-semibold">${escapeHtml(l.date || todayStr)}</td>
-                        <td class="py-3 px-3 font-mono text-zinc-400">${escapeHtml(l.time)}</td>
-                        <td class="py-3 px-3">
-                            <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badgeClass}">${escapeHtml(l.event)}</span>
+                        <td class="py-3 px-3 whitespace-nowrap">
+                            <span class="text-[10px] font-bold uppercase text-purple-300 block">${escapeHtml(info.dayName)}</span>
+                            <span class="font-mono text-zinc-200 font-semibold">${escapeHtml(info.date)}</span>
                         </td>
-                        <td class="py-3 px-3 font-bold text-white">${escapeHtml(l.visitor)}</td>
-                        <td class="py-3 px-3 text-purple-300 font-bold">${escapeHtml(l.house)}</td>
-                        <td class="py-3 px-3 text-zinc-400">${escapeHtml(l.type)}</td>
-                        <td class="py-3 px-3 font-mono text-emerald-400 text-[11px]">${escapeHtml(l.mode)}</td>
-                        <td class="py-3 px-3 text-right">
+                        <td class="py-3 px-3 font-mono text-emerald-300 font-bold whitespace-nowrap">${escapeHtml(info.time)}</td>
+                        <td class="py-3 px-3 whitespace-nowrap">
+                            <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badgeClass}">${escapeHtml(info.event)}</span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="font-bold text-white">${escapeHtml(info.visitor)}</div>
+                            <div class="text-[10px] font-mono text-zinc-500">${escapeHtml(info.passId)}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 font-mono text-amber-300 text-xs font-bold">
+                                <i class="fa-solid fa-id-card text-[10px]"></i>
+                                <span>${escapeHtml(info.ciPlaca)}</span>
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-purple-300 font-bold">${escapeHtml(info.houseDisplay)}</td>
+                        <td class="py-3 px-3 text-zinc-300">${escapeHtml(info.type)}</td>
+                        <td class="py-3 px-3 font-mono text-emerald-400 text-[11px] whitespace-nowrap">${escapeHtml(info.mode)}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap">
                             <button type="button" class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-purple-600 text-zinc-200 hover:text-white text-[11px] font-bold transition">
                                 Ver Ficha
                             </button>
@@ -4085,67 +4195,77 @@
                 return;
             }
 
-            const headers = ['ID', 'Fecha', 'Hora', 'Evento', 'Visitante', 'CI_Placa', 'Domicilio', 'Categoria', 'Guardia'];
-            const rows = dayLogs.map(l => [
-                l.id || '',
-                l.date || todayStr,
-                l.time || '',
-                `"${(l.event || '').replace(/"/g, '""')}"`,
-                `"${(l.visitor || '').replace(/"/g, '""')}"`,
-                `"${(l.ciPlaca || '').replace(/"/g, '""')}"`,
-                `"${(l.house || '').replace(/"/g, '""')}"`,
-                `"${(l.type || '').replace(/"/g, '""')}"`,
-                `"${(l.mode || '').replace(/"/g, '""')}"`
-            ].join(','));
+            const headers = ['ID_Registro', 'Dia', 'Fecha', 'Hora_Exacta_Segundos', 'Evento', 'Nombre_Completo', 'CI_y_Placa', 'Domicilio_Familia', 'ID_Pase', 'Categoria', 'Turno_Guardia'];
+            const rows = dayLogs.map(l => {
+                const info = resolveLogCompleteData(l);
+                return [
+                    info.id,
+                    `"${info.dayName.replace(/"/g, '""')}"`,
+                    info.date,
+                    info.time,
+                    `"${info.event.replace(/"/g, '""')}"`,
+                    `"${info.visitor.replace(/"/g, '""')}"`,
+                    `"${info.ciPlaca.replace(/"/g, '""')}"`,
+                    `"${info.houseDisplay.replace(/"/g, '""')}"`,
+                    `"${info.passId.replace(/"/g, '""')}"`,
+                    `"${info.type.replace(/"/g, '""')}"`,
+                    `"${info.mode.replace(/"/g, '""')}"`
+                ].join(',');
+            });
 
             const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Bitacora_VisePass_${selectedBitacoraDate.replace(/\//g, '-')}.csv`;
+            a.download = `Bitacora_Seguridad_VisePass_${selectedBitacoraDate.replace(/\//g, '-')}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('📊 Reporte CSV descargado con éxito');
+            showToast('📊 Reporte completo CSV con C.I./Placa y Segundos descargado');
         }
 
         function openLogDetailModal(logId, fallbackIdx) {
             const logItem = auditLogs.find(l => l.id === logId) || auditLogs[fallbackIdx];
             if (!logItem) return;
 
-            document.getElementById('logModalTitle').textContent = `${logItem.event}`;
+            const info = resolveLogCompleteData(logItem);
+            document.getElementById('logModalTitle').textContent = `${info.event}`;
             const body = document.getElementById('logModalBody');
             body.innerHTML = `
-                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-2">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-2.5">
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                        <span class="text-zinc-400">ID de Transacción:</span>
-                        <strong class="font-mono text-zinc-300">${escapeHtml(logItem.id || 'LOG-VERIFICADO')}</strong>
+                        <span class="text-zinc-400">ID de Registro / Pase:</span>
+                        <strong class="font-mono text-zinc-300">${escapeHtml(info.id)} • ${escapeHtml(info.passId)}</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                        <span class="text-zinc-400">Fecha y Hora Exacta:</span>
-                        <strong class="font-mono text-white">${escapeHtml(logItem.date || getTodayFormatted())} — ${escapeHtml(logItem.time)}</strong>
+                        <span class="text-zinc-400">Día y Fecha:</span>
+                        <strong class="font-mono text-purple-300">${escapeHtml(info.dayName)}, ${escapeHtml(info.date)}</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                        <span class="text-zinc-400">Visitante / Identificación:</span>
-                        <strong class="text-white">${escapeHtml(logItem.visitor)}</strong>
+                        <span class="text-zinc-400">Hora Exacta (con Segundos):</span>
+                        <strong class="font-mono text-emerald-400">${escapeHtml(info.time)} hrs</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                        <span class="text-zinc-400">C.I. / Placa / Detalle:</span>
-                        <strong class="font-mono text-amber-300">${escapeHtml(logItem.ciPlaca || 'Validado con Firma QR')}</strong>
+                        <span class="text-zinc-400">Nombre Completo:</span>
+                        <strong class="text-white text-sm">${escapeHtml(info.visitor)}</strong>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-zinc-800/80 pb-1.5">
+                        <span class="text-zinc-400">Carné de Identidad (C.I.) / Placa:</span>
+                        <strong class="font-mono text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded">${escapeHtml(info.ciPlaca)}</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                        <span class="text-zinc-400">Domicilio Destino:</span>
-                        <strong class="text-purple-300">${escapeHtml(logItem.house)}</strong>
+                        <span class="text-zinc-400">Domicilio y Familia:</span>
+                        <strong class="text-purple-300">${escapeHtml(info.houseDisplay)}</strong>
                     </div>
                     <div class="flex justify-between border-b border-zinc-800/80 pb-1.5">
                         <span class="text-zinc-400">Categoría de Pase:</span>
-                        <strong class="text-zinc-200">${escapeHtml(logItem.type)}</strong>
+                        <strong class="text-zinc-200">${escapeHtml(info.type)}</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-zinc-400">Terminal / Guardia:</span>
-                        <strong class="text-emerald-400">${escapeHtml(logItem.mode)}</strong>
+                        <span class="text-zinc-400">Guardia / Turno en Portería:</span>
+                        <strong class="text-emerald-400">${escapeHtml(info.mode)}</strong>
                     </div>
                 </div>
             `;
