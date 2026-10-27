@@ -1,7 +1,7 @@
 rules_version = '2';
 
-// Reglas de seguridad de VisePass SCZ
-// Perfiles: administración, portería (guardias), vecino (una cuenta por casa) e invitado (link de churrasco).
+// Reglas de seguridad de VisePass
+// Perfiles: administración, portería (guardias), vecino (una cuenta por casa) e invitado (link de evento).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -21,23 +21,55 @@ service cloud.firestore {
     function housePath(h) { return /databases/$(database)/documents/houses/$(h); }
     function house(h) { return get(housePath(h)).data; }
     function infoPath(h) { return /databases/$(database)/documents/houseInfo/$(h); }
+    function secretPath(h) { return /databases/$(database)/documents/houseSecrets/$(h); }
     // La casa existe y no está en mora (el estado de mora es privado: vive en /houseInfo)
     function houseAlDia(h) { return exists(housePath(h)) && exists(infoPath(h)) && get(infoPath(h)).data.isMorosa == false; }
-    // El vecino solo vale si su cuenta es la vigente de la casa (al resetear el PIN se crea otra)
+    // El vecino solo vale si su cuenta es la vigente de la casa (al cambiar el PIN desde administración se crea otra)
     function residentOf(h) { return isResident() && myHouse() == h && exists(housePath(h)) && house(h).authUid == request.auth.uid; }
+    function myCurrentHouse() { return isResident() && residentOf(myHouse()); }
     function nowMs() { return request.time.toMillis(); }
     function validTypes() { return ['VISITA SOCIAL', 'RESIDENTE VIP', 'PERSONAL HOGAR', 'PROVEEDOR / OBRA']; }
     function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+    function d() { return request.resource.data; }
+
+    // Campos que puede tener un pase creado desde un teléfono
+    function passKeys() {
+      return ['id', 'house', 'visitorName', 'ciPlaca', 'passType', 'validUntil', 'validUntilTime', 'validUntilTs',
+              'authBy', 'origin', 'qrKey', 'status', 'revoked', 'identityVerified', 'createdBy', 'createdAt', 'updatedAt'];
+    }
+    function cleanNewPass(id) {
+      return d().id == id
+        && d().house is string
+        && d().visitorName is string && d().visitorName.size() >= 3 && d().visitorName.size() <= 80
+        && d().ciPlaca is string && d().ciPlaca.size() >= 3 && d().ciPlaca.size() <= 80
+        && d().qrKey is string && d().qrKey.size() >= 10
+        && d().createdBy == request.auth.uid
+        && d().status == 'AFUERA'
+        && d().revoked == false
+        && d().identityVerified == false
+        && d().validUntilTs is number;
+    }
+    function logKeys() {
+      return ['id', 'ts', 'dayName', 'date', 'time', 'event', 'visitor', 'ciPlaca', 'house', 'family', 'passId', 'type', 'mode'];
+    }
 
     // ---------- Configuración general ----------
     match /config/main {
       allow read: if true;
       // Primera vez: quien crea el condominio queda como administrador (junto con su ficha en /members)
       allow create: if signedIn() && !isAnon() && !hasCfg()
-        && request.resource.data.adminUid == request.auth.uid
+        && d().adminUid == request.auth.uid
         && getAfter(memberPath()).data.role == 'admin';
-      allow update: if isAdmin() && request.resource.data.adminUid == resource.data.adminUid;
+      // Traspaso de administración: el nuevo administrador debe tener su ficha creada en la misma operación
+      allow update: if isAdmin() && (d().adminUid == resource.data.adminUid
+        || getAfter(/databases/$(database)/documents/members/$(d().adminUid)).data.role == 'admin');
       allow delete: if false;
+    }
+
+    // ---------- Lista de casas para la pantalla de ingreso (número y cuenta, sin nombres) ----------
+    match /config/houseIndex {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ---------- Fichas de cuentas (rol y casa) ----------
@@ -45,15 +77,14 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isAdmin()
         || (signedIn() && !isAnon() && uid == request.auth.uid && !hasCfg()
-            && request.resource.data.role == 'admin'
+            && d().role == 'admin'
             && getAfter(cfgPath()).data.adminUid == request.auth.uid);
       allow update, delete: if isAdmin() && uid != request.auth.uid;
     }
 
-    // ---------- Casas: solo el número y la cuenta (lo mínimo para la pantalla de ingreso) ----------
+    // ---------- Casas: número y cuenta vigente (lo usan estas reglas) ----------
     match /houses/{h} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     // ---------- Datos de la casa: familia, dirección y mora (privados) ----------
@@ -62,7 +93,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ---------- Datos privados de cada casa (código del link, frecuentes) ----------
+    // ---------- Datos privados de cada casa (link de evento, frecuentes, PIN temporal) ----------
     match /houseSecrets/{h} {
       allow read, write: if isAdmin() || residentOf(h);
     }
@@ -70,40 +101,40 @@ service cloud.firestore {
     // ---------- Pases ----------
     match /passes/{id} {
       allow read: if isAdmin() || isGuard()
-        || (isResident() && resource.data.house == myHouse())
+        || (myCurrentHouse() && resource.data.house == myHouse())
         || (signedIn() && resource.data.createdBy == request.auth.uid);
 
-      allow create: if isAdmin() || isGuard()
+      allow create: if isAdmin()
+        // Portería: solo entradas anotadas en la garita (sin QR o confirmadas por citófono)
+        || (isGuard() && d().origin in ['MANUAL', 'CITOFONO'] && d().id == id)
         // Vecino: solo para su casa, sin mora, con vigencia razonable
-        || (residentOf(request.resource.data.house)
-            && houseAlDia(request.resource.data.house)
-            && request.resource.data.id == id
-            && request.resource.data.createdBy == request.auth.uid
-            && request.resource.data.status == 'AFUERA'
-            && request.resource.data.revoked == false
-            && request.resource.data.passType in validTypes()
-            && request.resource.data.validUntilTs is number
-            && request.resource.data.validUntilTs > nowMs()
-            && request.resource.data.validUntilTs < nowMs() + 400 * 86400000)
-        // Invitado del link de churrasco: con el código secreto vigente de la casa
+        || (residentOf(d().house)
+            && houseAlDia(d().house)
+            && d().keys().hasOnly(passKeys())
+            && cleanNewPass(id)
+            && d().origin == 'VECINO'
+            && d().passType in validTypes()
+            && d().validUntilTs > nowMs()
+            && d().validUntilTs < nowMs() + 400 * 86400000)
+        // Invitado del link de evento: con el código y la fecha vigentes de la casa
         || (isAnon()
-            && request.resource.data.origin == 'INVITADO'
-            && request.resource.data.id == id
-            && request.resource.data.createdBy == request.auth.uid
-            && houseAlDia(request.resource.data.house)
-            && exists(/databases/$(database)/documents/houseSecrets/$(request.resource.data.house))
-            && get(/databases/$(database)/documents/houseSecrets/$(request.resource.data.house)).data.inviteCode == request.resource.data.inviteCode
-            && request.resource.data.status == 'AFUERA'
-            && request.resource.data.revoked == false
-            && request.resource.data.passType == 'VISITA SOCIAL'
-            && request.resource.data.validUntilTs is number
-            && request.resource.data.validUntilTs < nowMs() + 3 * 86400000);
+            && d().keys().hasOnly(passKeys().concat(['validFromTs', 'inviteCode']))
+            && cleanNewPass(id)
+            && d().origin == 'INVITADO'
+            && d().passType == 'VISITA SOCIAL'
+            && houseAlDia(d().house)
+            && exists(secretPath(d().house))
+            && get(secretPath(d().house)).data.inviteCode == d().inviteCode
+            && get(secretPath(d().house)).data.inviteUntilTs is number
+            && get(secretPath(d().house)).data.inviteUntilTs > nowMs()
+            && d().validUntilTs == get(secretPath(d().house)).data.inviteUntilTs
+            && d().validFromTs == get(secretPath(d().house)).data.inviteFromTs);
 
       allow update: if isAdmin()
         // Portería: solo entradas, salidas y verificación del carnet
         || (isGuard() && onlyChanged(['status', 'entryTs', 'entryTime', 'exitTs', 'identityVerified', 'updatedAt']))
         // Vecino: solo anular pases de su casa
-        || (residentOf(resource.data.house) && request.resource.data.revoked == true
+        || (residentOf(resource.data.house) && d().revoked == true
             && onlyChanged(['revoked', 'revokedAt', 'updatedAt']));
 
       allow delete: if isAdmin();
@@ -111,26 +142,39 @@ service cloud.firestore {
 
     // ---------- Avisos de taxi / delivery ----------
     match /fastPasses/{id} {
-      allow read: if isAdmin() || isGuard() || (isResident() && resource.data.house == myHouse());
+      allow read: if isAdmin() || isGuard() || (myCurrentHouse() && resource.data.house == myHouse());
       allow create: if isAdmin()
-        || (residentOf(request.resource.data.house)
-            && houseAlDia(request.resource.data.house)
-            && request.resource.data.status == 'PENDIENTE'
-            && request.resource.data.expiresAt is number
-            && request.resource.data.expiresAt <= nowMs() + 31 * 60000);
+        || (residentOf(d().house)
+            && houseAlDia(d().house)
+            && d().keys().hasOnly(['id', 'house', 'service', 'plateOrName', 'authBy', 'origin', 'createdAt', 'expiresAt', 'status', 'updatedAt'])
+            && d().id == id
+            && d().origin == 'VECINO'
+            && d()['service'] is string && d()['service'].size() <= 60
+            && d().plateOrName is string && d().plateOrName.size() <= 60
+            && d().status == 'PENDIENTE'
+            && d().expiresAt is number
+            && d().expiresAt <= nowMs() + 31 * 60000);
       allow update: if isAdmin()
         || (isGuard() && onlyChanged(['status', 'updatedAt']))
         || (residentOf(resource.data.house) && onlyChanged(['status', 'updatedAt'])
-            && request.resource.data.status in ['CANCELADO', 'VENCIDO']);
+            && d().status in ['CANCELADO', 'VENCIDO']);
       allow delete: if isAdmin();
     }
 
-    // ---------- Bitácora (solo administración la lee; nadie la edita) ----------
+    // ---------- Bitácora (solo administración la lee; nadie la edita ni la borra) ----------
     match /logs/{id} {
       allow read: if isAdmin();
-      allow create: if isAdmin() || isGuard() || isResident();
+      allow create: if isAdmin()
+        // Portería: registros de la garita (pueden llegar tarde si se cortó internet)
+        || (isGuard() && d().keys().hasOnly(logKeys()) && d().id == id
+            && d().ts is number && d().ts <= nowMs() + 600000 && d().ts > nowMs() - 7 * 86400000)
+        // Vecino: solo el aviso de que anuló un pase de su casa
+        || (myCurrentHouse() && d().keys().hasOnly(logKeys()) && d().id == id
+            && d().event == 'PASE ANULADO POR EL VECINO'
+            && d().house == 'Casa ' + myHouse()
+            && d().ts is number && d().ts <= nowMs() + 600000 && d().ts > nowMs() - 86400000);
       allow update: if false;
-      allow delete: if isAdmin();
+      allow delete: if false;
     }
 
     // ---------- Lista negra ----------
