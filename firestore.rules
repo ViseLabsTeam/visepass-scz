@@ -155,7 +155,9 @@ service cloud.firestore {
             && d().expiresAt is number
             && d().expiresAt <= nowMs() + 31 * 60000);
       allow update: if isAdmin()
-        || (isGuard() && onlyChanged(['status', 'updatedAt']))
+        // Portería: entrada y salida del taxi o delivery
+        || (isGuard() && onlyChanged(['status', 'entryTs', 'exitTs', 'updatedAt'])
+            && d().status in ['INGRESÓ', 'SALIÓ', 'VENCIDO'])
         || (residentOf(resource.data.house) && onlyChanged(['status', 'updatedAt'])
             && d().status in ['CANCELADO', 'VENCIDO']);
       allow delete: if isAdmin();
