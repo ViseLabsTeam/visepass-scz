@@ -14,7 +14,9 @@ service cloud.firestore {
     function memberPath() { return /databases/$(database)/documents/members/$(request.auth.uid); }
     function isMember() { return signedIn() && exists(memberPath()); }
     function member() { return get(memberPath()).data; }
-    function isAdmin() { return signedIn() && hasCfg() && cfg().adminUid == request.auth.uid; }
+    // Administrador principal (adminUid) y administradores adicionales (adminUids, hasta 5)
+    function isOwner() { return signedIn() && hasCfg() && cfg().adminUid == request.auth.uid; }
+    function isAdmin() { return isOwner() || (signedIn() && hasCfg() && request.auth.uid in cfg().get('adminUids', [])); }
     function isGuard() { return isMember() && member().role == 'guard' && hasCfg() && cfg().guardUid == request.auth.uid; }
     function isResident() { return isMember() && member().role == 'resident'; }
     function myHouse() { return member().house; }
@@ -28,14 +30,15 @@ service cloud.firestore {
     function residentOf(h) { return isResident() && myHouse() == h && exists(housePath(h)) && house(h).authUid == request.auth.uid; }
     function myCurrentHouse() { return isResident() && residentOf(myHouse()); }
     function nowMs() { return request.time.toMillis(); }
-    function validTypes() { return ['VISITA SOCIAL', 'RESIDENTE VIP', 'PERSONAL HOGAR', 'PROVEEDOR / OBRA']; }
+    function validTypes() { return ['VISITA SOCIAL', 'FAMILIAR', 'RESIDENTE VIP', 'PERSONAL HOGAR', 'PROVEEDOR / OBRA']; }
     function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
     function d() { return request.resource.data; }
 
     // Campos que puede tener un pase creado desde un teléfono
     function passKeys() {
       return ['id', 'house', 'visitorName', 'ciPlaca', 'passType', 'validUntil', 'validUntilTime', 'validUntilTs',
-              'authBy', 'origin', 'qrKey', 'status', 'revoked', 'identityVerified', 'createdBy', 'createdAt', 'updatedAt'];
+              'authBy', 'origin', 'qrKey', 'status', 'revoked', 'identityVerified', 'createdBy', 'createdAt', 'updatedAt',
+              'recurring', 'days', 'fromTime', 'toTime'];
     }
     function cleanNewPass(id) {
       return d().id == id
@@ -47,7 +50,10 @@ service cloud.firestore {
         && d().status == 'AFUERA'
         && d().revoked == false
         && d().identityVerified == false
-        && d().validUntilTs is number;
+        && d().validUntilTs is number
+        // Pase recurrente: días de la semana y horario
+        && (!('recurring' in d()) || (d().recurring == true && d().days is list && d().days.size() >= 1 && d().days.size() <= 7
+            && d().fromTime is string && d().fromTime.size() == 5 && d().toTime is string && d().toTime.size() == 5));
     }
     function logKeys() {
       return ['id', 'ts', 'dayName', 'date', 'time', 'event', 'visitor', 'ciPlaca', 'house', 'family', 'passId', 'type', 'mode'];
@@ -61,8 +67,12 @@ service cloud.firestore {
         && d().adminUid == request.auth.uid
         && getAfter(memberPath()).data.role == 'admin';
       // Traspaso de administración: el nuevo administrador debe tener su ficha creada en la misma operación
-      allow update: if isAdmin() && (d().adminUid == resource.data.adminUid
-        || getAfter(/databases/$(database)/documents/members/$(d().adminUid)).data.role == 'admin');
+      // Solo el principal suma o quita administradores; los demás no pueden tocar adminUid ni adminUids
+      allow update: if isAdmin()
+        && d().get('adminUids', []) is list && d().get('adminUids', []).size() <= 5
+        && (isOwner() || (d().adminUid == resource.data.adminUid && d().get('adminUids', []) == resource.data.get('adminUids', [])))
+        && (d().adminUid == resource.data.adminUid
+          || getAfter(/databases/$(database)/documents/members/$(d().adminUid)).data.role == 'admin');
       allow delete: if false;
     }
 
@@ -75,11 +85,13 @@ service cloud.firestore {
     // ---------- Fichas de cuentas (rol y casa) ----------
     match /members/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if isAdmin()
+      // Solo el principal crea o borra cuentas de administración
+      allow create: if (isAdmin() && (isOwner() || d().role != 'admin'))
         || (signedIn() && !isAnon() && uid == request.auth.uid && !hasCfg()
             && d().role == 'admin'
             && getAfter(cfgPath()).data.adminUid == request.auth.uid);
-      allow update, delete: if isAdmin() && uid != request.auth.uid;
+      allow update: if isAdmin() && uid != request.auth.uid && (isOwner() || (resource.data.role != 'admin' && d().role != 'admin'));
+      allow delete: if isAdmin() && uid != request.auth.uid && (isOwner() || resource.data.role != 'admin');
     }
 
     // ---------- Casas: número y cuenta vigente (lo usan estas reglas) ----------
@@ -105,7 +117,7 @@ service cloud.firestore {
         || (signedIn() && resource.data.createdBy == request.auth.uid);
 
       allow create: if isAdmin()
-        // Portería: solo entradas anotadas en la garita (sin QR o confirmadas por citófono)
+        // Portería: solo entradas anotadas en portería (sin QR o confirmadas por citófono)
         || (isGuard() && d().origin in ['MANUAL', 'CITOFONO'] && d().id == id)
         // Vecino: solo para su casa, sin mora, con vigencia razonable
         || (residentOf(d().house)
@@ -167,7 +179,7 @@ service cloud.firestore {
     match /logs/{id} {
       allow read: if isAdmin();
       allow create: if isAdmin()
-        // Portería: registros de la garita (pueden llegar tarde si se cortó internet)
+        // Portería: registros de portería (pueden llegar tarde si se cortó internet)
         || (isGuard() && d().keys().hasOnly(logKeys()) && d().id == id
             && d().ts is number && d().ts <= nowMs() + 600000 && d().ts > nowMs() - 7 * 86400000)
         // Vecino: solo el aviso de que anuló un pase de su casa
