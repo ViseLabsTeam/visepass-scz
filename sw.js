@@ -1,7 +1,7 @@
 // VisePass SCZ — service worker
 // Permite abrir la app aunque la garita se quede sin internet y muestra los avisos de taxis/deliveries.
 // Los datos (pases, casas, bitácora) NO pasan por aquí: los maneja Firebase con su propio caché.
-const VERSION = 'visepass-v4';
+const VERSION = 'visepass-v6';
 const APP_SHELL = ['./', './index.html', './manifest.json', './favicon.png', './apple-touch-icon.png', './icon-512.png'];
 // Librerías externas con versión fija: se guardan una vez y se sirven desde el teléfono
 const LIBS = [
@@ -38,20 +38,34 @@ self.addEventListener('activate', event => {
     })());
 });
 
-// Primero la red (para recibir actualizaciones); si no hay internet o tarda más de 4 s, la copia guardada
-async function networkFirst(request) {
+// ¿Es la app en sí? (la raíz o index.html, con o sin ?junte=… del link de evento)
+function isAppPage(url) {
+    const scope = new URL(self.registration.scope);
+    return url.origin === scope.origin && (url.pathname === scope.pathname || url.pathname === scope.pathname + 'index.html');
+}
+
+// Primero la red (para recibir actualizaciones); si no hay internet o tarda más de 4 s, la copia guardada.
+// Aunque se use la copia, la descarga sigue en segundo plano y queda guardada para la próxima vez.
+async function networkFirst(event) {
+    const request = event.request;
     const cache = await caches.open(VERSION);
+    const url = new URL(request.url);
+    const appPage = request.mode === 'navigate' && isAppPage(url);
+    const key = appPage ? './index.html' : request;
+    const fetching = fetch(request).then(response => {
+        if (response && response.ok && (request.mode !== 'navigate' || appPage)) cache.put(key, response.clone());
+        return response;
+    });
+    event.waitUntil(fetching.catch(() => {}));
     try {
-        const response = await Promise.race([
-            fetch(request),
+        return await Promise.race([
+            fetching,
             new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
         ]);
-        if (response && response.ok) cache.put(request.mode === 'navigate' ? './index.html' : request, response.clone());
-        return response;
     } catch (e) {
-        const cached = await cache.match(request.mode === 'navigate' ? './index.html' : request, { ignoreSearch: request.mode === 'navigate' });
+        const cached = await cache.match(key, { ignoreSearch: appPage });
         if (cached) return cached;
-        throw e;
+        return fetching;
     }
 }
 
@@ -72,7 +86,7 @@ self.addEventListener('fetch', event => {
     // Base de datos e inicio de sesión de Firebase: siempre directo, nunca desde el caché
     if (/firestore\.googleapis\.com|identitytoolkit|securetoken|firebaseinstallations|googleapis\.com\/(?!css)/.test(url.href) && url.host !== 'fonts.googleapis.com') return;
     if (url.origin === self.location.origin) {
-        event.respondWith(networkFirst(request));
+        event.respondWith(networkFirst(event));
         return;
     }
     if (CACHEABLE_HOSTS.includes(url.host)) event.respondWith(cacheFirst(request));
