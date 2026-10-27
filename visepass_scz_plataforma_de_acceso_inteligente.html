@@ -1407,6 +1407,14 @@
                     Guardar Contraseña y Entrar como Administración
                 </button>
             </form>
+
+            <div id="logoutSessionBox" class="hidden pt-4 border-t border-zinc-800 flex items-center justify-between gap-3">
+                <p id="logoutSessionText" class="text-xs text-zinc-400 leading-snug">Sesión guardada en este teléfono.</p>
+                <button type="button" onclick="logoutSession()" class="shrink-0 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                    <span>Cerrar sesión</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1964,6 +1972,8 @@
             updateAdminAndGuardLoginUI();
             syncCurrentHouseHeader();
             refreshAllViews();
+            if (hasAuthenticatedSession) enforceSavedSessionAfterSync();
+            else tryRestoreSavedSession();
         }
 
         async function initCloudSync() {
@@ -2016,6 +2026,7 @@
         async function pushStateToCloud() {
             lastStateUpdatedAt = Date.now();
             saveLocalState();
+            if (hasAuthenticatedSession && !isGuestMode) rememberCurrentSession();
             syncCurrentHouseHeader();
             refreshAllViews();
             if (isOfflineMode) return;
@@ -2465,12 +2476,104 @@
             }
         }
 
+        /* ---------- Sesión recordada en este teléfono ---------- */
+        const SESSION_KEY = 'visepass_scz_session_v1';
+        const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000; // Administración: 12 horas
+
+        function readSavedSession() {
+            try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { return null; }
+        }
+        function writeSavedSession(sess) {
+            try { localStorage.setItem(SESSION_KEY, JSON.stringify(sess)); } catch (e) {}
+        }
+        function clearSavedSession() {
+            try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+        }
+
+        function rememberCurrentSession() {
+            if (activeRole === 'RESIDENTE') {
+                const h = houses.find(x => x.number === currentHouse);
+                if (h) writeSavedSession({ role: 'RESIDENTE', house: h.number, pin: h.pin, at: Date.now() });
+            } else if (activeRole === 'GUARDIA') {
+                writeSavedSession({ role: 'GUARDIA', guardName: currentGuardName, pass: guardPassword || adminPassword, at: Date.now() });
+            } else if (activeRole === 'ADMIN') {
+                const prev = readSavedSession();
+                const at = prev && prev.role === 'ADMIN' && prev.pass === adminPassword ? prev.at : Date.now();
+                writeSavedSession({ role: 'ADMIN', pass: adminPassword, at });
+            }
+        }
+
+        // La sesión vale mientras el PIN o la clave sigan siendo los mismos
+        function isSavedSessionValid(sess) {
+            if (!sess || !sess.role) return false;
+            if (sess.role === 'RESIDENTE') {
+                const h = houses.find(x => x.number === sess.house);
+                return !!h && !!h.pin && h.pin === sess.pin;
+            }
+            if (sess.role === 'GUARDIA') {
+                return !!sess.pass && (sess.pass === (guardPassword || adminPassword) || sess.pass === adminPassword);
+            }
+            if (sess.role === 'ADMIN') {
+                return !!adminPassword && sess.pass === adminPassword && (Date.now() - (sess.at || 0)) < ADMIN_SESSION_MS;
+            }
+            return false;
+        }
+
+        function tryRestoreSavedSession() {
+            if (hasAuthenticatedSession || isGuestMode) return false;
+            const sess = readSavedSession();
+            if (!sess) return false;
+            if (!isSavedSessionValid(sess)) {
+                // Si todavía no llegaron datos, esperamos a la nube antes de descartarla
+                if (houses.length > 0 || adminPassword) clearSavedSession();
+                return false;
+            }
+            if (sess.role === 'RESIDENTE') {
+                const h = houses.find(x => x.number === sess.house);
+                enterAsResident(h, true);
+            } else if (sess.role === 'GUARDIA') {
+                const sel = document.getElementById('guardNameInput');
+                if (sel && sess.guardName) sel.value = sess.guardName;
+                enterAsGuard(sess.guardName || 'Turno Día', true);
+            } else if (sess.role === 'ADMIN') {
+                enterAsAdmin(true);
+            }
+            return true;
+        }
+
+        // Si la administración cambió el PIN o la clave, este teléfono sale solo
+        function enforceSavedSessionAfterSync() {
+            if (!hasAuthenticatedSession || isGuestMode) return;
+            const sess = readSavedSession();
+            if (sess && sess.role === activeRole && !isSavedSessionValid(sess)) {
+                logoutSession(sess.role === 'RESIDENTE'
+                    ? '🔑 El PIN de tu domicilio cambió. Ingresa con el nuevo PIN.'
+                    : '🔑 La contraseña cambió o la sesión venció. Vuelve a ingresar.');
+            }
+        }
+
+        function logoutSession(message) {
+            clearSavedSession();
+            hasAuthenticatedSession = false;
+            if (isCameraRunning && html5QrScanner) {
+                html5QrScanner.stop().then(() => { isCameraRunning = false; }).catch(() => {});
+            }
+            document.getElementById('closeAuthModalBtn')?.classList.add('hidden');
+            document.getElementById('logoutSessionBox')?.classList.add('hidden');
+            renderLoginHouseOptions();
+            updateAdminAndGuardLoginUI();
+            selectLoginTab('RESIDENTE');
+            document.getElementById('authPortalModal').classList.remove('hidden');
+            showToast(message || '👋 Sesión cerrada en este teléfono');
+        }
+
         function completeSessionLogin() {
             hasAuthenticatedSession = true;
             const closeBtn = document.getElementById('closeAuthModalBtn');
             if (closeBtn) closeBtn.classList.remove('hidden');
             document.getElementById('authPortalModal').classList.add('hidden');
             applyRolePermissions();
+            rememberCurrentSession();
         }
 
         function closeAuthPortalIfAllowed() {
@@ -2505,6 +2608,10 @@
 
             document.getElementById('loginErrorMsg').classList.add('hidden');
             document.getElementById('loginResidentPin').value = '';
+            enterAsResident(houseObj, false);
+        }
+
+        function enterAsResident(houseObj, restored) {
             currentHouse = houseObj.number;
             currentFamily = houseObj.family;
             activeRole = 'RESIDENTE';
@@ -2515,7 +2622,7 @@
             completeSessionLogin();
             switchTab('vecino');
             refreshAllViews();
-            showToast(`🏠 Bienvenido, ${currentFamily} (Casa ${currentHouse})`);
+            showToast(restored ? `🏠 Hola de nuevo, ${currentFamily}` : `🏠 Bienvenido, ${currentFamily} (Casa ${currentHouse})`);
         }
 
         function openChangePinModal() {
@@ -2569,7 +2676,11 @@
             }
 
             document.getElementById('loginErrorMsg').classList.add('hidden');
-            currentGuardName = document.getElementById('guardNameInput').value || 'Turno Día';
+            enterAsGuard(document.getElementById('guardNameInput').value || 'Turno Día', false);
+        }
+
+        function enterAsGuard(guardName, restored) {
+            currentGuardName = guardName;
             activeRole = 'GUARDIA';
             document.getElementById('activeRoleHeaderBadge').textContent = `PORTERÍA • ${currentGuardName.toUpperCase()}`;
 
@@ -2613,6 +2724,10 @@
             }
 
             document.getElementById('loginErrorMsg').classList.add('hidden');
+            enterAsAdmin(false);
+        }
+
+        function enterAsAdmin(restored) {
             activeRole = 'ADMIN';
             document.getElementById('activeRoleHeaderBadge').textContent = 'ADMINISTRACIÓN';
 
@@ -2766,6 +2881,13 @@
             renderLoginHouseOptions();
             updateAdminAndGuardLoginUI();
             selectLoginTab(activeRole || 'RESIDENTE');
+            const logoutBox = document.getElementById('logoutSessionBox');
+            if (logoutBox) {
+                logoutBox.classList.toggle('hidden', !hasAuthenticatedSession);
+                const who = activeRole === 'RESIDENTE' ? `${currentFamily} (Casa ${currentHouse})`
+                    : activeRole === 'GUARDIA' ? `Portería · ${currentGuardName}` : 'Administración';
+                document.getElementById('logoutSessionText').textContent = `Sesión guardada en este teléfono: ${who}.`;
+            }
             document.getElementById('authPortalModal').classList.remove('hidden');
         }
 
@@ -5178,7 +5300,10 @@
 
             selectLoginTab('RESIDENTE');
             document.getElementById('authPortalModal').classList.remove('hidden');
-            initCloudSync();
+            tryRestoreSavedSession();
+            initCloudSync().finally(() => {
+                if (!hasAuthenticatedSession) tryRestoreSavedSession();
+            });
         });
     </script>
 </body>
