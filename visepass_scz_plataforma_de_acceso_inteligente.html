@@ -794,7 +794,7 @@
                                 <i class="fa-solid fa-motorcycle text-amber-400"></i>
                                 <span>4. Taxis y Deliveries Anunciados por Vecinos</span>
                             </h3>
-                            <p class="text-xs text-zinc-400">Cuando llegue la moto o el taxi a la tranca, toca "Dejar Pasar".</p>
+                            <p class="text-xs text-zinc-400">Cuando llegue la moto o el taxi a la tranca, toca "Dejar Pasar". Cuando se vaya, márcalo en "3. Están Adentro".</p>
                         </div>
                         <span id="preAuthCountBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">0 EN ESPERA</span>
                     </div>
@@ -1397,7 +1397,7 @@
                 </div>
                 <div>
                     <label class="text-xs font-medium text-zinc-300 block mb-1">PIN de Seguridad del Propietario</label>
-                    <input type="password" inputmode="numeric" autocomplete="current-password" id="loginResidentPin" value="" placeholder="PIN de 4 dígitos" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono tracking-widest focus:outline-none focus:border-purple-500">
+                    <input type="password" inputmode="numeric" autocomplete="current-password" id="loginResidentPin" value="" placeholder="Tu PIN" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono tracking-widest focus:outline-none focus:border-purple-500">
                 </div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-purple-600/20">
                     Entrar como Vecino
@@ -2499,13 +2499,16 @@
                 const mergePasses = () => applyListenerData('passes', [...new Map([...vigentes, ...adentro]).values()]);
                 listen(FB.query(col('passes'), FB.where('validUntilTs', '>=', Date.now() - 2 * 86400000)), snap => { vigentes = new Map(docsOf(snap).map(x => [x.id, x])); mergePasses(); });
                 listen(FB.query(col('passes'), FB.where('status', '==', 'ADENTRO')), snap => { adentro = new Map(docsOf(snap).map(x => [x.id, x])); mergePasses(); });
-                let knownFast = null;
+                let knownFast = null, fastPend = [], fastIn = [];
+                const mergeFast = () => applyListenerData('fastPasses', [...new Map([...fastPend, ...fastIn].map(f => [f.id, f])).values()]);
                 listen(FB.query(col('fastPasses'), FB.where('status', '==', 'PENDIENTE')), snap => {
                     const list = docsOf(snap);
                     if (knownFast) list.filter(f => !knownFast.has(f.id) && (f.expiresAt || 0) > Date.now()).forEach(notifyGuardFastPass);
                     knownFast = new Set(list.map(f => f.id));
-                    applyListenerData('fastPasses', list);
+                    fastPend = list; mergeFast();
                 });
+                // Taxis y deliveries que entraron y todavía no salieron
+                listen(FB.query(col('fastPasses'), FB.where('status', '==', 'INGRESÓ')), snap => { fastIn = docsOf(snap); mergeFast(); });
                 listen(col('blacklist'), snap => applyListenerData('blacklist', docsOf(snap)));
             } else if (activeRole === 'RESIDENTE' && currentHouse) {
                 // Se marca qué pases aún no llegaron al servidor (sin señal) para no compartirlos todavía
@@ -4121,12 +4124,22 @@
             const container = document.getElementById('vecinoFastPassList');
             if (!container) return;
             const myPending = fastPasses.filter(f => isFastPassLive(f) && f.house === currentHouse);
-            if (myPending.length === 0) {
+            const recent = fastPasses.filter(f => f.house === currentHouse && (isFastPassInside(f) || (f.status === 'SALIÓ' && f.exitTs && Date.now() - f.exitTs < 3 * 3600000)))
+                .sort((a, b) => (b.entryTs || 0) - (a.entryTs || 0));
+            if (myPending.length === 0 && recent.length === 0) {
                 container.innerHTML = `<p class="text-xs text-zinc-500 italic">No tienes Taxis ni Deliveries anunciados en este momento.</p>`;
                 return;
             }
+            const recentHtml = recent.map(f => `
+                <div class="bg-zinc-950 border ${isFastPassInside(f) ? 'border-emerald-500/30' : 'border-zinc-800'} rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
+                    <i class="fa-solid ${isFastPassInside(f) ? 'fa-motorcycle text-emerald-400' : 'fa-door-open text-sky-400'}" aria-hidden="true"></i>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-white">${escapeHtml(f.service)} — <span class="text-zinc-300">${escapeHtml(f.plateOrName)}</span></div>
+                        <div class="text-[11px] ${isFastPassInside(f) ? 'text-emerald-300' : 'text-zinc-400'}">${isFastPassInside(f) ? `Entró a las ${toHHMM(new Date(f.entryTs))} • en el condominio` : `Entró ${f.entryTs ? toHHMM(new Date(f.entryTs)) : ''} • salió a las ${toHHMM(new Date(f.exitTs))}`}</div>
+                    </div>
+                </div>`).join('');
 
-            container.innerHTML = myPending.map(f => `
+            container.innerHTML = recentHtml + myPending.map(f => `
                 <div class="bg-zinc-950 border border-amber-500/30 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <i class="fa-solid fa-bolt text-amber-400" aria-hidden="true"></i>
@@ -5510,6 +5523,7 @@
                 return;
             }
             f.status = 'INGRESÓ';
+            f.entryTs = Date.now();
             setGuardSubTab('scan');
             showScanBanner('ENTRA', `ENTRA → ${destinationText(f.house)}`, `${f.service} • ${f.plateOrName} • Autorizó: ${authorizedByText(f.authBy, f.house, f.origin)}`);
             const screen = document.getElementById('guardResultScreen');
@@ -5529,32 +5543,52 @@
             }
             addAuditLog('INGRESO TAXI/DELIVERY', `${f.service} (${f.plateOrName})`, `Casa ${f.house}`, 'PRE-AUTORIZADO', currentGuardName, f.plateOrName);
             pushStateToCloud();
-            showToast(`✅ ${f.service} ingresó hacia Casa ${f.house}`);
+            showToast(`✅ ${f.service} ingresó hacia Casa ${f.house}. Cuando salga, márcalo en "Están Adentro".`);
         }
 
         function renderInsideVisitors() {
             const inside = passes.filter(p => p.status === 'ADENTRO');
+            const fastInside = fastPasses.filter(isFastPassInside);
+            const total = inside.length + fastInside.length;
             const badge = document.getElementById('insideCounterBadge');
-            if (badge) badge.textContent = `${inside.length} Adentro Ahora`;
+            if (badge) badge.textContent = `${total} Adentro Ahora`;
             const insideBadge = document.getElementById('guardInsideBadge');
             if (insideBadge) {
-                insideBadge.textContent = inside.length;
-                insideBadge.className = inside.length > 0
+                insideBadge.textContent = total;
+                insideBadge.className = total > 0
                     ? "ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-sky-400 text-zinc-950"
                     : "ml-1 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-800 text-zinc-400";
             }
             const container = document.getElementById('insideVisitorsList');
             if (!container) return;
 
-            if (inside.length === 0) {
+            if (total === 0) {
                 container.innerHTML = `<p class="text-xs text-zinc-500 italic col-span-3 py-6 text-center border border-dashed border-zinc-800 rounded-xl">No hay ningún visitante dentro del condominio en este momento.</p>`;
                 return;
             }
 
-            container.innerHTML = inside.map(p => `
+            const fastCards = fastInside.map(f => {
+                const late = isDeliveryOverstay(f);
+                return `
+                <div class="bg-zinc-950 border ${late ? 'border-red-500/60' : 'border-amber-500/40'} rounded-xl p-3.5 flex items-center justify-between gap-3">
+                    <div>
+                        <span class="text-[11px] font-mono ${late ? 'text-red-300' : 'text-amber-300'} font-bold">🛵 ENTRÓ A LAS ${escapeHtml(toHHMM(new Date(f.entryTs)))} • HACE ${deliveryMinutesInside(f)} MIN${late ? ' • DEMORADO' : ''}</span>
+                        <h4 class="font-black text-white text-base leading-tight mt-0.5">${escapeHtml(f.service)}</h4>
+                        <p class="text-xs font-mono text-amber-300 mt-0.5">🪪 ${escapeHtml(f.plateOrName || 'S/D')}</p>
+                        <p class="text-xs font-bold text-purple-300">${escapeHtml(destinationText(f.house))} • Taxi / Delivery</p>
+                        <p class="text-[11px] text-zinc-400">Autorizado por: ${escapeHtml(authorizedByText(f.authBy, f.house, f.origin))}</p>
+                    </div>
+                    <button type="button" data-fastid="${escapeHtml(f.id)}" onclick="checkoutFastPass(this.dataset.fastid)" class="px-4 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-zinc-950 text-xs font-black shrink-0 shadow-lg flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-door-open"></i>
+                        <span>Marcar Salida</span>
+                    </button>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = fastCards + inside.map(p => `
                 <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between gap-3">
                     <div>
-                        <span class="text-[11px] font-mono ${isOverstaying(p) ? 'text-red-300' : 'text-emerald-400'} font-bold">● ENTRÓ ${p.entryTs && toISODate(new Date(p.entryTs)) !== toISODate(new Date()) ? 'EL ' + escapeHtml(toShortDate(new Date(p.entryTs))) + ' ' : ''}A LAS ${escapeHtml(p.entryTime || '--')}${isOverstaying(p) ? ' • FUERA DE HORARIO' : ''}</span>
+                        <span class="text-[11px] font-mono ${isOverstaying(p) || isDeliveryOverstay(p) ? 'text-red-300' : 'text-emerald-400'} font-bold">● ENTRÓ ${p.entryTs && toISODate(new Date(p.entryTs)) !== toISODate(new Date()) ? 'EL ' + escapeHtml(toShortDate(new Date(p.entryTs))) + ' ' : ''}A LAS ${escapeHtml(p.entryTime || '--')}${isOverstaying(p) ? ' • FUERA DE HORARIO' : ''}</span>
                         <h4 class="font-black text-white text-base leading-tight mt-0.5">${escapeHtml(p.visitorName)}</h4>
                         <p class="text-xs font-mono text-amber-300 mt-0.5">🪪 ${escapeHtml(p.ciPlaca || 'S/D')}</p>
                         <p class="text-xs font-bold text-purple-300">${escapeHtml(destinationText(p.house))} • ${escapeHtml(p.passType)}</p>
@@ -5948,6 +5982,22 @@
             if (!alertBox) return;
             const now = new Date();
             const overstaying = passes.filter(p => isOverstaying(p, now));
+            const lateDeliveries = [...fastPasses.filter(isDeliveryOverstay), ...passes.filter(p => !isOverstaying(p, now) && isDeliveryOverstay(p))];
+            if (overstaying.length === 0 && lateDeliveries.length) {
+                const d = lateDeliveries[0];
+                const name = d.service ? `${d.service} (${d.plateOrName})` : d.visitorName;
+                document.getElementById('workerOvertimeDetail').textContent =
+                    `${name} entró a Casa ${d.house} hace ${deliveryMinutesInside(d)} minutos y no figura su salida${lateDeliveries.length > 1 ? ` (y ${lateDeliveries.length - 1} más)` : ''}. Verifica si ya salió.`;
+                alertBox.classList.remove('hidden');
+                badge?.classList.remove('hidden');
+                const keyD = lateDeliveries.map(x => x.id).join(',');
+                if (notify && keyD !== lastOverstayKey && hasAuthenticatedSession && (activeRole === 'GUARDIA' || activeRole === 'ADMIN')) {
+                    showToast(`🚨 ${name} lleva más de ${DELIVERY_MAX_MIN} minutos adentro`);
+                    playGuardBeep('PROHIBIDO');
+                }
+                lastOverstayKey = keyD;
+                return;
+            }
             if (overstaying.length === 0) {
                 alertBox.classList.add('hidden');
                 badge?.classList.add('hidden');
@@ -6418,6 +6468,26 @@
             return changed;
         }
 
+        const DELIVERY_MAX_MIN = 30; // minutos razonables para entregar y salir
+        // Entró y todavía no salió (los registros de más de un día o sin hora de entrada se ignoran)
+        function isFastPassInside(f) { return f && f.status === 'INGRESÓ' && f.entryTs && Date.now() - f.entryTs < 86400000; }
+        function deliveryMinutesInside(x) { return Math.floor((Date.now() - (x.entryTs || Date.now())) / 60000); }
+        function isDeliveryOverstay(x) {
+            if (isFastPassInside(x)) return deliveryMinutesInside(x) >= DELIVERY_MAX_MIN;
+            return x && x.passType === 'TAXI / DELIVERY' && x.status === 'ADENTRO' && deliveryMinutesInside(x) >= DELIVERY_MAX_MIN;
+        }
+        function checkoutFastPass(fastId) {
+            const f = fastPasses.find(x => x.id === fastId);
+            if (!f || !isFastPassInside(f)) { renderInsideVisitors(); showToast('ℹ️ Ese taxi o delivery ya no figura adentro'); return; }
+            f.status = 'SALIÓ';
+            f.exitTs = Date.now();
+            showScanBanner('SALE', `SALE — ${destinationText(f.house)}`, `${f.service} • ${f.plateOrName}`);
+            addAuditLog('SALIDA TAXI/DELIVERY', `${f.service} (${f.plateOrName})`, `Casa ${f.house}`, 'PRE-AUTORIZADO', currentGuardName, f.plateOrName);
+            checkOverstayAlerts(false);
+            pushStateToCloud();
+            renderInsideVisitors();
+            showToast(`🚪 Salida registrada: ${f.service} (${f.plateOrName})`);
+        }
         function isFastPassLive(f) { return f && f.status === 'PENDIENTE' && (f.expiresAt || 0) > Date.now(); }
         function minutesLeft(f) { return Math.max(0, Math.ceil(((f.expiresAt || 0) - Date.now()) / 60000)); }
 
@@ -6732,6 +6802,7 @@
                 if (hasAuthenticatedSession && activeRole === 'GUARDIA' && Date.now() - roleListenersStartedAt > 6 * 3600 * 1000) startRoleListeners();
                 renderGuardPreAuthScreen();
                 renderVecinoFastPasses();
+                renderInsideVisitors();
                 if (hasAuthenticatedSession && (activeRole === 'GUARDIA' || activeRole === 'ADMIN')) checkOverstayAlerts(true);
                 if (hasAuthenticatedSession && activeRole === 'ADMIN') {
                     const sess = readSavedSession();
