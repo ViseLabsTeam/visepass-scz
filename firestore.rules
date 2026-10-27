@@ -1,0 +1,142 @@
+rules_version = '2';
+
+// Reglas de seguridad de VisePass SCZ
+// Perfiles: administración, portería (guardias), vecino (una cuenta por casa) e invitado (link de churrasco).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Quién es quién ----------
+    function signedIn() { return request.auth != null; }
+    function isAnon() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
+    function cfgPath() { return /databases/$(database)/documents/config/main; }
+    function hasCfg() { return exists(cfgPath()); }
+    function cfg() { return get(cfgPath()).data; }
+    function memberPath() { return /databases/$(database)/documents/members/$(request.auth.uid); }
+    function isMember() { return signedIn() && exists(memberPath()); }
+    function member() { return get(memberPath()).data; }
+    function isAdmin() { return signedIn() && hasCfg() && cfg().adminUid == request.auth.uid; }
+    function isGuard() { return isMember() && member().role == 'guard' && hasCfg() && cfg().guardUid == request.auth.uid; }
+    function isResident() { return isMember() && member().role == 'resident'; }
+    function myHouse() { return member().house; }
+    function housePath(h) { return /databases/$(database)/documents/houses/$(h); }
+    function house(h) { return get(housePath(h)).data; }
+    function infoPath(h) { return /databases/$(database)/documents/houseInfo/$(h); }
+    // La casa existe y no está en mora (el estado de mora es privado: vive en /houseInfo)
+    function houseAlDia(h) { return exists(housePath(h)) && exists(infoPath(h)) && get(infoPath(h)).data.isMorosa == false; }
+    // El vecino solo vale si su cuenta es la vigente de la casa (al resetear el PIN se crea otra)
+    function residentOf(h) { return isResident() && myHouse() == h && exists(housePath(h)) && house(h).authUid == request.auth.uid; }
+    function nowMs() { return request.time.toMillis(); }
+    function validTypes() { return ['VISITA SOCIAL', 'RESIDENTE VIP', 'PERSONAL HOGAR', 'PROVEEDOR / OBRA']; }
+    function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    // ---------- Configuración general ----------
+    match /config/main {
+      allow read: if true;
+      // Primera vez: quien crea el condominio queda como administrador (junto con su ficha en /members)
+      allow create: if signedIn() && !isAnon() && !hasCfg()
+        && request.resource.data.adminUid == request.auth.uid
+        && getAfter(memberPath()).data.role == 'admin';
+      allow update: if isAdmin() && request.resource.data.adminUid == resource.data.adminUid;
+      allow delete: if false;
+    }
+
+    // ---------- Fichas de cuentas (rol y casa) ----------
+    match /members/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isAdmin()
+        || (signedIn() && !isAnon() && uid == request.auth.uid && !hasCfg()
+            && request.resource.data.role == 'admin'
+            && getAfter(cfgPath()).data.adminUid == request.auth.uid);
+      allow update, delete: if isAdmin() && uid != request.auth.uid;
+    }
+
+    // ---------- Casas: solo el número y la cuenta (lo mínimo para la pantalla de ingreso) ----------
+    match /houses/{h} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------- Datos de la casa: familia, dirección y mora (privados) ----------
+    match /houseInfo/{h} {
+      allow read: if isAdmin() || isGuard() || residentOf(h);
+      allow write: if isAdmin();
+    }
+
+    // ---------- Datos privados de cada casa (código del link, frecuentes) ----------
+    match /houseSecrets/{h} {
+      allow read, write: if isAdmin() || residentOf(h);
+    }
+
+    // ---------- Pases ----------
+    match /passes/{id} {
+      allow read: if isAdmin() || isGuard()
+        || (isResident() && resource.data.house == myHouse())
+        || (signedIn() && resource.data.createdBy == request.auth.uid);
+
+      allow create: if isAdmin() || isGuard()
+        // Vecino: solo para su casa, sin mora, con vigencia razonable
+        || (residentOf(request.resource.data.house)
+            && houseAlDia(request.resource.data.house)
+            && request.resource.data.id == id
+            && request.resource.data.createdBy == request.auth.uid
+            && request.resource.data.status == 'AFUERA'
+            && request.resource.data.revoked == false
+            && request.resource.data.passType in validTypes()
+            && request.resource.data.validUntilTs is number
+            && request.resource.data.validUntilTs > nowMs()
+            && request.resource.data.validUntilTs < nowMs() + 400 * 86400000)
+        // Invitado del link de churrasco: con el código secreto vigente de la casa
+        || (isAnon()
+            && request.resource.data.origin == 'INVITADO'
+            && request.resource.data.id == id
+            && request.resource.data.createdBy == request.auth.uid
+            && houseAlDia(request.resource.data.house)
+            && exists(/databases/$(database)/documents/houseSecrets/$(request.resource.data.house))
+            && get(/databases/$(database)/documents/houseSecrets/$(request.resource.data.house)).data.inviteCode == request.resource.data.inviteCode
+            && request.resource.data.status == 'AFUERA'
+            && request.resource.data.revoked == false
+            && request.resource.data.passType == 'VISITA SOCIAL'
+            && request.resource.data.validUntilTs is number
+            && request.resource.data.validUntilTs < nowMs() + 3 * 86400000);
+
+      allow update: if isAdmin()
+        // Portería: solo entradas, salidas y verificación del carnet
+        || (isGuard() && onlyChanged(['status', 'entryTs', 'entryTime', 'exitTs', 'identityVerified', 'updatedAt']))
+        // Vecino: solo anular pases de su casa
+        || (residentOf(resource.data.house) && request.resource.data.revoked == true
+            && onlyChanged(['revoked', 'revokedAt', 'updatedAt']));
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Avisos de taxi / delivery ----------
+    match /fastPasses/{id} {
+      allow read: if isAdmin() || isGuard() || (isResident() && resource.data.house == myHouse());
+      allow create: if isAdmin()
+        || (residentOf(request.resource.data.house)
+            && houseAlDia(request.resource.data.house)
+            && request.resource.data.status == 'PENDIENTE'
+            && request.resource.data.expiresAt is number
+            && request.resource.data.expiresAt <= nowMs() + 31 * 60000);
+      allow update: if isAdmin()
+        || (isGuard() && onlyChanged(['status', 'updatedAt']))
+        || (residentOf(resource.data.house) && onlyChanged(['status', 'updatedAt'])
+            && request.resource.data.status in ['CANCELADO', 'VENCIDO']);
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Bitácora (solo administración la lee; nadie la edita) ----------
+    match /logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() || isGuard() || isResident();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Lista negra ----------
+    match /blacklist/{id} {
+      allow read: if isAdmin() || isGuard();
+      allow write: if isAdmin();
+    }
+  }
+}
