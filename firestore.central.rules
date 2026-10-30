@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// Reglas del PROYECTO CENTRAL de VisePass (lista de condominios y Panel maestro).
+// No confundir con firestore.rules, que va en el proyecto de CADA condominio.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function withPassword() { return signedIn() && request.auth.token.firebase.sign_in_provider == 'password'; }
+    function ownerPath() { return /databases/$(database)/documents/meta/owner; }
+    function masterPath(uid) { return /databases/$(database)/documents/masters/$(uid); }
+    function isMaster() { return withPassword() && exists(masterPath(request.auth.uid)); }
+    function d() { return request.resource.data; }
+
+    // Dueño del servicio: se crea una sola vez (la primera persona que abre el Panel maestro)
+    match /meta/owner {
+      allow read: if true;
+      allow create: if withPassword() && !exists(ownerPath())
+        && d().keys().hasOnly(['uid', 'createdAt'])
+        && d().uid == request.auth.uid
+        && existsAfter(masterPath(request.auth.uid));
+      allow update, delete: if false;
+    }
+
+    // Cuentas con acceso al Panel maestro
+    match /masters/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isMaster());
+      allow create: if (withPassword() && uid == request.auth.uid && !exists(ownerPath())
+                        && getAfter(ownerPath()).data.uid == uid)
+                    || isMaster();
+      allow update: if false;
+      allow delete: if isMaster() && uid != request.auth.uid;
+    }
+
+    // Lista pública de condominios: nombre, datos de conexión (públicos por diseño) y estado
+    function validCondo(slug) {
+      return slug.matches('^[a-z0-9-]{3,40}$')
+        && d().keys().hasOnly(['name', 'firebase', 'status', 'blockAfter', 'createdAt', 'updatedAt'])
+        && d().name is string && d().name.size() >= 2 && d().name.size() <= 80
+        && d().status in ['active', 'suspended']
+        && d().firebase is map
+        && d().firebase.keys().hasOnly(['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'])
+        && d().firebase.apiKey is string && d().firebase.projectId is string
+        && d().firebase.authDomain is string && d().firebase.appId is string
+        && (!('blockAfter' in d()) || d().blockAfter == null || d().blockAfter is number);
+    }
+    match /condos/{slug} {
+      allow read: if true;
+      allow create, update: if isMaster() && validCondo(slug);
+      allow delete: if isMaster();
+    }
+
+    // Pagos, contacto y notas: solo el Panel maestro
+    match /condosPrivate/{slug} {
+      allow read, write: if isMaster();
+    }
+  }
+}
