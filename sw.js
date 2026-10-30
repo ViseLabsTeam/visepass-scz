@@ -1,8 +1,8 @@
 // VisePass SCZ — service worker
 // Permite abrir la app aunque la portería se quede sin internet y muestra los avisos de taxis/deliveries.
 // Los datos (pases, casas, bitácora) NO pasan por aquí: los maneja Firebase con su propio caché.
-const VERSION = 'visepass-v11';
-const APP_SHELL = ['./', './index.html', './config.js', './manifest.json', './favicon.png', './apple-touch-icon.png', './icon-512.png'];
+const VERSION = 'visepass-v12';
+const APP_SHELL = ['./', './index.html', './config.js', './manifest.json', './favicon.png', './apple-touch-icon.png', './icon-512.png', './icon-maskable-512.png'];
 // Librerías externas con versión fija: se guardan una vez y se sirven desde el teléfono
 const LIBS = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
