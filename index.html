@@ -20,6 +20,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <!-- Librería Generadora de QR Real -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Datos de Firebase de ESTE condominio (un archivo distinto por condominio) -->
+    <script src="./config.js"></script>
     <!-- Firebase: inicio de sesión y base de datos del condominio -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
@@ -212,7 +214,7 @@
         }
     </style>
     <!-- Tailwind CSS compilado (antes venía del CDN, que no es para producción). Regenerar con: npx tailwindcss@3 -i in.css --content index.html --minify -->
-    <style id="tailwind-css">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width:640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width:768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width:1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width:1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width:1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.visible{visibility:visible}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.left-4{left:1rem}.right-1{right:.25rem}.right-1\.5{right:.375rem}.right-4{right:1rem}.top-0{top:0}.top-1{top:.25rem}.top-1\.5{top:.375rem}.top-2{top:.5rem}.z-10{z-index:10}.z-20{z-index:20}.z-40{z-index:40}.z-50{z-index:50}.z-\[60\]{z-index:60}.z-\[70\]{z-index:70}.order-last{order:9999}.col-span-3{grid-column:span 3/span 3}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.my-auto{margin-top:auto;margin-bottom:auto}.mb-1{margin-bottom:.25rem}.mb-1\.5{margin-bottom:.375rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mr-1{margin-right:.25rem}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-2\.5{margin-top:.625rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-11{height:2.75rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-2{height:.5rem}.h-20{height:5rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[164px\]{height:164px}.h-\[180px\]{height:180px}.h-fit{height:-moz-fit-content;height:fit-content}.h-full{height:100%}.max-h-\[210px\]{max-height:210px}.max-h-\[320px\]{max-height:320px}.max-h-\[380px\]{max-height:380px}.max-h-\[520px\]{max-height:520px}.min-h-\[140px\]{min-height:140px}.min-h-\[340px\]{min-height:340px}.min-h-\[360px\]{min-height:360px}.min-h-\[380px\]{min-height:380px}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-11{width:2.75rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-16{width:4rem}.w-2{width:.5rem}.w-20{width:5rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[164px\]{width:164px}.w-\[180px\]{width:180px}.w-full{width:100%}.min-w-0{min-width:0}.min-w-\[1\.25rem\]{min-width:1.25rem}.max-w-7xl{max-width:80rem}.max-w-\[360px\]{max-width:360px}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}.select-all{-webkit-user-select:all;-moz-user-select:all;user-select:all}.appearance-none{-webkit-appearance:none;-moz-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0\.5{gap:.125rem}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-0\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.125rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.125rem*var(--tw-space-y-reverse))}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.375rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.375rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-2\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.625rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.625rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-3\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.875rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.875rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.divide-y>:not([hidden])~:not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px*(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px*var(--tw-divide-y-reverse))}.divide-zinc-800\/60>:not([hidden])~:not([hidden]){border-color:rgba(39,39,42,.6)}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.break-words{overflow-wrap:break-word}.break-all{word-break:break-all}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[26px\]{border-radius:26px}.rounded-\[28px\]{border-radius:28px}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-0{border-width:0}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77/var(--tw-border-opacity,1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.border-amber-400\/50{border-color:rgba(251,191,36,.5)}.border-amber-400\/60{border-color:rgba(251,191,36,.6)}.border-amber-500\/20{border-color:rgba(245,158,11,.2)}.border-amber-500\/30{border-color:rgba(245,158,11,.3)}.border-amber-500\/40{border-color:rgba(245,158,11,.4)}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.border-emerald-400\/40{border-color:rgba(52,211,153,.4)}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129/var(--tw-border-opacity,1))}.border-emerald-500\/30{border-color:rgba(16,185,129,.3)}.border-emerald-500\/40{border-color:rgba(16,185,129,.4)}.border-orange-500\/30{border-color:rgba(249,115,22,.3)}.border-orange-500\/40{border-color:rgba(249,115,22,.4)}.border-purple-400{--tw-border-opacity:1;border-color:rgb(192 132 252/var(--tw-border-opacity,1))}.border-purple-400\/30{border-color:rgba(192,132,252,.3)}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-purple-500\/30{border-color:rgba(168,85,247,.3)}.border-purple-500\/40{border-color:rgba(168,85,247,.4)}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-400\/40{border-color:hsla(0,91%,71%,.4)}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.border-red-500\/20{border-color:rgba(239,68,68,.2)}.border-red-500\/30{border-color:rgba(239,68,68,.3)}.border-red-500\/40{border-color:rgba(239,68,68,.4)}.border-red-500\/50{border-color:rgba(239,68,68,.5)}.border-red-500\/60{border-color:rgba(239,68,68,.6)}.border-sky-300{--tw-border-opacity:1;border-color:rgb(125 211 252/var(--tw-border-opacity,1))}.border-sky-400{--tw-border-opacity:1;border-color:rgb(56 189 248/var(--tw-border-opacity,1))}.border-sky-500\/30{border-color:rgba(14,165,233,.3)}.border-sky-500\/40{border-color:rgba(14,165,233,.4)}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.border-white\/15{border-color:hsla(0,0%,100%,.15)}.border-white\/20{border-color:hsla(0,0%,100%,.2)}.border-white\/25{border-color:hsla(0,0%,100%,.25)}.border-white\/30{border-color:hsla(0,0%,100%,.3)}.border-zinc-200{--tw-border-opacity:1;border-color:rgb(228 228 231/var(--tw-border-opacity,1))}.border-zinc-700{--tw-border-opacity:1;border-color:rgb(63 63 70/var(--tw-border-opacity,1))}.border-zinc-800{--tw-border-opacity:1;border-color:rgb(39 39 42/var(--tw-border-opacity,1))}.border-zinc-800\/80{border-color:rgba(39,39,42,.8)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-amber-500\/10{background-color:rgba(245,158,11,.1)}.bg-amber-500\/15{background-color:rgba(245,158,11,.15)}.bg-amber-500\/20{background-color:rgba(245,158,11,.2)}.bg-amber-950\/20{background-color:rgba(69,26,3,.2)}.bg-amber-950\/90{background-color:rgba(69,26,3,.9)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0/var(--tw-bg-opacity,1))}.bg-black\/25{background-color:rgba(0,0,0,.25)}.bg-black\/30{background-color:rgba(0,0,0,.3)}.bg-black\/40{background-color:rgba(0,0,0,.4)}.bg-black\/80{background-color:rgba(0,0,0,.8)}.bg-black\/85{background-color:rgba(0,0,0,.85)}.bg-black\/95{background-color:rgba(0,0,0,.95)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-emerald-500\/10{background-color:rgba(16,185,129,.1)}.bg-emerald-500\/15{background-color:rgba(16,185,129,.15)}.bg-emerald-500\/20{background-color:rgba(16,185,129,.2)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105/var(--tw-bg-opacity,1))}.bg-emerald-600\/20{background-color:rgba(5,150,105,.2)}.bg-emerald-950\/30{background-color:rgba(2,44,34,.3)}.bg-emerald-950\/60{background-color:rgba(2,44,34,.6)}.bg-emerald-950\/90{background-color:rgba(2,44,34,.9)}.bg-orange-400{--tw-bg-opacity:1;background-color:rgb(251 146 60/var(--tw-bg-opacity,1))}.bg-orange-500{--tw-bg-opacity:1;background-color:rgb(249 115 22/var(--tw-bg-opacity,1))}.bg-orange-500\/10{background-color:rgba(249,115,22,.1)}.bg-orange-500\/15{background-color:rgba(249,115,22,.15)}.bg-purple-400{--tw-bg-opacity:1;background-color:rgb(192 132 252/var(--tw-bg-opacity,1))}.bg-purple-500\/15{background-color:rgba(168,85,247,.15)}.bg-purple-500\/20{background-color:rgba(168,85,247,.2)}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.bg-purple-600\/15{background-color:rgba(147,51,234,.15)}.bg-purple-600\/20{background-color:rgba(147,51,234,.2)}.bg-purple-950\/30{background-color:rgba(59,7,100,.3)}.bg-purple-950\/40{background-color:rgba(59,7,100,.4)}.bg-red-400{--tw-bg-opacity:1;background-color:rgb(248 113 113/var(--tw-bg-opacity,1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68/var(--tw-bg-opacity,1))}.bg-red-500\/10{background-color:rgba(239,68,68,.1)}.bg-red-500\/15{background-color:rgba(239,68,68,.15)}.bg-red-500\/20{background-color:rgba(239,68,68,.2)}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38/var(--tw-bg-opacity,1))}.bg-red-950\/20{background-color:rgba(69,10,10,.2)}.bg-red-950\/60{background-color:rgba(69,10,10,.6)}.bg-red-950\/80{background-color:rgba(69,10,10,.8)}.bg-red-950\/95{background-color:rgba(69,10,10,.95)}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248/var(--tw-bg-opacity,1))}.bg-sky-500{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.bg-sky-500\/20{background-color:rgba(14,165,233,.2)}.bg-sky-600{--tw-bg-opacity:1;background-color:rgb(2 132 199/var(--tw-bg-opacity,1))}.bg-sky-950\/30{background-color:rgba(8,47,73,.3)}.bg-sky-950\/60{background-color:rgba(8,47,73,.6)}.bg-sky-950\/90{background-color:rgba(8,47,73,.9)}.bg-sky-950\/95{background-color:rgba(8,47,73,.95)}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/20{background-color:hsla(0,0%,100%,.2)}.bg-zinc-100{--tw-bg-opacity:1;background-color:rgb(244 244 245/var(--tw-bg-opacity,1))}.bg-zinc-200{--tw-bg-opacity:1;background-color:rgb(228 228 231/var(--tw-bg-opacity,1))}.bg-zinc-400{--tw-bg-opacity:1;background-color:rgb(161 161 170/var(--tw-bg-opacity,1))}.bg-zinc-800{--tw-bg-opacity:1;background-color:rgb(39 39 42/var(--tw-bg-opacity,1))}.bg-zinc-900{--tw-bg-opacity:1;background-color:rgb(24 24 27/var(--tw-bg-opacity,1))}.bg-zinc-900\/90{background-color:rgba(24,24,27,.9)}.bg-zinc-900\/95{background-color:rgba(24,24,27,.95)}.bg-zinc-950{--tw-bg-opacity:1;background-color:rgb(9 9 11/var(--tw-bg-opacity,1))}.bg-zinc-950\/60{background-color:rgba(9,9,11,.6)}.bg-zinc-950\/90{background-color:rgba(9,9,11,.9)}.bg-zinc-950\/95{background-color:rgba(9,9,11,.95)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-purple-600{--tw-gradient-from:#9333ea var(--tw-gradient-from-position);--tw-gradient-to:rgba(147,51,234,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-600\/30{--tw-gradient-from:rgba(147,51,234,.3) var(--tw-gradient-from-position);--tw-gradient-to:rgba(147,51,234,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-indigo-600\/30{--tw-gradient-to:rgba(79,70,229,.3) var(--tw-gradient-to-position)}.object-contain{-o-object-fit:contain;object-fit:contain}.p-0{padding:0}.p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-1{padding-bottom:.25rem}.pb-2\.5{padding-bottom:.625rem}.pb-3{padding-bottom:.75rem}.pl-0\.5{padding-left:.125rem}.pr-1{padding-right:.25rem}.pr-2{padding-right:.5rem}.pt-1{padding-top:.25rem}.pt-3{padding-top:.75rem}.pt-4{padding-top:1rem}.pt-8{padding-top:2rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tabular-nums{--tw-numeric-spacing:tabular-nums;font-variant-numeric:var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction)}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-\[0\.3em\]{letter-spacing:.3em}.tracking-tight{letter-spacing:-.025em}.tracking-wider{letter-spacing:.05em}.tracking-widest{letter-spacing:.1em}.text-amber-100{--tw-text-opacity:1;color:rgb(254 243 199/var(--tw-text-opacity,1))}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138/var(--tw-text-opacity,1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77/var(--tw-text-opacity,1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0/var(--tw-text-opacity,1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208/var(--tw-text-opacity,1))}.text-emerald-200\/80{color:rgba(167,243,208,.8)}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153/var(--tw-text-opacity,1))}.text-emerald-50{--tw-text-opacity:1;color:rgb(236 253 245/var(--tw-text-opacity,1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105/var(--tw-text-opacity,1))}.text-orange-200{--tw-text-opacity:1;color:rgb(254 215 170/var(--tw-text-opacity,1))}.text-orange-300{--tw-text-opacity:1;color:rgb(253 186 116/var(--tw-text-opacity,1))}.text-orange-400{--tw-text-opacity:1;color:rgb(251 146 60/var(--tw-text-opacity,1))}.text-purple-200{--tw-text-opacity:1;color:rgb(233 213 255/var(--tw-text-opacity,1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254/var(--tw-text-opacity,1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}.text-red-100{--tw-text-opacity:1;color:rgb(254 226 226/var(--tw-text-opacity,1))}.text-red-200{--tw-text-opacity:1;color:rgb(254 202 202/var(--tw-text-opacity,1))}.text-red-200\/80{color:hsla(0,96%,89%,.8)}.text-red-300{--tw-text-opacity:1;color:rgb(252 165 165/var(--tw-text-opacity,1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113/var(--tw-text-opacity,1))}.text-red-50{--tw-text-opacity:1;color:rgb(254 242 242/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-sky-200{--tw-text-opacity:1;color:rgb(186 230 253/var(--tw-text-opacity,1))}.text-sky-200\/80{color:rgba(186,230,253,.8)}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252/var(--tw-text-opacity,1))}.text-sky-400{--tw-text-opacity:1;color:rgb(56 189 248/var(--tw-text-opacity,1))}.text-sky-50{--tw-text-opacity:1;color:rgb(240 249 255/var(--tw-text-opacity,1))}.text-sky-600{--tw-text-opacity:1;color:rgb(2 132 199/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/70{color:hsla(0,0%,100%,.7)}.text-white\/80{color:hsla(0,0%,100%,.8)}.text-zinc-100{--tw-text-opacity:1;color:rgb(244 244 245/var(--tw-text-opacity,1))}.text-zinc-200{--tw-text-opacity:1;color:rgb(228 228 231/var(--tw-text-opacity,1))}.text-zinc-300{--tw-text-opacity:1;color:rgb(212 212 216/var(--tw-text-opacity,1))}.text-zinc-400{--tw-text-opacity:1;color:rgb(161 161 170/var(--tw-text-opacity,1))}.text-zinc-500{--tw-text-opacity:1;color:rgb(113 113 122/var(--tw-text-opacity,1))}.text-zinc-600{--tw-text-opacity:1;color:rgb(82 82 91/var(--tw-text-opacity,1))}.text-zinc-700{--tw-text-opacity:1;color:rgb(63 63 70/var(--tw-text-opacity,1))}.text-zinc-800{--tw-text-opacity:1;color:rgb(39 39 42/var(--tw-text-opacity,1))}.text-zinc-900{--tw-text-opacity:1;color:rgb(24 24 27/var(--tw-text-opacity,1))}.text-zinc-950{--tw-text-opacity:1;color:rgb(9 9 11/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.underline-offset-4{text-underline-offset:4px}.accent-emerald-500{accent-color:#10b981}.opacity-60{opacity:.6}.shadow{--tw-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color)}.shadow,.shadow-2xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-lg,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.shadow-amber-500\/20{--tw-shadow-color:rgba(245,158,11,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/30{--tw-shadow-color:rgba(245,158,11,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-black\/60{--tw-shadow-color:rgba(0,0,0,.6);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/20{--tw-shadow-color:rgba(5,150,105,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/25{--tw-shadow-color:rgba(5,150,105,.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/30{--tw-shadow-color:rgba(5,150,105,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-600\/20{--tw-shadow-color:rgba(147,51,234,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-600\/30{--tw-shadow-color:rgba(147,51,234,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-950\/50{--tw-shadow-color:rgba(59,7,100,.5);--tw-shadow:var(--tw-shadow-colored)}.shadow-red-600\/40{--tw-shadow-color:rgba(220,38,38,.4);--tw-shadow:var(--tw-shadow-colored)}.shadow-sky-600\/25{--tw-shadow-color:rgba(2,132,199,.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-sky-600\/30{--tw-shadow-color:rgba(2,132,199,.3);--tw-shadow:var(--tw-shadow-colored)}.outline{outline-style:solid}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.ring-red-500\/30{--tw-ring-color:rgba(239,68,68,.3)}.invert{--tw-invert:invert(100%)}.filter,.invert{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px)}.backdrop-blur,.backdrop-blur-md{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px)}.backdrop-blur-sm,.backdrop-blur-xl{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-300{transition-duration:.3s}.selection\:bg-purple-500 ::-moz-selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:bg-purple-500 ::selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:text-white ::-moz-selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:text-white ::selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:bg-purple-500::-moz-selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:bg-purple-500::selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:text-white::-moz-selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.last\:border-0:last-child{border-width:0}.hover\:border-purple-500\/60:hover{border-color:rgba(168,85,247,.6)}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.hover\:bg-amber-500\/25:hover{background-color:rgba(245,158,11,.25)}.hover\:bg-emerald-400:hover{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.hover\:bg-emerald-500\/20:hover{background-color:rgba(16,185,129,.2)}.hover\:bg-emerald-500\/25:hover{background-color:rgba(16,185,129,.25)}.hover\:bg-emerald-600\/30:hover{background-color:rgba(5,150,105,.3)}.hover\:bg-orange-400:hover{--tw-bg-opacity:1;background-color:rgb(251 146 60/var(--tw-bg-opacity,1))}.hover\:bg-orange-500\/25:hover{background-color:rgba(249,115,22,.25)}.hover\:bg-purple-500:hover{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.hover\:bg-purple-500\/25:hover{background-color:rgba(168,85,247,.25)}.hover\:bg-purple-600:hover{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68/var(--tw-bg-opacity,1))}.hover\:bg-red-500\/15:hover{background-color:rgba(239,68,68,.15)}.hover\:bg-red-500\/20:hover{background-color:rgba(239,68,68,.2)}.hover\:bg-sky-400:hover{--tw-bg-opacity:1;background-color:rgb(56 189 248/var(--tw-bg-opacity,1))}.hover\:bg-sky-500:hover{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.hover\:bg-white:hover{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.hover\:bg-zinc-200:hover{--tw-bg-opacity:1;background-color:rgb(228 228 231/var(--tw-bg-opacity,1))}.hover\:bg-zinc-700:hover{--tw-bg-opacity:1;background-color:rgb(63 63 70/var(--tw-bg-opacity,1))}.hover\:bg-zinc-800:hover{--tw-bg-opacity:1;background-color:rgb(39 39 42/var(--tw-bg-opacity,1))}.hover\:bg-zinc-800\/60:hover{background-color:rgba(39,39,42,.6)}.hover\:bg-zinc-900:hover{--tw-bg-opacity:1;background-color:rgb(24 24 27/var(--tw-bg-opacity,1))}.hover\:bg-zinc-950:hover{--tw-bg-opacity:1;background-color:rgb(9 9 11/var(--tw-bg-opacity,1))}.hover\:from-purple-500:hover{--tw-gradient-from:#a855f7 var(--tw-gradient-from-position);--tw-gradient-to:rgba(168,85,247,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:to-indigo-500:hover{--tw-gradient-to:#6366f1 var(--tw-gradient-to-position)}.hover\:text-emerald-300:hover{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.hover\:text-red-200:hover{--tw-text-opacity:1;color:rgb(254 202 202/var(--tw-text-opacity,1))}.hover\:text-red-300:hover{--tw-text-opacity:1;color:rgb(252 165 165/var(--tw-text-opacity,1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:opacity-100:hover{opacity:1}.focus\:border-amber-500:focus{--tw-border-opacity:1;border-color:rgb(245 158 11/var(--tw-border-opacity,1))}.focus\:border-emerald-500:focus{--tw-border-opacity:1;border-color:rgb(16 185 129/var(--tw-border-opacity,1))}.focus\:border-purple-500:focus{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.focus\:border-red-500:focus{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.focus\:border-sky-500:focus{--tw-border-opacity:1;border-color:rgb(14 165 233/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95}.active\:scale-95:active,.active\:scale-\[0\.98\]:active{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:scale-\[0\.98\]:active{--tw-scale-x:0.98;--tw-scale-y:0.98}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:opacity-40:disabled{opacity:.4}.disabled\:opacity-50:disabled{opacity:.5}@media (min-width:640px){.sm\:left-auto{left:auto}.sm\:right-5{right:1.25rem}.sm\:order-none{order:0}.sm\:block{display:block}.sm\:inline{display:inline}.sm\:hidden{display:none}.sm\:h-auto{height:auto}.sm\:w-auto{width:auto}.sm\:max-w-sm{max-width:24rem}.sm\:flex-none{flex:none}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:gap-1\.5{gap:.375rem}.sm\:gap-2{gap:.5rem}.sm\:gap-4{gap:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:px-3{padding-left:.75rem;padding-right:.75rem}.sm\:py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.sm\:pt-16{padding-top:4rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width:768px){.md\:col-span-2{grid-column:span 2/span 2}.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.lg\:col-span-4{grid-column:span 4/span 4}.lg\:col-span-5{grid-column:span 5/span 5}.lg\:col-span-7{grid-column:span 7/span 7}.lg\:col-span-8{grid-column:span 8/span 8}.lg\:flex{display:flex}.lg\:w-auto{width:auto}.lg\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:flex-row{flex-direction:row}.lg\:flex-wrap{flex-wrap:wrap}.lg\:items-center{align-items:center}}</style>
+    <style id="tailwind-css">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width:640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width:768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width:1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width:1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width:1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.visible{visibility:visible}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.left-4{left:1rem}.right-1{right:.25rem}.right-1\.5{right:.375rem}.right-4{right:1rem}.top-0{top:0}.top-1{top:.25rem}.top-1\.5{top:.375rem}.top-2{top:.5rem}.z-10{z-index:10}.z-20{z-index:20}.z-40{z-index:40}.z-50{z-index:50}.z-\[100\]{z-index:100}.z-\[60\]{z-index:60}.z-\[70\]{z-index:70}.z-\[80\]{z-index:80}.z-\[95\]{z-index:95}.order-last{order:9999}.col-span-3{grid-column:span 3/span 3}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.my-auto{margin-top:auto;margin-bottom:auto}.mb-1{margin-bottom:.25rem}.mb-1\.5{margin-bottom:.375rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mr-1{margin-right:.25rem}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-2\.5{margin-top:.625rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-11{height:2.75rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-2{height:.5rem}.h-20{height:5rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[164px\]{height:164px}.h-\[180px\]{height:180px}.h-fit{height:-moz-fit-content;height:fit-content}.h-full{height:100%}.max-h-\[210px\]{max-height:210px}.max-h-\[320px\]{max-height:320px}.max-h-\[380px\]{max-height:380px}.max-h-\[520px\]{max-height:520px}.min-h-\[140px\]{min-height:140px}.min-h-\[3\.5rem\]{min-height:3.5rem}.min-h-\[340px\]{min-height:340px}.min-h-\[360px\]{min-height:360px}.min-h-\[380px\]{min-height:380px}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-11{width:2.75rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-16{width:4rem}.w-2{width:.5rem}.w-20{width:5rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[164px\]{width:164px}.w-\[180px\]{width:180px}.w-full{width:100%}.min-w-0{min-width:0}.min-w-\[1\.25rem\]{min-width:1.25rem}.max-w-2xl{max-width:42rem}.max-w-7xl{max-width:80rem}.max-w-\[360px\]{max-width:360px}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}.select-all{-webkit-user-select:all;-moz-user-select:all;user-select:all}.appearance-none{-webkit-appearance:none;-moz-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0\.5{gap:.125rem}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-0\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.125rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.125rem*var(--tw-space-y-reverse))}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.375rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.375rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-2\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.625rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.625rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-3\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.875rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.875rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.divide-y>:not([hidden])~:not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px*(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px*var(--tw-divide-y-reverse))}.divide-zinc-800\/60>:not([hidden])~:not([hidden]){border-color:rgba(39,39,42,.6)}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.break-words{overflow-wrap:break-word}.break-all{word-break:break-all}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[26px\]{border-radius:26px}.rounded-\[28px\]{border-radius:28px}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-0{border-width:0}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77/var(--tw-border-opacity,1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.border-amber-400\/50{border-color:rgba(251,191,36,.5)}.border-amber-400\/60{border-color:rgba(251,191,36,.6)}.border-amber-500\/20{border-color:rgba(245,158,11,.2)}.border-amber-500\/30{border-color:rgba(245,158,11,.3)}.border-amber-500\/40{border-color:rgba(245,158,11,.4)}.border-amber-500\/50{border-color:rgba(245,158,11,.5)}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.border-emerald-400\/40{border-color:rgba(52,211,153,.4)}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129/var(--tw-border-opacity,1))}.border-emerald-500\/30{border-color:rgba(16,185,129,.3)}.border-emerald-500\/40{border-color:rgba(16,185,129,.4)}.border-orange-500\/30{border-color:rgba(249,115,22,.3)}.border-orange-500\/40{border-color:rgba(249,115,22,.4)}.border-purple-400{--tw-border-opacity:1;border-color:rgb(192 132 252/var(--tw-border-opacity,1))}.border-purple-400\/30{border-color:rgba(192,132,252,.3)}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-purple-500\/30{border-color:rgba(168,85,247,.3)}.border-purple-500\/40{border-color:rgba(168,85,247,.4)}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-red-400\/40{border-color:hsla(0,91%,71%,.4)}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.border-red-500\/20{border-color:rgba(239,68,68,.2)}.border-red-500\/30{border-color:rgba(239,68,68,.3)}.border-red-500\/40{border-color:rgba(239,68,68,.4)}.border-red-500\/50{border-color:rgba(239,68,68,.5)}.border-red-500\/60{border-color:rgba(239,68,68,.6)}.border-sky-300{--tw-border-opacity:1;border-color:rgb(125 211 252/var(--tw-border-opacity,1))}.border-sky-400{--tw-border-opacity:1;border-color:rgb(56 189 248/var(--tw-border-opacity,1))}.border-sky-500{--tw-border-opacity:1;border-color:rgb(14 165 233/var(--tw-border-opacity,1))}.border-sky-500\/30{border-color:rgba(14,165,233,.3)}.border-sky-500\/40{border-color:rgba(14,165,233,.4)}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.border-white\/15{border-color:hsla(0,0%,100%,.15)}.border-white\/20{border-color:hsla(0,0%,100%,.2)}.border-white\/25{border-color:hsla(0,0%,100%,.25)}.border-white\/30{border-color:hsla(0,0%,100%,.3)}.border-zinc-200{--tw-border-opacity:1;border-color:rgb(228 228 231/var(--tw-border-opacity,1))}.border-zinc-700{--tw-border-opacity:1;border-color:rgb(63 63 70/var(--tw-border-opacity,1))}.border-zinc-800{--tw-border-opacity:1;border-color:rgb(39 39 42/var(--tw-border-opacity,1))}.border-zinc-800\/80{border-color:rgba(39,39,42,.8)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-amber-500\/10{background-color:rgba(245,158,11,.1)}.bg-amber-500\/15{background-color:rgba(245,158,11,.15)}.bg-amber-500\/20{background-color:rgba(245,158,11,.2)}.bg-amber-950\/20{background-color:rgba(69,26,3,.2)}.bg-amber-950\/90{background-color:rgba(69,26,3,.9)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0/var(--tw-bg-opacity,1))}.bg-black\/25{background-color:rgba(0,0,0,.25)}.bg-black\/30{background-color:rgba(0,0,0,.3)}.bg-black\/40{background-color:rgba(0,0,0,.4)}.bg-black\/80{background-color:rgba(0,0,0,.8)}.bg-black\/85{background-color:rgba(0,0,0,.85)}.bg-black\/95{background-color:rgba(0,0,0,.95)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-emerald-500\/10{background-color:rgba(16,185,129,.1)}.bg-emerald-500\/15{background-color:rgba(16,185,129,.15)}.bg-emerald-500\/20{background-color:rgba(16,185,129,.2)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105/var(--tw-bg-opacity,1))}.bg-emerald-600\/20{background-color:rgba(5,150,105,.2)}.bg-emerald-950\/30{background-color:rgba(2,44,34,.3)}.bg-emerald-950\/60{background-color:rgba(2,44,34,.6)}.bg-emerald-950\/90{background-color:rgba(2,44,34,.9)}.bg-orange-400{--tw-bg-opacity:1;background-color:rgb(251 146 60/var(--tw-bg-opacity,1))}.bg-orange-500{--tw-bg-opacity:1;background-color:rgb(249 115 22/var(--tw-bg-opacity,1))}.bg-orange-500\/10{background-color:rgba(249,115,22,.1)}.bg-orange-500\/15{background-color:rgba(249,115,22,.15)}.bg-purple-400{--tw-bg-opacity:1;background-color:rgb(192 132 252/var(--tw-bg-opacity,1))}.bg-purple-500\/15{background-color:rgba(168,85,247,.15)}.bg-purple-500\/20{background-color:rgba(168,85,247,.2)}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.bg-purple-600\/15{background-color:rgba(147,51,234,.15)}.bg-purple-600\/20{background-color:rgba(147,51,234,.2)}.bg-purple-950\/30{background-color:rgba(59,7,100,.3)}.bg-purple-950\/40{background-color:rgba(59,7,100,.4)}.bg-red-400{--tw-bg-opacity:1;background-color:rgb(248 113 113/var(--tw-bg-opacity,1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68/var(--tw-bg-opacity,1))}.bg-red-500\/10{background-color:rgba(239,68,68,.1)}.bg-red-500\/15{background-color:rgba(239,68,68,.15)}.bg-red-500\/20{background-color:rgba(239,68,68,.2)}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38/var(--tw-bg-opacity,1))}.bg-red-950\/20{background-color:rgba(69,10,10,.2)}.bg-red-950\/60{background-color:rgba(69,10,10,.6)}.bg-red-950\/80{background-color:rgba(69,10,10,.8)}.bg-red-950\/95{background-color:rgba(69,10,10,.95)}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248/var(--tw-bg-opacity,1))}.bg-sky-500{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.bg-sky-500\/20{background-color:rgba(14,165,233,.2)}.bg-sky-600{--tw-bg-opacity:1;background-color:rgb(2 132 199/var(--tw-bg-opacity,1))}.bg-sky-950\/30{background-color:rgba(8,47,73,.3)}.bg-sky-950\/60{background-color:rgba(8,47,73,.6)}.bg-sky-950\/90{background-color:rgba(8,47,73,.9)}.bg-sky-950\/95{background-color:rgba(8,47,73,.95)}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/20{background-color:hsla(0,0%,100%,.2)}.bg-zinc-100{--tw-bg-opacity:1;background-color:rgb(244 244 245/var(--tw-bg-opacity,1))}.bg-zinc-200{--tw-bg-opacity:1;background-color:rgb(228 228 231/var(--tw-bg-opacity,1))}.bg-zinc-400{--tw-bg-opacity:1;background-color:rgb(161 161 170/var(--tw-bg-opacity,1))}.bg-zinc-800{--tw-bg-opacity:1;background-color:rgb(39 39 42/var(--tw-bg-opacity,1))}.bg-zinc-900{--tw-bg-opacity:1;background-color:rgb(24 24 27/var(--tw-bg-opacity,1))}.bg-zinc-900\/90{background-color:rgba(24,24,27,.9)}.bg-zinc-900\/95{background-color:rgba(24,24,27,.95)}.bg-zinc-950{--tw-bg-opacity:1;background-color:rgb(9 9 11/var(--tw-bg-opacity,1))}.bg-zinc-950\/60{background-color:rgba(9,9,11,.6)}.bg-zinc-950\/90{background-color:rgba(9,9,11,.9)}.bg-zinc-950\/95{background-color:rgba(9,9,11,.95)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgba(245,158,11,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-600{--tw-gradient-from:#9333ea var(--tw-gradient-from-position);--tw-gradient-to:rgba(147,51,234,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-600\/30{--tw-gradient-from:rgba(147,51,234,.3) var(--tw-gradient-from-position);--tw-gradient-to:rgba(147,51,234,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-indigo-600\/30{--tw-gradient-to:rgba(79,70,229,.3) var(--tw-gradient-to-position)}.to-orange-600{--tw-gradient-to:#ea580c var(--tw-gradient-to-position)}.object-contain{-o-object-fit:contain;object-fit:contain}.p-0{padding:0}.p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-1{padding-bottom:.25rem}.pb-2\.5{padding-bottom:.625rem}.pb-3{padding-bottom:.75rem}.pl-0\.5{padding-left:.125rem}.pr-1{padding-right:.25rem}.pr-2{padding-right:.5rem}.pt-1{padding-top:.25rem}.pt-2{padding-top:.5rem}.pt-3{padding-top:.75rem}.pt-4{padding-top:1rem}.pt-8{padding-top:2rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tabular-nums{--tw-numeric-spacing:tabular-nums;font-variant-numeric:var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction)}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-\[0\.3em\]{letter-spacing:.3em}.tracking-tight{letter-spacing:-.025em}.tracking-wider{letter-spacing:.05em}.tracking-widest{letter-spacing:.1em}.text-amber-100{--tw-text-opacity:1;color:rgb(254 243 199/var(--tw-text-opacity,1))}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138/var(--tw-text-opacity,1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77/var(--tw-text-opacity,1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0/var(--tw-text-opacity,1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208/var(--tw-text-opacity,1))}.text-emerald-200\/80{color:rgba(167,243,208,.8)}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153/var(--tw-text-opacity,1))}.text-emerald-50{--tw-text-opacity:1;color:rgb(236 253 245/var(--tw-text-opacity,1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105/var(--tw-text-opacity,1))}.text-orange-200{--tw-text-opacity:1;color:rgb(254 215 170/var(--tw-text-opacity,1))}.text-orange-300{--tw-text-opacity:1;color:rgb(253 186 116/var(--tw-text-opacity,1))}.text-orange-400{--tw-text-opacity:1;color:rgb(251 146 60/var(--tw-text-opacity,1))}.text-purple-200{--tw-text-opacity:1;color:rgb(233 213 255/var(--tw-text-opacity,1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254/var(--tw-text-opacity,1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}.text-red-100{--tw-text-opacity:1;color:rgb(254 226 226/var(--tw-text-opacity,1))}.text-red-200{--tw-text-opacity:1;color:rgb(254 202 202/var(--tw-text-opacity,1))}.text-red-200\/80{color:hsla(0,96%,89%,.8)}.text-red-300{--tw-text-opacity:1;color:rgb(252 165 165/var(--tw-text-opacity,1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113/var(--tw-text-opacity,1))}.text-red-50{--tw-text-opacity:1;color:rgb(254 242 242/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-sky-200{--tw-text-opacity:1;color:rgb(186 230 253/var(--tw-text-opacity,1))}.text-sky-200\/80{color:rgba(186,230,253,.8)}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252/var(--tw-text-opacity,1))}.text-sky-400{--tw-text-opacity:1;color:rgb(56 189 248/var(--tw-text-opacity,1))}.text-sky-50{--tw-text-opacity:1;color:rgb(240 249 255/var(--tw-text-opacity,1))}.text-sky-600{--tw-text-opacity:1;color:rgb(2 132 199/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/70{color:hsla(0,0%,100%,.7)}.text-white\/80{color:hsla(0,0%,100%,.8)}.text-zinc-100{--tw-text-opacity:1;color:rgb(244 244 245/var(--tw-text-opacity,1))}.text-zinc-200{--tw-text-opacity:1;color:rgb(228 228 231/var(--tw-text-opacity,1))}.text-zinc-300{--tw-text-opacity:1;color:rgb(212 212 216/var(--tw-text-opacity,1))}.text-zinc-400{--tw-text-opacity:1;color:rgb(161 161 170/var(--tw-text-opacity,1))}.text-zinc-500{--tw-text-opacity:1;color:rgb(113 113 122/var(--tw-text-opacity,1))}.text-zinc-600{--tw-text-opacity:1;color:rgb(82 82 91/var(--tw-text-opacity,1))}.text-zinc-700{--tw-text-opacity:1;color:rgb(63 63 70/var(--tw-text-opacity,1))}.text-zinc-800{--tw-text-opacity:1;color:rgb(39 39 42/var(--tw-text-opacity,1))}.text-zinc-900{--tw-text-opacity:1;color:rgb(24 24 27/var(--tw-text-opacity,1))}.text-zinc-950{--tw-text-opacity:1;color:rgb(9 9 11/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.underline-offset-4{text-underline-offset:4px}.accent-amber-500{accent-color:#f59e0b}.accent-emerald-500{accent-color:#10b981}.opacity-60{opacity:.6}.shadow{--tw-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color)}.shadow,.shadow-2xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-lg,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.shadow-amber-500\/20{--tw-shadow-color:rgba(245,158,11,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/30{--tw-shadow-color:rgba(245,158,11,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-black\/60{--tw-shadow-color:rgba(0,0,0,.6);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/20{--tw-shadow-color:rgba(5,150,105,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/25{--tw-shadow-color:rgba(5,150,105,.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-600\/30{--tw-shadow-color:rgba(5,150,105,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-600\/20{--tw-shadow-color:rgba(147,51,234,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-600\/30{--tw-shadow-color:rgba(147,51,234,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-purple-950\/50{--tw-shadow-color:rgba(59,7,100,.5);--tw-shadow:var(--tw-shadow-colored)}.shadow-red-600\/40{--tw-shadow-color:rgba(220,38,38,.4);--tw-shadow:var(--tw-shadow-colored)}.shadow-sky-600\/25{--tw-shadow-color:rgba(2,132,199,.25);--tw-shadow:var(--tw-shadow-colored)}.shadow-sky-600\/30{--tw-shadow-color:rgba(2,132,199,.3);--tw-shadow:var(--tw-shadow-colored)}.outline{outline-style:solid}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.ring-red-500\/30{--tw-ring-color:rgba(239,68,68,.3)}.invert{--tw-invert:invert(100%)}.filter,.invert{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px)}.backdrop-blur,.backdrop-blur-md{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px)}.backdrop-blur-sm,.backdrop-blur-xl{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-300{transition-duration:.3s}.selection\:bg-purple-500 ::-moz-selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:bg-purple-500 ::selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:text-white ::-moz-selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:text-white ::selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:bg-purple-500::-moz-selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:bg-purple-500::selection{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.selection\:text-white::-moz-selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.last\:border-0:last-child{border-width:0}.read-only\:opacity-60:-moz-read-only{opacity:.6}.read-only\:opacity-60:read-only{opacity:.6}.hover\:border-purple-500\/60:hover{border-color:rgba(168,85,247,.6)}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.hover\:bg-amber-500\/25:hover{background-color:rgba(245,158,11,.25)}.hover\:bg-emerald-400:hover{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.hover\:bg-emerald-500\/20:hover{background-color:rgba(16,185,129,.2)}.hover\:bg-emerald-500\/25:hover{background-color:rgba(16,185,129,.25)}.hover\:bg-emerald-600\/30:hover{background-color:rgba(5,150,105,.3)}.hover\:bg-orange-400:hover{--tw-bg-opacity:1;background-color:rgb(251 146 60/var(--tw-bg-opacity,1))}.hover\:bg-orange-500\/25:hover{background-color:rgba(249,115,22,.25)}.hover\:bg-purple-500:hover{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.hover\:bg-purple-500\/25:hover{background-color:rgba(168,85,247,.25)}.hover\:bg-purple-600:hover{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68/var(--tw-bg-opacity,1))}.hover\:bg-red-500\/15:hover{background-color:rgba(239,68,68,.15)}.hover\:bg-red-500\/20:hover{background-color:rgba(239,68,68,.2)}.hover\:bg-sky-400:hover{--tw-bg-opacity:1;background-color:rgb(56 189 248/var(--tw-bg-opacity,1))}.hover\:bg-sky-500:hover{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.hover\:bg-white:hover{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.hover\:bg-zinc-200:hover{--tw-bg-opacity:1;background-color:rgb(228 228 231/var(--tw-bg-opacity,1))}.hover\:bg-zinc-700:hover{--tw-bg-opacity:1;background-color:rgb(63 63 70/var(--tw-bg-opacity,1))}.hover\:bg-zinc-800:hover{--tw-bg-opacity:1;background-color:rgb(39 39 42/var(--tw-bg-opacity,1))}.hover\:bg-zinc-800\/60:hover{background-color:rgba(39,39,42,.6)}.hover\:bg-zinc-900:hover{--tw-bg-opacity:1;background-color:rgb(24 24 27/var(--tw-bg-opacity,1))}.hover\:bg-zinc-950:hover{--tw-bg-opacity:1;background-color:rgb(9 9 11/var(--tw-bg-opacity,1))}.hover\:from-purple-500:hover{--tw-gradient-from:#a855f7 var(--tw-gradient-from-position);--tw-gradient-to:rgba(168,85,247,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:to-indigo-500:hover{--tw-gradient-to:#6366f1 var(--tw-gradient-to-position)}.hover\:text-emerald-300:hover{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.hover\:text-red-200:hover{--tw-text-opacity:1;color:rgb(254 202 202/var(--tw-text-opacity,1))}.hover\:text-red-300:hover{--tw-text-opacity:1;color:rgb(252 165 165/var(--tw-text-opacity,1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.hover\:text-zinc-300:hover{--tw-text-opacity:1;color:rgb(212 212 216/var(--tw-text-opacity,1))}.hover\:text-zinc-400:hover{--tw-text-opacity:1;color:rgb(161 161 170/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:opacity-100:hover{opacity:1}.focus\:border-amber-500:focus{--tw-border-opacity:1;border-color:rgb(245 158 11/var(--tw-border-opacity,1))}.focus\:border-emerald-500:focus{--tw-border-opacity:1;border-color:rgb(16 185 129/var(--tw-border-opacity,1))}.focus\:border-purple-500:focus{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.focus\:border-red-500:focus{--tw-border-opacity:1;border-color:rgb(239 68 68/var(--tw-border-opacity,1))}.focus\:border-sky-500:focus{--tw-border-opacity:1;border-color:rgb(14 165 233/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95}.active\:scale-95:active,.active\:scale-\[0\.98\]:active{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:scale-\[0\.98\]:active{--tw-scale-x:0.98;--tw-scale-y:0.98}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:opacity-40:disabled{opacity:.4}.disabled\:opacity-50:disabled{opacity:.5}@media (min-width:640px){.sm\:left-auto{left:auto}.sm\:right-5{right:1.25rem}.sm\:order-none{order:0}.sm\:block{display:block}.sm\:inline{display:inline}.sm\:hidden{display:none}.sm\:h-auto{height:auto}.sm\:w-auto{width:auto}.sm\:max-w-sm{max-width:24rem}.sm\:flex-none{flex:none}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:gap-1\.5{gap:.375rem}.sm\:gap-2{gap:.5rem}.sm\:gap-4{gap:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:px-3{padding-left:.75rem;padding-right:.75rem}.sm\:py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.sm\:pt-16{padding-top:4rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width:768px){.md\:col-span-2{grid-column:span 2/span 2}.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.lg\:col-span-4{grid-column:span 4/span 4}.lg\:col-span-5{grid-column:span 5/span 5}.lg\:col-span-7{grid-column:span 7/span 7}.lg\:col-span-8{grid-column:span 8/span 8}.lg\:flex{display:flex}.lg\:w-auto{width:auto}.lg\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:flex-row{flex-direction:row}.lg\:flex-wrap{flex-wrap:wrap}.lg\:items-center{align-items:center}}</style>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 selection:bg-purple-500 selection:text-white">
 
@@ -234,7 +236,7 @@
                     </div>
                     <p class="text-xs text-zinc-400 flex items-center gap-1.5 min-w-0">
                         <i class="fa-solid fa-location-dot text-purple-400 text-xs" aria-hidden="true"></i>
-                        <span id="headerCondoName" class="truncate">Condominio La Hacienda - Rincón • Santa Cruz</span>
+                        <span id="headerCondoName" class="truncate">Condominio</span>
                     </p>
                 </div>
             </div>
@@ -505,7 +507,7 @@
                                 <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center border border-white/30 shrink-0">
                                     <i class="fa-solid fa-sun text-white text-sm"></i>
                                 </div>
-                                <span id="cardCondoName" class="font-bold text-sm tracking-tight leading-tight line-clamp-2">La Hacienda - Rincon</span>
+                                <span id="cardCondoName" class="font-bold text-sm tracking-tight leading-tight line-clamp-2">VisePass</span>
                             </div>
                             <span id="cardPassType" class="shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full bg-white/20 border border-white/30">Visita</span>
                         </div>
@@ -1369,6 +1371,160 @@
     <!-- ==========================================
          MODAL 4: PORTAL INICIAL DE INGRESO POR ROL
          ========================================== -->
+    <!-- ==========================================
+         SELECTOR DE CONDOMINIO (una app para varios condominios)
+         ========================================== -->
+    <div id="condoPickerModal" class="hidden fixed inset-0 z-[60] bg-zinc-950/95 backdrop-blur-xl flex items-start justify-center p-4 pt-8 sm:pt-16 overflow-y-auto">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30 border border-purple-400/30 shrink-0">
+                        <i class="fa-solid fa-building text-white text-lg" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-white leading-tight">¿Cuál es tu condominio?</h3>
+                        <p class="text-xs text-zinc-400 mt-0.5">Elígelo una vez; el teléfono lo recuerda.</p>
+                    </div>
+                </div>
+                <button id="condoPickerCloseBtn" type="button" onclick="closeCondoPicker()" class="hidden text-zinc-400 hover:text-white p-1" aria-label="Cerrar">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p id="condoPickerMsg" class="hidden text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></p>
+            <input type="search" id="condoPickerSearch" oninput="renderCondoPicker()" placeholder="🔍 Buscar condominio" autocomplete="off" class="hidden w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+            <div id="condoPickerList" class="space-y-2"></div>
+            <button type="button" onclick="openMasterPanel()" class="master-link hidden w-full text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4">Panel maestro</button>
+        </div>
+    </div>
+
+    <!-- Servicio suspendido por el dueño del servicio -->
+    <div id="condoSuspendedScreen" class="hidden fixed inset-0 z-[70] bg-zinc-950 flex items-center justify-center p-6 overflow-y-auto">
+        <div class="max-w-sm w-full text-center space-y-4">
+            <div class="w-20 h-20 mx-auto rounded-3xl bg-red-500/15 border border-red-500/40 text-red-400 flex items-center justify-center text-4xl">
+                <i class="fa-solid fa-circle-pause" aria-hidden="true"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white">Servicio suspendido</h2>
+            <p class="text-sm text-zinc-300"><strong id="condoSuspendedName" class="text-white">Este condominio</strong> tiene el servicio de VisePass suspendido.</p>
+            <p class="text-sm text-zinc-400">Consulta con la administración de tu condominio. Mientras tanto, las visitas se anuncian por citófono.</p>
+            <div class="grid grid-cols-1 gap-2 pt-2">
+                <button type="button" onclick="location.reload()" class="h-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm font-bold">Volver a revisar</button>
+                <button id="condoSuspendedOther" type="button" onclick="document.getElementById('condoSuspendedScreen').classList.add('hidden'); openCondoPicker(false)" class="hidden h-12 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-sm font-bold">Elegir otro condominio</button>
+                <button type="button" onclick="openMasterPanel()" class="master-link hidden text-xs text-zinc-600 hover:text-zinc-400 underline underline-offset-4 pt-2">Panel maestro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PANEL MAESTRO: condominios, pagos y suspensión (solo el dueño del servicio)
+         ========================================== -->
+    <div id="masterPanelModal" class="hidden fixed inset-0 z-[80] bg-zinc-950 overflow-y-auto">
+        <div class="max-w-2xl mx-auto p-4 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-crown text-white text-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-black text-white leading-tight">Panel maestro</h2>
+                        <p id="masterUserEmail" class="text-xs text-zinc-400 truncate">Condominios, pagos y suspensión</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeMasterPanel()" class="w-11 h-11 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 flex items-center justify-center shrink-0" aria-label="Cerrar panel">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Ingreso al panel -->
+            <form id="masterLoginBox" onsubmit="handleMasterLogin(event)" class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+                <p id="masterLoginMsg" class="hidden"></p>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Correo</label>
+                    <input type="email" id="masterEmail" autocomplete="username" placeholder="tu@correo.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-zinc-300 block mb-1">Contraseña</label>
+                    <input type="password" id="masterPass" autocomplete="current-password" placeholder="Tu contraseña" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
+                </div>
+                <button id="masterLoginBtn" type="submit" class="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-sm">Entrar al panel</button>
+                <div id="masterSetupBox" class="hidden space-y-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+                    <p class="text-xs text-amber-200"><strong>Primera vez:</strong> crea la cuenta del dueño del servicio. Solo puede haber una y luego nadie más puede crearla.</p>
+                    <button type="button" onclick="handleMasterSetup()" class="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-sm">Crear Panel maestro con estos datos</button>
+                </div>
+            </form>
+
+            <!-- Panel -->
+            <div id="masterMainBox" class="hidden space-y-4">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <div id="masterCountActive" class="text-2xl font-black text-emerald-400 leading-tight">0</div>
+                        <div class="text-xs text-zinc-400">Activos</div>
+                    </div>
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <div id="masterCountBlocked" class="text-2xl font-black text-red-400 leading-tight">0</div>
+                        <div class="text-xs text-zinc-400">Suspendidos</div>
+                    </div>
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 text-center">
+                        <div id="masterCountLate" class="text-2xl font-black text-amber-400 leading-tight">0</div>
+                        <div class="text-xs text-zinc-400">Pago vencido</div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="openMasterForm('')" class="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i><span>Agregar condominio</span>
+                </button>
+
+                <!-- Formulario de condominio -->
+                <form id="masterCondoForm" onsubmit="handleMasterCondoSave(event)" class="hidden bg-zinc-900 border border-purple-500/40 rounded-2xl p-4 space-y-3">
+                    <h3 id="masterFormTitle" class="text-base font-bold text-white">Agregar condominio</h3>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Nombre del condominio</label>
+                        <input type="text" id="masterCondoName" oninput="onMasterNameInput()" maxlength="80" placeholder="Ej. Las Brisas" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Identificador para el link</label>
+                        <input type="text" id="masterCondoSlug" oninput="this.dataset.touched = '1'" maxlength="40" placeholder="ej. las-brisas" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-purple-500 read-only:opacity-60">
+                        <p class="text-xs text-zinc-500 mt-1">Minúsculas, números y guiones. No se puede cambiar después.</p>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Configuración de Firebase del condominio</label>
+                        <textarea id="masterCondoCfg" oninput="updateMasterCfgPreview()" rows="6" placeholder="Pega aquí el bloque const firebaseConfig = { ... }" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-purple-500"></textarea>
+                        <p id="masterCondoCfgPreview" class="text-xs text-zinc-500"></p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="min-w-0">
+                            <label class="text-xs font-medium text-zinc-300 block mb-1">Pagado hasta</label>
+                            <input type="date" id="masterCondoPaid" class="block w-full min-w-0 bg-zinc-950 border border-zinc-800 rounded-xl px-2 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div class="min-w-0">
+                            <label class="text-xs font-medium text-zinc-300 block mb-1">Días de gracia</label>
+                            <input type="number" id="masterCondoGrace" min="0" max="60" value="5" class="block w-full min-w-0 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                        </div>
+                    </div>
+                    <label class="flex items-start gap-2 text-sm text-white cursor-pointer">
+                        <input type="checkbox" id="masterCondoAutoBlock" class="w-5 h-5 mt-0.5 accent-amber-500">
+                        <span class="flex flex-col leading-tight"><span class="font-bold">Bloquear solo si no paga</span><span class="text-xs text-zinc-400">Se suspende automáticamente pasados los días de gracia.</span></span>
+                    </label>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Contacto</label>
+                        <input type="text" id="masterCondoContact" maxlength="120" placeholder="Ej. Juan Pérez · 70012345" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1">Notas</label>
+                        <textarea id="masterCondoNotes" rows="2" maxlength="500" placeholder="Precio, forma de pago, observaciones" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="closeMasterForm()" class="h-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold text-sm">Cancelar</button>
+                        <button type="submit" class="h-12 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm">Guardar</button>
+                    </div>
+                </form>
+
+                <div id="masterCondoList" class="space-y-3"></div>
+
+                <button type="button" onclick="masterLogout()" class="w-full h-11 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-bold">Cerrar sesión del panel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="authPortalModal" class="fixed inset-0 z-50 bg-zinc-950/95 backdrop-blur-xl flex items-start justify-center p-4 pt-8 sm:pt-16 overflow-y-auto">
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-5 shadow-2xl">
             <div class="flex items-start justify-between gap-3">
@@ -1378,7 +1534,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-black text-white leading-tight">¿Cómo deseas ingresar?</h3>
-                        <p class="text-xs text-zinc-400 mt-0.5"><span class="condo-name-text">La Hacienda - Rincón</span> · Elige tu perfil</p>
+                        <p class="text-xs text-zinc-400 mt-0.5"><span class="condo-name-text">VisePass</span> · Elige tu perfil</p>
                     </div>
                 </div>
                 <button id="closeAuthModalBtn" onclick="closeAuthPortalIfAllowed()" class="hidden text-zinc-400 hover:text-white p-1" title="Volver al panel actual">
@@ -1465,7 +1621,7 @@
                     </p>
                     <div>
                         <label class="text-xs font-medium text-zinc-300 block mb-1">Nombre del condominio</label>
-                        <input type="text" id="adminFirstSetupCondo" maxlength="60" placeholder="Ej. La Hacienda - Rincón" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                        <input type="text" id="adminFirstSetupCondo" maxlength="60" placeholder="Ej. Las Brisas" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
                     </div>
                     <div>
                         <label class="text-xs font-medium text-zinc-300 block mb-1">Tu correo</label>
@@ -1499,6 +1655,13 @@
                     Entrar como administración
                 </button>
             </form>
+
+            <div id="multiCondoLinks" class="hidden pt-3 border-t border-zinc-800 space-y-2">
+                <button type="button" onclick="openCondoPicker(true)" class="w-full h-11 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-building" aria-hidden="true"></i><span>Cambiar condominio</span>
+                </button>
+                <button type="button" onclick="openMasterPanel()" class="master-link hidden w-full text-xs text-zinc-600 hover:text-zinc-400 underline underline-offset-4">Panel maestro</button>
+            </div>
 
             <div id="logoutSessionBox" class="hidden pt-4 border-t border-zinc-800 flex items-center justify-between gap-3">
                 <p id="logoutSessionText" class="text-xs text-zinc-400 leading-snug">Sesión guardada en este teléfono.</p>
@@ -1696,7 +1859,7 @@
                             <i class="fa-solid fa-wallet text-white text-base"></i>
                         </div>
                         <div>
-                            <div id="awCondoName" class="text-sm font-extrabold tracking-tight">La Hacienda - Rincón</div>
+                            <div id="awCondoName" class="text-sm font-extrabold tracking-tight">VisePass</div>
                             <div id="awPassType" class="text-xs uppercase tracking-wider font-bold text-white/80">VISITA SOCIAL</div>
                         </div>
                     </div>
@@ -1754,7 +1917,7 @@
     </div>
 
     <!-- VENTANA DE CONFIRMACIÓN -->
-    <div id="confirmDialog" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
+    <div id="confirmDialog" class="hidden fixed inset-0 z-[95] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
             <div class="flex items-start gap-3">
                 <div id="confirmDialogIcon" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-red-500/15 text-red-400 border-red-500/30" aria-hidden="true">
@@ -1777,7 +1940,7 @@
     </div>
 
     <!-- TOAST DE NOTIFICACIONES FLOTANTE -->
-    <div id="toastBox" role="status" aria-live="polite" class="hidden fixed left-4 right-4 sm:left-auto sm:right-5 z-[60] sm:max-w-sm bg-zinc-900/95 backdrop-blur border border-zinc-700 text-zinc-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/60 flex items-start gap-2.5 text-sm font-semibold leading-snug">
+    <div id="toastBox" role="status" aria-live="polite" class="hidden fixed left-4 right-4 sm:left-auto sm:right-5 z-[100] sm:max-w-sm bg-zinc-900/95 backdrop-blur border border-zinc-700 text-zinc-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/60 flex items-start gap-2.5 text-sm font-semibold leading-snug">
         <span id="toastMessage">Notificación</span>
     </div>
 
@@ -2270,15 +2433,516 @@
         let auditLogs = [];
         let blacklist = [];
 
-        /* ---------- Conexión con Firebase ---------- */
-        const FIREBASE_CONFIG = {
-            apiKey: 'AIzaSyBkgyoPnSzOGLNptJrjWrqbYMLAqXGxYdY',
-            authDomain: 'visepass-edb93.firebaseapp.com',
-            projectId: 'visepass-edb93',
-            storageBucket: 'visepass-edb93.firebasestorage.app',
-            messagingSenderId: '617499757663',
-            appId: '1:617499757663:web:e18bb0e252cba98be61fea'
-        };
+        /* ---------- Conexión con Firebase ----------
+           Una sola app para todos los condominios. Cada condominio tiene su propio proyecto Firebase
+           (datos separados); la lista de condominios y su estado (activo o suspendido) vive en un
+           proyecto central que maneja el dueño del servicio desde el Panel maestro. Todo se configura
+           en config.js. Si config.js trae solo "firebase", la app funciona con un único condominio. */
+        const VP_CFG = window.VISEPASS_CONFIG || {};
+        const CONDO_KEY = 'visepass_condo_v1';
+        const CONDO_CACHE_KEY = 'visepass_condos_cache_v1';
+        function isPlaceholderCfg(c) { return !c || typeof c !== 'object' || !c.projectId || !c.apiKey || /PEGAR/.test(JSON.stringify(c)); }
+        const MULTI_MODE = !!(VP_CFG.condos || VP_CFG.central);
+        const CENTRAL_CFG = isPlaceholderCfg(VP_CFG.central) ? null : VP_CFG.central;
+        let FIREBASE_CONFIG = MULTI_MODE ? null : (VP_CFG.firebase || null);
+        // Falta config.js, o se subió la plantilla sin completar
+        let CONFIG_MISSING = !window.VISEPASS_EMULATOR && isPlaceholderCfg(FIREBASE_CONFIG);
+        let currentCondoSlug = '', currentCondoEntry = null;
+        // En pruebas locales cada proyecto apunta al emulador
+        function emulatorCfg(c, fallbackId) {
+            const id = c && /^demo-/.test(c.projectId || '') ? c.projectId : fallbackId;
+            return { ...(c || {}), projectId: id, apiKey: 'demo-key', authDomain: `${id}.firebaseapp.com` };
+        }
+        // Identificador de un condominio en el link: solo minúsculas, números y guiones
+        function normSlug(s) { return String(s || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40); }
+        function readJsonLS(key, def) { try { const v = JSON.parse(localStorage.getItem(key) || 'null'); return v == null ? def : v; } catch (e) { return def; } }
+        function writeJsonLS(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+        function staticCondos() {
+            const out = {};
+            Object.entries(VP_CFG.condos || {}).forEach(([slug, c]) => {
+                const s = normSlug(slug);
+                if (s && c && !isPlaceholderCfg(c.firebase)) out[s] = { name: c.name || s, firebase: c.firebase, status: 'active', source: 'config' };
+            });
+            return out;
+        }
+        // Lo que dice el proyecto central (guardado en el teléfono) manda sobre config.js
+        function knownCondos() { return { ...staticCondos(), ...readJsonLS(CONDO_CACHE_KEY, {}) }; }
+        function condoBlocked(entry, now = Date.now()) {
+            return !!entry && (entry.status === 'suspended' || (typeof entry.blockAfter === 'number' && now > entry.blockAfter));
+        }
+
+        // Conexión al proyecto central (lista de condominios y Panel maestro)
+        let centralFb = null;
+        function getCentralFb() {
+            if (!CENTRAL_CFG || !window.FB) return null;
+            if (!centralFb) {
+                const cfg = window.VISEPASS_EMULATOR ? emulatorCfg(CENTRAL_CFG, 'demo-central') : CENTRAL_CFG;
+                const app = FB.initializeApp(cfg, 'central');
+                const auth = FB.getAuth(app);
+                const db = FB.initializeFirestore(app, { localCache: FB.memoryLocalCache() });
+                if (window.VISEPASS_EMULATOR) {
+                    FB.connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+                    FB.connectFirestoreEmulator(db, '127.0.0.1', 8080);
+                }
+                centralFb = { app, auth, db };
+            }
+            return centralFb;
+        }
+        function centralEntry(d) {
+            const x = d.data() || {};
+            return { name: String(x.name || d.id), firebase: x.firebase || null, status: x.status === 'suspended' ? 'suspended' : 'active',
+                blockAfter: typeof x.blockAfter === 'number' ? x.blockAfter : null, source: 'central' };
+        }
+        async function fetchCentralCondos(timeoutMs = 8000) {
+            const c = getCentralFb();
+            if (!c) return null;
+            const snap = await Promise.race([
+                FB.getDocs(FB.collection(c.db, 'condos')),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
+            ]);
+            const list = {};
+            snap.forEach(d => { const e = centralEntry(d); if (!isPlaceholderCfg(e.firebase)) list[d.id] = e; });
+            writeJsonLS(CONDO_CACHE_KEY, list);
+            return list;
+        }
+
+        function applyCondoEntry(slug, entry) {
+            currentCondoSlug = slug;
+            currentCondoEntry = entry;
+            FIREBASE_CONFIG = entry.firebase;
+            CONFIG_MISSING = !window.VISEPASS_EMULATOR && isPlaceholderCfg(FIREBASE_CONFIG);
+            try { localStorage.setItem(CONDO_KEY, slug); } catch (e) {}
+            // Cada condominio guarda su propia sesión (La Hacienda conserva la de siempre)
+            if (slug !== normSlug(VP_CFG.defaultCondo)) SESSION_KEY = `visepass_scz_session_v1:${slug}`;
+            document.querySelectorAll('.condo-name-text').forEach(el => { el.textContent = entry.name; });
+        }
+
+        // Elige el condominio: por el link (?condo=), por el que este teléfono recuerda o por el de siempre
+        async function resolveCondo(urlParams) {
+            if (!MULTI_MODE) return 'ok';
+            const fromLink = normSlug(urlParams.get('condo'));
+            let stored = '';
+            try { stored = normSlug(localStorage.getItem(CONDO_KEY)); } catch (e) {}
+            let slug = fromLink || stored || normSlug(VP_CFG.defaultCondo);
+            let list = knownCondos();
+            if (CENTRAL_CFG && (!slug || !list[slug])) {
+                try { await fetchCentralCondos(); } catch (e) { console.warn('central', e && e.message); }
+                list = knownCondos();
+            }
+            if (!slug && Object.keys(list).length === 1) slug = Object.keys(list)[0];
+            if (fromLink && urlParams.has('condo')) {
+                const u = new URL(location.href);
+                u.searchParams.delete('condo');
+                history.replaceState(null, '', u.pathname + u.search + u.hash);
+            }
+            if (!slug || !list[slug]) {
+                openCondoPicker(false, slug ? 'No encontramos ese condominio. Elígelo de la lista.' : '');
+                return 'picker';
+            }
+            applyCondoEntry(slug, list[slug]);
+            if (CENTRAL_CFG) watchCurrentCondo();
+            if (condoBlocked(list[slug])) { showSuspendedScreen(); return 'blocked'; }
+            return 'ok';
+        }
+
+        // Si el dueño del servicio suspende o reactiva el condominio, el teléfono se entera al instante
+        let condoWatchUnsub = null, condoWasBlocked = false;
+        function watchCurrentCondo() {
+            const c = getCentralFb();
+            if (!c || !currentCondoSlug || condoWatchUnsub) return;
+            condoWasBlocked = condoBlocked(currentCondoEntry);
+            condoWatchUnsub = FB.onSnapshot(FB.doc(c.db, 'condos', currentCondoSlug), snap => {
+                if (!snap.exists()) return;
+                const entry = centralEntry(snap);
+                const cache = readJsonLS(CONDO_CACHE_KEY, {});
+                cache[currentCondoSlug] = entry;
+                writeJsonLS(CONDO_CACHE_KEY, cache);
+                const blocked = condoBlocked(entry);
+                if (blocked) showSuspendedScreen();
+                else if (condoWasBlocked) { location.reload(); return; }
+                condoWasBlocked = blocked;
+            }, err => console.warn('central', err.code));
+            // La fecha límite de pago también se revisa con la app abierta
+            setInterval(() => {
+                const e = knownCondos()[currentCondoSlug];
+                if (condoBlocked(e) && !condoWasBlocked) { condoWasBlocked = true; showSuspendedScreen(); }
+            }, 60000);
+        }
+
+        function showSuspendedScreen() {
+            const box = document.getElementById('condoSuspendedScreen');
+            if (!box) return;
+            const nameEl = document.getElementById('condoSuspendedName');
+            if (nameEl) nameEl.textContent = (currentCondoEntry && currentCondoEntry.name) || 'Este condominio';
+            document.getElementById('condoSuspendedOther')?.classList.toggle('hidden', Object.keys(knownCondos()).length < 2);
+            box.classList.remove('hidden');
+            document.getElementById('authPortalModal')?.classList.add('hidden');
+            if (typeof stopCameraScanner === 'function' && isCameraRunning) stopCameraScanner();
+        }
+
+        /* ---------- Selector de condominio ---------- */
+        function openCondoPicker(canClose, message) {
+            const modal = document.getElementById('condoPickerModal');
+            if (!modal) return;
+            document.getElementById('condoPickerCloseBtn')?.classList.toggle('hidden', !canClose);
+            const msg = document.getElementById('condoPickerMsg');
+            if (msg) { msg.textContent = message || ''; msg.classList.toggle('hidden', !message); }
+            const search = document.getElementById('condoPickerSearch');
+            if (search) search.value = '';
+            renderCondoPicker();
+            modal.classList.remove('hidden');
+            if (CENTRAL_CFG) fetchCentralCondos().then(renderCondoPicker).catch(() => {});
+        }
+        function closeCondoPicker() { document.getElementById('condoPickerModal')?.classList.add('hidden'); }
+        function renderCondoPicker() {
+            const listEl = document.getElementById('condoPickerList');
+            if (!listEl) return;
+            const q = normalizeText(document.getElementById('condoPickerSearch')?.value || '');
+            const all = Object.entries(knownCondos()).sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'));
+            document.getElementById('condoPickerSearch')?.classList.toggle('hidden', all.length < 6);
+            const items = all.filter(([slug, c]) => !q || normalizeText(c.name).includes(q) || slug.includes(q));
+            if (!items.length) {
+                listEl.innerHTML = `<p class="text-sm text-zinc-400 text-center py-6">${all.length ? 'Ningún condominio coincide.' : (navigator.onLine ? 'Todavía no hay condominios registrados.' : 'Sin internet. Conéctate para ver la lista de condominios.')}</p>`;
+                return;
+            }
+            listEl.innerHTML = items.map(([slug, c]) => `
+                <button type="button" data-slug="${escapeHtml(slug)}" onclick="chooseCondo(this.dataset.slug)" class="w-full min-h-[3.5rem] px-4 py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 border ${slug === currentCondoSlug ? 'border-purple-500' : 'border-zinc-800'} text-left flex items-center justify-between gap-3 transition">
+                    <span class="min-w-0 text-sm font-bold text-white leading-tight line-clamp-2 break-words">${escapeHtml(c.name)}</span>
+                    ${condoBlocked(c) ? '<span class="shrink-0 text-xs font-bold text-red-300">Suspendido</span>' : '<i class="fa-solid fa-chevron-right text-zinc-500 text-xs" aria-hidden="true"></i>'}
+                </button>`).join('');
+        }
+        function chooseCondo(slug) {
+            slug = normSlug(slug);
+            if (!slug) return;
+            try { localStorage.setItem(CONDO_KEY, slug); } catch (e) {}
+            if (slug === currentCondoSlug && !condoBlocked(currentCondoEntry)) { closeCondoPicker(); return; }
+            location.href = location.pathname;
+        }
+        // Link directo de un condominio (para el mensaje de bienvenida a los vecinos)
+        function condoDirectLink(slug) {
+            return `${location.origin}${location.pathname}?condo=${encodeURIComponent(slug)}`;
+        }
+
+        function setupMultiCondoLinks() {
+            const box = document.getElementById('multiCondoLinks');
+            if (box) box.classList.toggle('hidden', !(MULTI_MODE && (Object.keys(knownCondos()).length > 1 || CENTRAL_CFG)));
+            document.querySelectorAll('.master-link').forEach(el => el.classList.toggle('hidden', !CENTRAL_CFG));
+        }
+
+        /* ---------- Panel maestro (dueño del servicio) ----------
+           Lista de condominios en el proyecto central: agregar, editar, registrar pagos y suspender. */
+        let masterUnsubs = [], masterCondos = {}, masterPrivate = {}, masterEditingSlug = '', masterAuthUnsub = null, masterIsOwner = false;
+        const fmtDateBo = ts => ts ? new Intl.DateTimeFormat('es-BO', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: BO_TZ }).format(new Date(ts)) : '';
+        function masterMsg(text, tone = 'error') {
+            const el = document.getElementById('masterLoginMsg');
+            if (!el) return;
+            el.textContent = text || '';
+            el.className = `${text ? '' : 'hidden '}text-xs rounded-lg px-3 py-2 ${tone === 'ok' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/10 text-red-300 border border-red-500/30'}`;
+        }
+
+        async function openMasterPanel() {
+            const c = getCentralFb();
+            if (!c) {
+                showToast('⚙️ Falta configurar el proyecto central en config.js (ver CREAR-CONDOMINIO.md)');
+                return;
+            }
+            document.getElementById('masterPanelModal').classList.remove('hidden');
+            masterMsg('');
+            if (!masterAuthUnsub) masterAuthUnsub = FB.onAuthStateChanged(c.auth, user => { handleMasterAuth(user).catch(err => console.warn('maestro', err)); });
+            // ¿Ya existe el dueño del panel? Si no, se ofrece crearlo
+            try {
+                const owner = await FB.getDoc(FB.doc(c.db, 'meta', 'owner'));
+                document.getElementById('masterSetupBox').classList.toggle('hidden', owner.exists());
+                document.getElementById('masterLoginBtn').classList.toggle('hidden', !owner.exists());
+            } catch (e) {
+                masterMsg(e && e.code === 'permission-denied'
+                    ? 'El proyecto central aún no tiene sus reglas. Pega firestore.central.rules en Firebase y publícalas.'
+                    : 'No se pudo conectar con el proyecto central. Revisa tu internet.');
+            }
+        }
+        function closeMasterPanel() { document.getElementById('masterPanelModal').classList.add('hidden'); }
+
+        async function handleMasterAuth(user) {
+            const c = getCentralFb();
+            masterUnsubs.forEach(u => { try { u(); } catch (e) {} });
+            masterUnsubs = [];
+            const loginBox = document.getElementById('masterLoginBox');
+            const mainBox = document.getElementById('masterMainBox');
+            if (!user) { loginBox.classList.remove('hidden'); mainBox.classList.add('hidden'); return; }
+            let isMaster = false;
+            try { isMaster = (await FB.getDoc(FB.doc(c.db, 'masters', user.uid))).exists(); } catch (e) { isMaster = false; }
+            if (!isMaster) {
+                await FB.signOut(c.auth);
+                masterMsg('Esta cuenta no tiene acceso al Panel maestro.');
+                return;
+            }
+            try { masterIsOwner = ((await FB.getDoc(FB.doc(c.db, 'meta', 'owner'))).data() || {}).uid === user.uid; } catch (e) { masterIsOwner = false; }
+            loginBox.classList.add('hidden');
+            mainBox.classList.remove('hidden');
+            document.getElementById('masterUserEmail').textContent = user.email || '';
+            masterUnsubs.push(FB.onSnapshot(FB.collection(c.db, 'condos'), snap => {
+                masterCondos = {};
+                snap.forEach(d => { masterCondos[d.id] = { ...d.data() }; });
+                renderMasterCondos();
+                importStaticCondos();
+            }, err => console.warn('maestro condos', err.code)));
+            masterUnsubs.push(FB.onSnapshot(FB.collection(c.db, 'condosPrivate'), snap => {
+                masterPrivate = {};
+                snap.forEach(d => { masterPrivate[d.id] = { ...d.data() }; });
+                renderMasterCondos();
+            }, err => console.warn('maestro privado', err.code)));
+        }
+
+        async function handleMasterLogin(e) {
+            e.preventDefault();
+            const c = getCentralFb();
+            const email = (document.getElementById('masterEmail').value || '').trim();
+            const pass = document.getElementById('masterPass').value || '';
+            if (!email || !pass) { masterMsg('Escribe tu correo y tu contraseña.'); return; }
+            try {
+                await FB.signInWithEmailAndPassword(c.auth, email, pass);
+                document.getElementById('masterPass').value = '';
+            } catch (err) {
+                masterMsg(/invalid-credential|wrong-password|user-not-found|invalid-email/.test(err.code || '') ? 'Correo o contraseña incorrectos.' : authErrorMessage(err));
+            }
+        }
+
+        // Primera vez: quien crea el panel queda como dueño (las reglas no permiten un segundo dueño)
+        async function handleMasterSetup() {
+            const c = getCentralFb();
+            const email = (document.getElementById('masterEmail').value || '').trim();
+            const pass = document.getElementById('masterPass').value || '';
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { masterMsg('Escribe un correo válido.'); return; }
+            if (pass.length < 8) { masterMsg('La contraseña debe tener al menos 8 caracteres.'); return; }
+            try {
+                let cred;
+                try { cred = await FB.createUserWithEmailAndPassword(c.auth, email, pass); }
+                catch (err) {
+                    if (!/email-already-in-use/.test(err.code || '')) throw err;
+                    cred = await FB.signInWithEmailAndPassword(c.auth, email, pass);
+                }
+                const uid = cred.user.uid;
+                const batch = FB.writeBatch(c.db);
+                batch.set(FB.doc(c.db, 'masters', uid), { email, createdAt: Date.now() });
+                batch.set(FB.doc(c.db, 'meta', 'owner'), { uid, createdAt: Date.now() });
+                await batch.commit();
+                document.getElementById('masterPass').value = '';
+                document.getElementById('masterSetupBox').classList.add('hidden');
+                await handleMasterAuth(c.auth.currentUser);
+                showToast('✅ Panel maestro creado. Guarda bien esta contraseña.');
+            } catch (err) {
+                masterMsg(err && err.code === 'permission-denied' ? 'El Panel maestro ya tiene dueño. Ingresa con esa cuenta.' : authErrorMessage(err));
+            }
+        }
+        async function masterLogout() {
+            const c = getCentralFb();
+            if (c) await FB.signOut(c.auth);
+            closeMasterForm();
+        }
+
+        // Los condominios escritos en config.js pasan solos al panel la primera vez
+        let staticImportDone = false;
+        async function importStaticCondos() {
+            if (staticImportDone) return;
+            staticImportDone = true;
+            const c = getCentralFb();
+            const missing = Object.entries(staticCondos()).filter(([slug]) => !masterCondos[slug]);
+            for (const [slug, entry] of missing) {
+                try {
+                    await FB.setDoc(FB.doc(c.db, 'condos', slug), { name: entry.name, firebase: cleanFirebaseCfg(entry.firebase), status: 'active', blockAfter: null, createdAt: Date.now(), updatedAt: Date.now() });
+                    showToast(`✅ ${entry.name} se agregó al panel`);
+                } catch (err) { console.warn('importar', slug, err.code); }
+            }
+        }
+
+        function paidUntilOf(slug) { const p = masterPrivate[slug] || {}; return typeof p.paidUntil === 'number' ? p.paidUntil : null; }
+        function renderMasterCondos() {
+            const listEl = document.getElementById('masterCondoList');
+            if (!listEl) return;
+            const now = Date.now();
+            const rows = Object.entries(masterCondos).map(([slug, c]) => {
+                const blocked = condoBlocked({ status: c.status, blockAfter: c.blockAfter }, now);
+                const paid = paidUntilOf(slug);
+                return { slug, c, p: masterPrivate[slug] || {}, blocked, paid, late: paid !== null && paid < now };
+            }).sort((a, b) => (Number(b.late || b.blocked) - Number(a.late || a.blocked)) || String(a.c.name).localeCompare(String(b.c.name), 'es'));
+            const count = f => rows.filter(f).length;
+            document.getElementById('masterCountActive').textContent = count(r => !r.blocked);
+            document.getElementById('masterCountBlocked').textContent = count(r => r.blocked);
+            document.getElementById('masterCountLate').textContent = count(r => r.late);
+            if (!rows.length) {
+                listEl.innerHTML = `<p class="text-sm text-zinc-400 text-center py-6 border border-dashed border-zinc-800 rounded-xl">Todavía no hay condominios. Toca "Agregar condominio".</p>`;
+                return;
+            }
+            const btn = 'h-11 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition';
+            listEl.innerHTML = rows.map(({ slug, c, p, blocked, paid, late }) => {
+                const s = escapeHtml(slug);
+                const [stTxt, stCls] = c.status === 'suspended' ? ['Suspendido', 'bg-red-500/15 text-red-300 border-red-500/40']
+                    : blocked ? ['Bloqueado por pago', 'bg-red-500/15 text-red-300 border-red-500/40']
+                    : ['Activo', 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'];
+                return `
+                <div class="rounded-2xl border ${blocked ? 'border-red-500/50 bg-red-950/20' : late ? 'border-amber-500/50' : 'border-zinc-800 bg-zinc-950'} p-3.5 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-base font-bold text-white leading-tight break-words">${escapeHtml(c.name || slug)}</h4>
+                            <p class="text-xs text-zinc-500 font-mono truncate">?condo=${s}</p>
+                        </div>
+                        <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full border ${stCls}">${stTxt}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="rounded-lg bg-zinc-900 border border-zinc-800 px-2.5 py-2">
+                            <div class="text-zinc-500">Pagado hasta</div>
+                            <div class="font-bold ${late ? 'text-amber-300' : 'text-white'}">${paid ? fmtDateBo(paid) : 'Sin registrar'}</div>
+                        </div>
+                        <div class="rounded-lg bg-zinc-900 border border-zinc-800 px-2.5 py-2">
+                            <div class="text-zinc-500">Bloqueo automático</div>
+                            <div class="font-bold text-white">${typeof c.blockAfter === 'number' ? fmtDateBo(c.blockAfter) : 'No'}</div>
+                        </div>
+                    </div>
+                    ${p.contact || p.notes ? `<p class="text-xs text-zinc-400 break-words">${escapeHtml([p.contact, p.notes].filter(Boolean).join(' · '))}</p>` : ''}
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" data-slug="${s}" onclick="masterRegisterPayment(this.dataset.slug)" class="${btn} bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"><i class="fa-solid fa-money-bill-wave"></i><span>Pagó 1 mes</span></button>
+                        <button type="button" data-slug="${s}" onclick="masterToggleSuspend(this.dataset.slug)" class="${btn} ${c.status === 'suspended' ? 'bg-sky-600 hover:bg-sky-500 border-sky-500 text-white' : 'bg-zinc-900 hover:bg-red-500/15 border-zinc-800 text-red-300'}"><i class="fa-solid ${c.status === 'suspended' ? 'fa-play' : 'fa-pause'}"></i><span>${c.status === 'suspended' ? 'Reactivar' : 'Suspender'}</span></button>
+                        <button type="button" data-slug="${s}" onclick="openMasterForm(this.dataset.slug)" class="${btn} bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200"><i class="fa-solid fa-pen"></i><span>Editar</span></button>
+                        <button type="button" data-slug="${s}" onclick="copyCondoLink(this.dataset.slug)" class="${btn} bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200"><i class="fa-solid fa-link"></i><span>Copiar link</span></button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function copyCondoLink(slug) {
+            const link = condoDirectLink(slug);
+            try { await navigator.clipboard.writeText(link); showToast('🔗 Link copiado: pásalo a los vecinos y a portería'); }
+            catch (e) { await askConfirm({ title: 'Link del condominio', message: 'Cópialo y compártelo con los vecinos y portería.', bigText: link, infoOnly: true, danger: false, confirmText: 'Listo' }); }
+        }
+
+        function blockAfterFor(paidUntil, autoBlock, graceDays) {
+            return autoBlock && typeof paidUntil === 'number' ? paidUntil + Math.max(0, Number(graceDays) || 0) * 86400000 : null;
+        }
+        // Suma un mes desde la fecha pagada (o desde hoy si ya venció)
+        function addOneMonth(ts) {
+            const d = bo(new Date(Math.max(ts || 0, Date.now())));
+            const y = d.getUTCFullYear(), mo = d.getUTCMonth() + 1;
+            const lastDay = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+            return boMake(y, mo, Math.min(d.getUTCDate(), lastDay), 23, 59, 59, 999).getTime();
+        }
+        async function masterRegisterPayment(slug) {
+            const c = getCentralFb();
+            const p = masterPrivate[slug] || {};
+            const next = addOneMonth(paidUntilOf(slug));
+            const ok = await askConfirm({ title: `¿Registrar pago de ${masterCondos[slug]?.name || slug}?`, message: `Quedará pagado hasta el ${fmtDateBo(next)}.`, confirmText: 'Registrar pago', danger: false });
+            if (!ok) return;
+            try {
+                const batch = FB.writeBatch(c.db);
+                batch.set(FB.doc(c.db, 'condosPrivate', slug), { ...p, paidUntil: next, updatedAt: Date.now() });
+                const upd = { updatedAt: Date.now() };
+                if (p.autoBlock) upd.blockAfter = blockAfterFor(next, true, p.graceDays);
+                batch.update(FB.doc(c.db, 'condos', slug), upd);
+                await batch.commit();
+                showToast(`💰 Pago registrado hasta el ${fmtDateBo(next)}`);
+            } catch (err) { showToast(authErrorMessage(err)); }
+        }
+        async function masterToggleSuspend(slug) {
+            const c = getCentralFb();
+            const cur = masterCondos[slug];
+            if (!cur) return;
+            const suspend = cur.status !== 'suspended';
+            const ok = await askConfirm(suspend
+                ? { title: `¿Suspender ${cur.name}?`, message: 'Vecinos, portería y administración de ese condominio verán "Servicio suspendido" y no podrán usar la app hasta que lo reactives. No se borra ningún dato.', confirmText: 'Suspender' }
+                : { title: `¿Reactivar ${cur.name}?`, message: 'La app vuelve a funcionar al instante en todos sus teléfonos.', confirmText: 'Reactivar', danger: false });
+            if (!ok) return;
+            try {
+                await FB.updateDoc(FB.doc(c.db, 'condos', slug), { status: suspend ? 'suspended' : 'active', updatedAt: Date.now() });
+                showToast(suspend ? `⏸️ ${cur.name} suspendido` : `▶️ ${cur.name} reactivado`);
+            } catch (err) { showToast(authErrorMessage(err)); }
+        }
+
+        // Lee el bloque que muestra Firebase ("const firebaseConfig = { apiKey: ..., ... }")
+        const FB_CFG_KEYS = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+        function parseFirebaseConfigText(text) {
+            const out = {};
+            const re = /["']?(apiKey|authDomain|projectId|storageBucket|messagingSenderId|appId)["']?\s*:\s*["']([^"']+)["']/g;
+            let m;
+            while ((m = re.exec(String(text || '')))) out[m[1]] = m[2].trim();
+            return out;
+        }
+        function cleanFirebaseCfg(c) {
+            const out = {};
+            FB_CFG_KEYS.forEach(k => { if (c && typeof c[k] === 'string' && c[k]) out[k] = c[k]; });
+            return out;
+        }
+        function updateMasterCfgPreview() {
+            const cfg = parseFirebaseConfigText(document.getElementById('masterCondoCfg').value);
+            const el = document.getElementById('masterCondoCfgPreview');
+            const okCfg = cfg.apiKey && cfg.projectId && cfg.appId && cfg.authDomain;
+            el.className = `text-xs ${okCfg ? 'text-emerald-300' : 'text-zinc-500'}`;
+            el.textContent = okCfg ? `✓ Proyecto: ${cfg.projectId}` : 'Pega el bloque completo que muestra Firebase (apiKey, authDomain, projectId, appId…).';
+        }
+        function onMasterNameInput() {
+            if (masterEditingSlug) return;
+            const slugEl = document.getElementById('masterCondoSlug');
+            if (!slugEl.dataset.touched) slugEl.value = normSlug(document.getElementById('masterCondoName').value);
+        }
+        function openMasterForm(slug) {
+            masterEditingSlug = slug || '';
+            const c = masterCondos[slug] || {};
+            const p = masterPrivate[slug] || {};
+            document.getElementById('masterFormTitle').textContent = slug ? `Editar ${c.name || slug}` : 'Agregar condominio';
+            document.getElementById('masterCondoName').value = c.name || '';
+            const slugEl = document.getElementById('masterCondoSlug');
+            slugEl.value = slug || '';
+            slugEl.readOnly = !!slug;
+            delete slugEl.dataset.touched;
+            document.getElementById('masterCondoCfg').value = c.firebase ? `const firebaseConfig = ${JSON.stringify(c.firebase, null, 2)};` : '';
+            document.getElementById('masterCondoPaid').value = typeof p.paidUntil === 'number' ? toISODate(new Date(p.paidUntil)) : '';
+            document.getElementById('masterCondoAutoBlock').checked = !!p.autoBlock;
+            document.getElementById('masterCondoGrace').value = p.graceDays != null ? p.graceDays : 5;
+            document.getElementById('masterCondoContact').value = p.contact || '';
+            document.getElementById('masterCondoNotes').value = p.notes || '';
+            updateMasterCfgPreview();
+            document.getElementById('masterCondoForm').classList.remove('hidden');
+            document.getElementById('masterCondoForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function closeMasterForm() {
+            masterEditingSlug = '';
+            document.getElementById('masterCondoForm')?.classList.add('hidden');
+        }
+        async function handleMasterCondoSave(e) {
+            e.preventDefault();
+            const c = getCentralFb();
+            const name = (document.getElementById('masterCondoName').value || '').trim().replace(/\s+/g, ' ');
+            const slug = masterEditingSlug || normSlug(document.getElementById('masterCondoSlug').value);
+            const cfg = cleanFirebaseCfg(parseFirebaseConfigText(document.getElementById('masterCondoCfg').value));
+            const paidVal = document.getElementById('masterCondoPaid').value;
+            const m = paidVal.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            const paidUntil = m ? boMake(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999).getTime() : null;
+            const autoBlock = document.getElementById('masterCondoAutoBlock').checked;
+            const graceDays = Math.min(60, Math.max(0, Number(document.getElementById('masterCondoGrace').value) || 0));
+            if (name.length < 3) { showToast('⚠️ Escribe el nombre del condominio'); return; }
+            if (!/^[a-z0-9-]{3,40}$/.test(slug)) { showToast('⚠️ El identificador debe tener de 3 a 40 letras minúsculas, números o guiones'); return; }
+            if (!masterEditingSlug && masterCondos[slug]) { showToast('⚠️ Ya existe un condominio con ese identificador'); return; }
+            if (!cfg.apiKey || !cfg.projectId || !cfg.appId || !cfg.authDomain) { showToast('⚠️ Pega el bloque de configuración completo de Firebase'); return; }
+            if (autoBlock && !paidUntil) { showToast('⚠️ Para el bloqueo automático indica hasta cuándo está pagado'); return; }
+            const prev = masterCondos[slug] || {};
+            try {
+                const batch = FB.writeBatch(c.db);
+                batch.set(FB.doc(c.db, 'condos', slug), {
+                    name, firebase: cfg, status: prev.status === 'suspended' ? 'suspended' : 'active',
+                    blockAfter: blockAfterFor(paidUntil, autoBlock, graceDays),
+                    createdAt: typeof prev.createdAt === 'number' ? prev.createdAt : Date.now(), updatedAt: Date.now()
+                });
+                batch.set(FB.doc(c.db, 'condosPrivate', slug), {
+                    paidUntil, autoBlock, graceDays,
+                    contact: (document.getElementById('masterCondoContact').value || '').trim().slice(0, 120),
+                    notes: (document.getElementById('masterCondoNotes').value || '').trim().slice(0, 500),
+                    updatedAt: Date.now()
+                });
+                await batch.commit();
+                const wasEditing = !!masterEditingSlug;
+                closeMasterForm();
+                showToast(wasEditing ? `✅ ${name} actualizado` : `✅ ${name} agregado. Copia su link para el administrador.`);
+            } catch (err) { showToast(err && err.code === 'permission-denied' ? '⛔ Datos no válidos o sin permiso' : authErrorMessage(err)); }
+        }
+
         // Dominio de las cuentas internas (casas y portería). No se envían correos a estas direcciones.
         const ACCOUNT_DOMAIN = 'cuentas.visepass.app';
         let fbApp = null, fbAuth = null, fbDb = null, fbConfigInUse = FIREBASE_CONFIG;
@@ -2296,9 +2960,9 @@
         function fbReady() { return !!(fbAuth && fbDb); }
 
         function initFirebase() {
-            if (!window.FB) return false;
+            if (!window.FB || CONFIG_MISSING) return false;
             const useEmulator = !!window.VISEPASS_EMULATOR;
-            fbConfigInUse = useEmulator ? { ...FIREBASE_CONFIG, projectId: 'demo-visepass', apiKey: 'demo-key' } : FIREBASE_CONFIG;
+            fbConfigInUse = useEmulator ? emulatorCfg(FIREBASE_CONFIG, 'demo-visepass') : FIREBASE_CONFIG;
             fbApp = FB.initializeApp(fbConfigInUse);
             fbAuth = FB.getAuth(fbApp);
             try {
@@ -3497,7 +4161,7 @@
         }
 
         /* ---------- Sesión recordada en este teléfono ---------- */
-        const SESSION_KEY = 'visepass_scz_session_v1';
+        let SESSION_KEY = 'visepass_scz_session_v1';
         const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000; // Administración: 12 horas
 
         function readSavedSession() {
@@ -5836,7 +6500,7 @@
             return `Casa ${houseNum}${fam ? ' · ' + fam : ''}`;
         }
         // Bloque grande para la pantalla de portería
-        function getCondoName() { return (configDoc && configDoc.condoName) || 'La Hacienda - Rincón'; }
+        function getCondoName() { return (configDoc && configDoc.condoName) || (currentCondoEntry && currentCondoEntry.name) || 'tu condominio'; }
         function renderCondoName() {
             const n = getCondoName();
             const hdr = document.getElementById('headerCondoName');
@@ -7016,6 +7680,7 @@
             u.searchParams.set('c', h.inviteCode);
             u.searchParams.set('f', String(h.inviteFromTs));
             u.searchParams.set('u', String(h.inviteUntilTs));
+            if (MULTI_MODE && currentCondoSlug) u.searchParams.set('condo', currentCondoSlug);
             return u.toString();
         }
 
@@ -7218,7 +7883,7 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             MODAL_IDS.forEach(id => {
                 const modalEl = document.getElementById(id);
                 if (modalEl) {
@@ -7269,6 +7934,11 @@
             }
 
             const urlParams = new URLSearchParams(window.location.search);
+            // Primero el condominio: decide a qué proyecto Firebase se conecta la app
+            const condoState = await resolveCondo(urlParams);
+            setupMultiCondoLinks();
+            if (urlParams.has('maestro')) openMasterPanel();
+            if (condoState !== 'ok') return;
             const guestHouseParam = urlParams.get('junte');
             if (guestHouseParam) enterGuestMode(guestHouseParam, urlParams.get('c'), urlParams.get('f'), urlParams.get('u'));
             else selectLoginTab('RESIDENTE');
@@ -7281,7 +7951,9 @@
                 } else {
                     document.getElementById('authPortalModal').classList.remove('hidden');
                     updateAdminAndGuardLoginUI();
-                    showLoginError('📡 No se pudo conectar con el servidor. Revisa tu conexión a internet y recarga la página.');
+                    showLoginError(CONFIG_MISSING
+                        ? '⚙️ Falta completar config.js con los datos de Firebase de este condominio. Sigue la guía CREAR-CONDOMINIO.md (paso 4).'
+                        : '📡 No se pudo conectar con el servidor. Revisa tu conexión a internet y recarga la página.');
                 }
                 return;
             }
